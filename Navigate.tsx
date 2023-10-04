@@ -25,6 +25,13 @@ import {
   lightTheme,
   setTheme,
 } from "./redux/reducers/settingsReducer";
+import { useNavigation } from "@react-navigation/native";
+import Settings from "./components/Settings/Settings";
+import {
+  StackNavigationProp,
+  createStackNavigator,
+} from "@react-navigation/stack";
+
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 export type RootStackParamList = {
@@ -36,6 +43,7 @@ export type RootStackParamList = {
   Educator: undefined;
   ScheduleEducator: undefined;
   News: undefined;
+  Settings: undefined;
 };
 
 interface TabIconProps {
@@ -61,13 +69,16 @@ interface DepartmentsState {
   };
 }
 const Tab = createBottomTabNavigator();
-
+const Stack = createStackNavigator();
 type ITheme = {
   settingsReducer: {
     theme: any;
   };
 };
-const Navigate = (): JSX.Element => {
+type GroupsProps = {
+  navigation: StackNavigationProp<RootStackParamList, "Settings">;
+};
+const Navigate = ({ navigation }: GroupsProps) => {
   const getTabIcon = ({ route, focused, size, color }: TabIconProps) => {
     let iconSource;
     if (route.name === "Schedule") {
@@ -150,6 +161,25 @@ const Navigate = (): JSX.Element => {
   return (
     <ThemeProvider theme={theme}>
       <NavigationContainer>
+        <Stack.Screen
+          name="Home"
+          component={Navigate}
+          options={({ navigation }) => ({
+            title: "Главная",
+            headerLeft: () => (
+              <TouchableOpacity
+                onPress={() => navigation.navigate("Settings")}
+                style={{ marginLeft: 10 }}
+              >
+                <Image
+                  source={require("./assets/Settings.png")}
+                  style={{ width: 30, height: 30 }}
+                />
+              </TouchableOpacity>
+            ),
+          })}
+        />
+        <Stack.Screen name="Settings" component={Settings} />
         <Tab.Navigator
           backBehavior="history"
           screenOptions={({ route }) => ({
@@ -175,48 +205,6 @@ const Navigate = (): JSX.Element => {
             headerStyle: {
               height: 100,
               backgroundColor: theme.mainColor,
-            },
-            headerLeft: () => {
-              if (theme === lightTheme) {
-                // Здесь lightTheme - ваше условие для отображения кнопки
-                return (
-                  <Pressable
-                    style={{ marginLeft: screenWidth * 0.065 }}
-                    onPress={() => {
-                      dispatch(setTheme("darkTheme"));
-                    }}
-                  >
-                    <Image
-                      resizeMode="contain"
-                      style={{
-                        height: screenHeight * 0.08,
-                        width: screenWidth * 0.07,
-                        tintColor: "white",
-                      }}
-                      source={require("./assets/DarkTheme.png")}
-                    />
-                  </Pressable>
-                );
-              } else {
-                return (
-                  <Pressable
-                    style={{ marginLeft: screenWidth * 0.05 }}
-                    onPress={() => {
-                      dispatch(setTheme("lightTheme"));
-                    }}
-                  >
-                    <Image
-                      resizeMode="contain"
-                      style={{
-                        height: screenHeight * 0.1,
-                        width: screenWidth * 0.1,
-                        tintColor: "#004C6F",
-                      }}
-                      source={require("./assets/LightTheme.png")}
-                    />
-                  </Pressable>
-                );
-              }
             },
           })}
         >
@@ -291,6 +279,32 @@ const Navigate = (): JSX.Element => {
             name="ScheduleEducator"
             component={ScheduleEducator}
             options={{ tabBarButton: () => null }}
+          />
+          <Tab.Screen
+            name="Settings"
+            component={Settings}
+            options={({ navigation }) => ({
+              tabBarLabel: "Настройки",
+              tabBarLabelStyle: {
+                color: theme.navigateColor,
+              },
+              tabBarButton: () => null,
+              headerLeft: () => {
+                return (
+                  <TouchableOpacity
+                    style={{ marginLeft: screenWidth * 0.065 }}
+                    onPress={() => {
+                      navigation.navigate("Settings");
+                    }}
+                  >
+                    <Image
+                      resizeMode="contain"
+                      source={require("./assets/Settings.png")}
+                    />
+                  </TouchableOpacity>
+                );
+              },
+            })}
           />
           <Tab.Screen
             name="News"
