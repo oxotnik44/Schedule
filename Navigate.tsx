@@ -20,11 +20,6 @@ import News from "./components/News/News";
 import { resetTextSearchGroup } from "./redux/reducers/departmentsInfoReducer";
 import ScheduleEducator from "./components/Schedule/ScheduleEducator";
 import { ThemeProvider } from "styled-components/native";
-import {
-  darkTheme,
-  lightTheme,
-  setTheme,
-} from "./redux/reducers/settingsReducer";
 import { useNavigation } from "@react-navigation/native";
 import Settings from "./components/Settings/Settings";
 import {
@@ -98,8 +93,8 @@ const Navigate = ({ navigation }: GroupsProps) => {
       <Image
         source={iconSource}
         style={{
-          width: size,
-          height: size,
+          width: screenWidth * 0.06,
+          height: screenHeight * 0.05,
           tintColor: color,
           resizeMode: "contain",
         }}
@@ -119,23 +114,6 @@ const Navigate = ({ navigation }: GroupsProps) => {
       state.departmentInfoReducer.selectNameDepartments
   );
 
-  // const fetchScheduleIfNeeded = async () => {
-  //   const storedGroups = await AsyncStorage.getItem("favoriteGroups");
-  //   if (storedGroups) {
-  //     const parsedGroups: { idGroup: number; nameGroup: string }[] =
-  //       JSON.parse(storedGroups);
-  //     const idGroup = parsedGroups[0]?.idGroup;
-  //     if (idGroup) {
-  //       try {
-  //         await getSchedule(idGroup, dispatch);
-  //       } catch (error) {
-  //         // Обработка ошибки
-  //         alert("Произошла ошибка: " + error);
-  //         // Дополнительные действия по обработке ошибки
-  //       }
-  //     }
-  //   }
-  // };
   const getHeaderTitle = (route: { name: string }) => {
     if (route.name === "ScheduleMyGroups") {
       return "Моя группа";
@@ -155,39 +133,23 @@ const Navigate = ({ navigation }: GroupsProps) => {
       return "Избранное";
     } else if (route.name === "News") {
       return "Новости";
+    } else if (route.name === "Settings") {
+      return "Настройки";
     }
   };
 
   return (
     <ThemeProvider theme={theme}>
       <NavigationContainer>
-        <Stack.Screen
-          name="Home"
-          component={Navigate}
-          options={({ navigation }) => ({
-            title: "Главная",
-            headerLeft: () => (
-              <TouchableOpacity
-                onPress={() => navigation.navigate("Settings")}
-                style={{ marginLeft: 10 }}
-              >
-                <Image
-                  source={require("./assets/Settings.png")}
-                  style={{ width: 30, height: 30 }}
-                />
-              </TouchableOpacity>
-            ),
-          })}
-        />
-        <Stack.Screen name="Settings" component={Settings} />
         <Tab.Navigator
           backBehavior="history"
-          screenOptions={({ route }) => ({
+          screenOptions={({ route, navigation }) => ({
             tabBarIcon: ({ focused, size, color }) =>
               getTabIcon({ route, focused, size, color: theme.navigateColor }),
             tabBarStyle: {
               paddingBottom: 5,
               backgroundColor: theme.mainColor,
+              height: screenHeight * 0.08,
               // Цвет tabBar
             },
             tabBarInactiveTintColor: "#FFFFFF",
@@ -199,9 +161,23 @@ const Navigate = ({ navigation }: GroupsProps) => {
             headerTitleAlign: "center",
             headerTintColor: theme.navigateColor, // Цвет текста в header
             headerTitleStyle: {
-              fontSize: 25,
+              fontSize: screenWidth * 0.06,
               fontFamily: "Montserrat-SemiBold",
             },
+            headerLeft: () => (
+              <TouchableOpacity onPress={() => navigation.navigate("Settings")}>
+                <Image
+                  source={require("./assets/Settings.png")} // Замените на путь к вашей иконке
+                  style={{
+                    resizeMode: "contain",
+                    width: screenWidth * 0.09,
+                    height: screenHeight * 0.05,
+                    marginLeft: screenWidth * 0.04,
+                    tintColor: theme.navigateColor,
+                  }}
+                />
+              </TouchableOpacity>
+            ),
             headerStyle: {
               height: 100,
               backgroundColor: theme.mainColor,
@@ -214,6 +190,8 @@ const Navigate = ({ navigation }: GroupsProps) => {
             options={({ navigation }) => ({
               tabBarLabel: "Моя группа",
               tabBarLabelStyle: {
+                fontSize: screenWidth * 0.03,
+
                 color: theme.navigateColor,
               },
               tabBarButton: (props) => (
@@ -233,6 +211,8 @@ const Navigate = ({ navigation }: GroupsProps) => {
             options={({ navigation }) => ({
               tabBarLabel: "Расписание",
               tabBarLabelStyle: {
+                fontSize: screenWidth * 0.03,
+
                 color: theme.navigateColor,
               },
               tabBarButton: (props) => (
@@ -253,6 +233,7 @@ const Navigate = ({ navigation }: GroupsProps) => {
             options={({ navigation }) => ({
               tabBarLabel: "Преподватели",
               tabBarLabelStyle: {
+                fontSize: screenWidth * 0.03,
                 color: theme.navigateColor,
               },
               tabBarButton: (props) => (
@@ -264,6 +245,11 @@ const Navigate = ({ navigation }: GroupsProps) => {
                 />
               ),
             })}
+          />
+          <Tab.Screen
+            name="Settings"
+            component={Settings}
+            options={{ tabBarButton: () => null }}
           />
           <Tab.Screen
             name="Groups"
@@ -281,37 +267,13 @@ const Navigate = ({ navigation }: GroupsProps) => {
             options={{ tabBarButton: () => null }}
           />
           <Tab.Screen
-            name="Settings"
-            component={Settings}
-            options={({ navigation }) => ({
-              tabBarLabel: "Настройки",
-              tabBarLabelStyle: {
-                color: theme.navigateColor,
-              },
-              tabBarButton: () => null,
-              headerLeft: () => {
-                return (
-                  <TouchableOpacity
-                    style={{ marginLeft: screenWidth * 0.065 }}
-                    onPress={() => {
-                      navigation.navigate("Settings");
-                    }}
-                  >
-                    <Image
-                      resizeMode="contain"
-                      source={require("./assets/Settings.png")}
-                    />
-                  </TouchableOpacity>
-                );
-              },
-            })}
-          />
-          <Tab.Screen
             name="News"
             component={News}
             options={({ navigation }) => ({
               tabBarLabel: "Новости",
               tabBarLabelStyle: {
+                fontSize: screenWidth * 0.03,
+
                 color: theme.navigateColor,
               },
               tabBarButton: (props) => (
