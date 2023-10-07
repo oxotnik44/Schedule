@@ -34,7 +34,6 @@ import { setNameEducator } from "../../redux/reducers/educatorReducer";
 
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../Navigate";
-import { useFonts } from "expo-font";
 import {
   getFullScheduleStudentExtramuralist,
   getSchedule,
@@ -44,6 +43,7 @@ import { lightTheme } from "../../redux/reducers/settingsReducer";
 import { ThemeProvider } from "styled-components/native";
 import { setSelectIdEducator } from "../../redux/reducers/scheduleEducatorInfo";
 import { setIsFullScheduleStudent } from "../../redux/reducers/scheduleStudentInfo";
+import { useNavigation } from "@react-navigation/native";
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 
@@ -91,10 +91,8 @@ interface ScheduleState {
     isFullSchedule: boolean;
   };
 }
-interface ContainerProps {
-  typeWeek: any;
-  isColorPair: any;
-}
+
+// Тип ScheduleProps
 type ScheduleProps = {
   navigation: StackNavigationProp<RootStackParamList, "Schedule">;
 };
@@ -105,7 +103,6 @@ type ITheme = {
 };
 const Schedule = ({ navigation }: ScheduleProps) => {
   const theme = useSelector((state: ITheme) => state.settingsReducer.theme);
-
   moment.tz.setDefault("Asia/Novosibirsk");
   const dataSchedule = useSelector(
     (state: ScheduleState) => state.scheduleInfoStudentReducer.dataSchedule
@@ -192,13 +189,7 @@ const Schedule = ({ navigation }: ScheduleProps) => {
       )
     );
   };
-  const handleGetScheduleExtramural = async () => {
-    try {
-      await getFullScheduleStudentExtramuralist(dispatch, selectIdGroup);
-    } catch (error) {
-      console.error("Error while getting scheduleExtramural:", error);
-    }
-  };
+
   return (
     <ThemeProvider theme={theme}>
       <Container>
