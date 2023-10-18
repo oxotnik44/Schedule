@@ -20,6 +20,7 @@ import {
   TextSelfStudy,
   TextTypePair,
   TextWeekday,
+  TimeToLesson,
   ToggleButton,
   ToggleButtonText,
   ToggleContainer,
@@ -30,7 +31,6 @@ import {
 import { setNameGroup } from "../../redux/reducers/groupsInfoReducer";
 import {
   getFullScheduleEducatorExtramural,
-  getFullScheduleStudentExtramuralist,
   getSchedule,
   getScheduleEducator,
 } from "../../api/apiSchedule";
@@ -108,6 +108,7 @@ type ITheme = {
 };
 const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
   const theme = useSelector((state: ITheme) => state.settingsReducer.theme);
+  const dispatch = useDispatch();
 
   moment.tz.setDefault("Asia/Novosibirsk");
   const dataScheduleEducator = useSelector(
@@ -115,6 +116,9 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
   );
   const selectIdEducator = useSelector(
     (state: ScheduleState) => state.scheduleInfoEducatorReducer.selectIdEducator
+  );
+  const isFullSchedule = useSelector(
+    (state: ScheduleState) => state.scheduleInfoEducatorReducer.isFullSchedule
   );
   const [groupType, setGroupType] = useState<"resident" | "extramural">(
     "resident"
@@ -126,16 +130,23 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
   const [currentTypeWeek, setCurrentTypeWeek] = useState<
     "numerator" | "denominator"
   >();
-  useEffect(() => {
-    // Обновление значения typeWeek при изменении dispatch
-    setTypeWeek(() => {
-      const currentDate = moment();
-      const isNumeratorWeek = currentDate.weekday() <= currentDate.date() % 7;
-      setCurrentTypeWeek(isNumeratorWeek ? "numerator" : "denominator");
-      return isNumeratorWeek ? "numerator" : "denominator";
-    });
-  }, [dataScheduleEducator]);
-  const dispatch = useDispatch();
+  const [currentDayForResident, setCurrentDayForResident] =
+    useState<string>("");
+  const [currentDayForExtramuralist, setCurrentDayForExtramuralist] =
+    useState<string>("");
+  const [currentTime, setCurrentTime] = useState<string>("");
+  let hasWeekday: any = null;
+  const resultArray: any[] = [];
+  const [timeArray, setTimeArray] = useState("");
+  const [timeDifferences, setTimeDifference] = useState<string>("");
+  const weekdays = [
+    "Понедельник",
+    "Вторник",
+    "Среда",
+    "Четверг",
+    "Пятница",
+    "Суббота",
+  ];
   const fetchSchedule = async (idGroup: number, groupName: string) => {
     try {
       dispatch(setNameGroup(groupName));
@@ -145,30 +156,68 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
       console.log(error);
     }
   };
+  const formatTime = (timeDiff: number) => {
+    const hours = Math.floor(timeDiff / 3600)
+      .toString()
+      .padStart(2, "0");
+    const minutes = Math.floor((timeDiff % 3600) / 60)
+      .toString()
+      .padStart(2, "0");
+    const seconds = (timeDiff % 60).toString().padStart(2, "0");
 
-  const weekdays = [
-    "Понедельник",
-    "Вторник",
-    "Среда",
-    "Четверг",
-    "Пятница",
-    "Суббота",
-  ];
+    return `${hours}:${minutes}:${seconds}`;
+  };
+  const getFilteredSchedule = () => {
+    const filteredSchedule =
+      typeWeek === "numerator"
+        ? dataScheduleEducator.scheduleResident.numerator
+        : dataScheduleEducator.scheduleResident.denominator;
 
-  const [currentDayForResident, setCurrentDayForResident] =
-    useState<string>("");
-  const [currentDayForExtramuralist, setCurrentDayForExtramuralist] =
-    useState<string>("");
-  const isFullSchedule = useSelector(
-    (state: ScheduleState) => state.scheduleInfoEducatorReducer.isFullSchedule
-  );
-  const [currentTime, setCurrentTime] = useState<string>("");
+    return weekdays.map((weekday) =>
+      filteredSchedule.filter(
+        (item) => item.weekday === weekday || item.date === weekday
+      )
+    );
+  };
+
+  weekdays.map((item, index) => {
+    const timeFilteredSchedule = getFilteredSchedule()[index];
+    timeFilteredSchedule.map((item) => {
+      const [start] = item.numberPair.split("-");
+
+      if (item.weekday === currentDayForResident) {
+        resultArray.push(start);
+      }
+    });
+  });
+  hasWeekday =
+    typeWeek === "numerator"
+      ? dataScheduleEducator.scheduleResident.numerator.some(
+          (item: IScheduleInfo) =>
+            (item.hasOwnProperty("weekday") && item.weekday !== "") ||
+            (item.hasOwnProperty("date") && item.date !== "")
+        )
+      : dataScheduleEducator.scheduleResident.denominator.some(
+          (item: IScheduleInfo) =>
+            (item.hasOwnProperty("weekday") && item.weekday !== "") ||
+            (item.hasOwnProperty("date") && item.date !== "")
+        );
+
+  useEffect(() => {
+    setTypeWeek(() => {
+      const currentDate = moment();
+      const dayOfWeek = currentDate.weekday();
+      const isNumeratorWeek = dayOfWeek <= currentDate.date() % 7;
+      setCurrentTypeWeek(isNumeratorWeek ? "numerator" : "denominator");
+      return isNumeratorWeek ? "numerator" : "denominator";
+    });
+  }, [dataScheduleEducator]);
 
   useEffect(() => {
     const updateCurrentTime = () => {
       const date = moment().tz("Asia/Novosibirsk").locale("ru");
       const day = weekdays[date.day() === 0 ? 6 : date.day() - 1];
-      const time = date.format("HH:mm");
+      const time = date.format("HH:mm:ss");
       const dayExtramuralist = date.format("D MMMM YYYY");
       setCurrentDayForExtramuralist(dayExtramuralist);
       setCurrentDayForResident(day);
@@ -180,22 +229,27 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
       clearInterval(interval);
     };
   }, []);
+  useEffect(() => {
+    const currentTimeParts = currentTime.split(":").map(Number);
+    const currentTimeInSeconds =
+      currentTimeParts[0] * 3600 +
+      currentTimeParts[1] * 60 +
+      currentTimeParts[2];
 
-  let hasWeekday: any = null;
-  if (typeWeek === "numerator") {
-    hasWeekday = dataScheduleEducator.scheduleResident.numerator.some(
-      (item: IScheduleInfo) =>
-        (item.hasOwnProperty("weekday") && item.weekday !== "") ||
-        (item.hasOwnProperty("date") && item.date !== "")
-    );
-  } else {
-    hasWeekday = dataScheduleEducator.scheduleResident.denominator.some(
-      (item: IScheduleInfo) =>
-        (item.hasOwnProperty("weekday") && item.weekday !== "") ||
-        (item.hasOwnProperty("date") && item.date !== "")
-    );
-  }
+    for (let i = 0; i < resultArray.length; i++) {
+      const scheduleParts = resultArray[i].split("-");
+      const startParts = scheduleParts[0].split(":").map(Number);
+      const scheduleTimeInSeconds = startParts[0] * 3600 + startParts[1] * 60;
 
+      if (currentTimeInSeconds < scheduleTimeInSeconds) {
+        const timeDiff = scheduleTimeInSeconds - currentTimeInSeconds;
+        const formattedTimeDiff = formatTime(timeDiff);
+        setTimeDifference(formattedTimeDiff);
+        setTimeArray(scheduleParts[0]);
+        break;
+      }
+    }
+  }, [currentTime, resultArray]);
   return (
     <Container>
       <ToggleContainer>
@@ -332,13 +386,20 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
                     const [start, end] = item.numberPair.split("-");
                     const startTime = moment(start, "HH:mm");
                     const endTime = moment(end, "HH:mm");
-
                     const isCurrent =
                       currentDayForResident ===
                         (hasWeekday ? item.weekday : item.date) &&
                       moment(currentTime, "HH:mm").isSameOrAfter(startTime) &&
                       moment(currentTime, "HH:mm").isSameOrBefore(endTime);
                     const isColorPair = isCurrent;
+                    const timeDifference = moment.utc(
+                      moment(endTime, "HH:mm:ss").diff(
+                        moment(currentTime, "HH:mm:ss")
+                      )
+                    );
+                    const formattedTimeDifference = timeDifference
+                      .format("HH:mm:ss")
+                      .padStart(8, "0");
 
                     return (
                       <View key={item.idPair}>
@@ -384,6 +445,18 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
                                   {item.typePair &&
                                     "Тип пары: " + item.typePair}
                                 </TextTypePair>
+                                {weekday === currentDayForResident &&
+                                  timeArray === start && (
+                                    <TimeToLesson>
+                                      До начала пары: {timeDifferences}
+                                    </TimeToLesson>
+                                  )}
+
+                                {isCurrent && (
+                                  <TimeToLesson>
+                                    До окончания пары: {formattedTimeDifference}
+                                  </TimeToLesson>
+                                )}
                               </ContainerRight>
                             </View>
                             <Text style={{ textAlign: "center" }}>

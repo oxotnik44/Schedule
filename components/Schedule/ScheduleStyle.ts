@@ -200,3 +200,9 @@ export const BtnGetScheduleExtramural = styled.TouchableOpacity`
   justify-content: center;
   margin-top: ${screenHeight * 0.01}px;
 `;
+export const TimeToLesson = styled.Text`
+  color: ${(props) => props.theme.textColor};
+  font-size: ${screenWidth * 0.03}px;
+  font-family: "Montserrat-SemiBold";
+  text-align: center;
+`;

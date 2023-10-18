@@ -39,7 +39,6 @@ export const ArrowIcon = styled.Image<ArrowIconProps>`
   height: ${screenHeight * 0.06}px;
   resize-mode: contain;
   tint-color: ${(props) => props.theme.imageColor};
-
   transform: rotate(270deg);
   ${(props) =>
     props.isRotate &&
