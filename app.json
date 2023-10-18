@@ -23,7 +23,7 @@
       },
       "resizeMode": "contain",
       "package": "com.oxotnik443.Schedule",
-      "versionCode": 2
+      "versionCode": 3
     },
     "web": {
       "favicon": "./assets/favicon.png"

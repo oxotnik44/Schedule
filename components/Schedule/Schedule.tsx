@@ -26,6 +26,7 @@ import {
   TextRoomNumber,
   TextSelfStudy,
   TextTypePair,
+  TimeToLesson,
   TypeWeekButton,
   TypeWeekContainer,
   TypeWeekText,
@@ -104,6 +105,8 @@ type ITheme = {
 const Schedule = ({ navigation }: ScheduleProps) => {
   const theme = useSelector((state: ITheme) => state.settingsReducer.theme);
   moment.tz.setDefault("Asia/Novosibirsk");
+  const dispatch = useDispatch();
+
   const dataSchedule = useSelector(
     (state: ScheduleState) => state.scheduleInfoStudentReducer.dataSchedule
   );
@@ -117,20 +120,77 @@ const Schedule = ({ navigation }: ScheduleProps) => {
   const isFullSchedule = useSelector(
     (state: ScheduleState) => state.scheduleInfoStudentReducer.isFullSchedule
   );
+
   const [typeWeek, setTypeWeek] = useState("");
   const [currentTypeWeek, setCurrentTypeWeek] = useState<
     "numerator" | "denominator"
   >();
+  const [currentDayForResident, setСurrentDayForResident] =
+    useState<string>("Понедельник");
+  const [currentDayForExtramuralist, setCurrentDayForExtramuralist] =
+    useState<string>("");
+  const [currentTime, setCurrentTime] = useState<string>("9:59:58");
+  const resultArray: any[] = [];
+  const [timeArray, setTimeArray] = useState("");
+  const [timeDifferences, setTimeDifference] = useState<string>("");
+  const weekdays = [
+    "Понедельник",
+    "Вторник",
+    "Среда",
+    "Четверг",
+    "Пятница",
+    "Суббота",
+  ];
 
   useEffect(() => {
     setTypeWeek(() => {
       const currentDate = moment();
-      const isNumeratorWeek = currentDate.weekday() <= currentDate.date() % 7;
+      const dayOfWeek = currentDate.weekday();
+      const isNumeratorWeek = dayOfWeek <= currentDate.date() % 7;
       setCurrentTypeWeek(isNumeratorWeek ? "numerator" : "denominator");
       return isNumeratorWeek ? "numerator" : "denominator";
     });
   }, [dataSchedule]);
-  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const updateCurrentTime = () => {
+      const date = moment().tz("Asia/Novosibirsk").locale("ru");
+      const day = weekdays[date.day() === 0 ? 6 : date.day() - 1];
+      const time = date.format("HH:mm:ss");
+      const dayExtramuralist = date.format("D MMMM YYYY");
+      setCurrentDayForExtramuralist(dayExtramuralist);
+      setСurrentDayForResident(day);
+      setCurrentTime(time);
+    };
+
+    const interval = setInterval(updateCurrentTime, 1000);
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
+
+  useEffect(() => {
+    const currentTimeParts = currentTime.split(":").map(Number);
+    const currentTimeInSeconds =
+      currentTimeParts[0] * 3600 +
+      currentTimeParts[1] * 60 +
+      currentTimeParts[2];
+
+    for (let i = 0; i < resultArray.length; i++) {
+      const scheduleParts = resultArray[i].split("-");
+      const startParts = scheduleParts[0].split(":").map(Number);
+      const scheduleTimeInSeconds = startParts[0] * 3600 + startParts[1] * 60;
+
+      if (currentTimeInSeconds < scheduleTimeInSeconds) {
+        const timeDiff = scheduleTimeInSeconds - currentTimeInSeconds;
+        const formattedTimeDiff = formatTime(timeDiff);
+        setTimeDifference(formattedTimeDiff);
+        setTimeArray(scheduleParts[0]);
+
+        break;
+      }
+    }
+  }, [currentTime, resultArray]);
 
   const fetchScheduleEducator = async (
     fullNameEducator: string,
@@ -145,38 +205,6 @@ const Schedule = ({ navigation }: ScheduleProps) => {
     }
   };
 
-  const weekdays = [
-    "Понедельник",
-    "Вторник",
-    "Среда",
-    "Четверг",
-    "Пятница",
-    "Суббота",
-  ];
-
-  const [currentDayForResident, setcurrentDayForResident] =
-    useState<string>("");
-  const [currentDayForExtramuralist, setCurrentDayForExtramuralist] =
-    useState<string>("");
-
-  const [currentTime, setCurrentTime] = useState<string>("");
-  useEffect(() => {
-    const updateCurrentTime = () => {
-      const date = moment().tz("Asia/Novosibirsk").locale("ru");
-      const day = weekdays[date.day() === 0 ? 6 : date.day() - 1];
-      const time = date.format("HH:mm");
-      const dayExtramuralist = date.format("D MMMM YYYY");
-      setCurrentDayForExtramuralist(dayExtramuralist);
-      setcurrentDayForResident(day);
-      setCurrentTime(time);
-    };
-
-    const interval = setInterval(updateCurrentTime, 1000);
-    return () => {
-      clearInterval(interval);
-    };
-  }, []);
-
   const getFilteredSchedule = () => {
     const filteredSchedule =
       typeWeek === "numerator"
@@ -188,6 +216,29 @@ const Schedule = ({ navigation }: ScheduleProps) => {
         (item) => item.weekday === weekday || item.date === weekday
       )
     );
+  };
+
+  weekdays.forEach((weekday, index) => {
+    const timeFilteredSchedule = getFilteredSchedule()[index];
+    timeFilteredSchedule.forEach((scheduleItem) => {
+      const [start] = scheduleItem.numberPair.split("-");
+
+      if (scheduleItem.weekday === currentDayForResident) {
+        resultArray.push(start);
+      }
+    });
+  });
+
+  const formatTime = (timeDiff: number) => {
+    const hours = Math.floor(timeDiff / 3600)
+      .toString()
+      .padStart(2, "0");
+    const minutes = Math.floor((timeDiff % 3600) / 60)
+      .toString()
+      .padStart(2, "0");
+    const seconds = (timeDiff % 60).toString().padStart(2, "0");
+
+    return `${hours}:${minutes}:${seconds}`;
   };
 
   return (
@@ -315,15 +366,25 @@ const Schedule = ({ navigation }: ScheduleProps) => {
                         const [start, end] = item.numberPair.split("-");
                         const startTime = moment(start, "HH:mm");
                         const endTime = moment(end, "HH:mm");
-
                         const isCurrent =
                           currentDayForResident ===
                             (item.weekday || item.date) &&
-                          moment(currentTime, "HH:mm").isBetween(
-                            startTime,
+                          moment(currentTime, "HH:mm:ss").isSameOrAfter(
+                            startTime
+                          ) &&
+                          moment(currentTime, "HH:mm:ss").isSameOrBefore(
                             endTime
                           );
+
                         const isColorPair = isCurrent;
+                        const timeDifference = moment.utc(
+                          moment(endTime, "HH:mm:ss").diff(
+                            moment(currentTime, "HH:mm:ss")
+                          )
+                        );
+                        const formattedTimeDifference = timeDifference
+                          .format("HH:mm:ss")
+                          .padStart(8, "0");
 
                         return (
                           <View key={item.idPair}>
@@ -378,8 +439,22 @@ const Schedule = ({ navigation }: ScheduleProps) => {
                                     {item.typePair &&
                                       "Тип пары: " + item.typePair}
                                   </TextTypePair>
+                                  {weekday === currentDayForResident &&
+                                    timeArray === start && (
+                                      <TimeToLesson>
+                                        До начала пары: {timeDifferences}
+                                      </TimeToLesson>
+                                    )}
+
+                                  {isCurrent && (
+                                    <TimeToLesson>
+                                      До окончания пары:{" "}
+                                      {formattedTimeDifference}
+                                    </TimeToLesson>
+                                  )}
                                 </ContainerRight>
                               </View>
+
                               {item.comments && (
                                 <CommentsText style={{ textAlign: "center" }}>
                                   {item.comments}

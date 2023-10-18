@@ -14,6 +14,13 @@ import {
   setTheme,
   darkTheme,
 } from "../../redux/reducers/settingsReducer";
+import {
+  BtnPrivacyPolicy,
+  TextIncorporateTheme,
+  TextPrivacyPolicy,
+  TextSwitchTheme,
+} from "./SettingsStyle";
+
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 type ITheme = {
@@ -26,38 +33,21 @@ const Settings = () => {
   const theme = useSelector((state: ITheme) => state.settingsReducer.theme);
 
   useEffect(() => {
-    if (theme === lightTheme) {
-      setIsDarkMode(false);
-    } else if (theme === darkTheme) {
-      setIsDarkMode(true);
-    }
+    setIsDarkMode(theme === darkTheme);
   }, [theme]);
+
   // Функция для переключения темы
   const toggleDarkMode = () => {
+    const newMode = isDarkMode ? "lightTheme" : "darkTheme";
     setIsDarkMode(!isDarkMode);
-
-    if (isDarkMode) {
-      dispatch(setTheme("lightTheme"));
-    } else {
-      dispatch(setTheme("darkTheme"));
-    }
+    dispatch(setTheme(newMode));
   };
 
   const dispatch = useDispatch();
   return (
     <View style={{ backgroundColor: theme.backgroundColor, flex: 1 }}>
       <View>
-        <Text
-          style={{
-            fontSize: screenWidth * 0.05,
-            color: theme.textColor,
-            fontFamily: "Montserrat-SemiBold",
-            textAlign: "center",
-            marginTop: screenHeight * 0.02,
-          }}
-        >
-          Смена цветовой темы приложения
-        </Text>
+        <TextSwitchTheme>Смена цветовой темы приложения</TextSwitchTheme>
         <View
           style={{
             flexDirection: "row",
@@ -65,54 +55,31 @@ const Settings = () => {
             alignSelf: "center",
           }}
         >
-          <Text
-            style={{
-              fontSize: screenWidth * 0.045,
-              color: theme.textColor,
-              fontFamily: "Montserrat-SemiBold",
-              textAlign: "center",
-              marginTop: screenHeight * -0.01,
-            }}
-          >
+          <TextIncorporateTheme>
             {isDarkMode ? "Включить светлую тему" : "Включить темную тему"}
-          </Text>
+          </TextIncorporateTheme>
           <Switch // Переключатель для смены темы
             trackColor={{ false: "#767577", true: "#FFFFFF" }}
             thumbColor={isDarkMode ? "#004C6F" : "#FFFFFF"}
             value={isDarkMode} // Значение переключателя
             onValueChange={toggleDarkMode} // Функция при изменении значения
             style={{
-              marginLeft: screenWidth * 0.03 // Увеличьте размер переключателя
+              marginLeft: screenWidth * 0.04,
+              transform: [
+                { scaleX: screenWidth * 0.003 },
+                { scaleY: screenWidth * 0.003 },
+              ],
+              // Увеличьте размер переключателя
             }}
           />
         </View>
       </View>
 
       <View>
-        <Text
-          style={{
-            fontSize: screenWidth * 0.045,
-            color: theme.textColor,
-            fontFamily: "Montserrat-SemiBold",
-            textAlign: "center",
-            marginTop: screenHeight * 0.02,
-          }}
-        >
-          Политика конфиденциальности
-        </Text>
-        <Pressable
+        <TextPrivacyPolicy>Политика конфиденциальности</TextPrivacyPolicy>
+        <BtnPrivacyPolicy
           onPress={() => {
             Linking.openURL("https://schedule.nspu.ru/api/Privacy_policy.html");
-          }}
-          style={{
-            height: screenHeight * 0.05,
-            width: screenWidth * 0.5,
-            backgroundColor: theme.mainColor,
-            borderRadius: 20,
-            marginTop: screenHeight * 0.02,
-            justifyContent: "center",
-            alignItems: "center",
-            alignSelf: "center",
           }}
         >
           <Text
@@ -124,7 +91,7 @@ const Settings = () => {
           >
             Privacy policy
           </Text>
-        </Pressable>
+        </BtnPrivacyPolicy>
       </View>
     </View>
   );
