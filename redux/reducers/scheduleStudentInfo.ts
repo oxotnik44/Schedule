@@ -3,10 +3,13 @@ import { Reducer } from "redux";
 const SET_DATA_SCHEDULE_STUDENT = "SET_DATA_SCHEDULE_STUDENT";
 const RESET_SCHEDULE_STUDENT = "RESET_SCHEDULE_STUDENT";
 const SET_TYPE_GROUP_STUDENT = "SET_TYPE_GROUP_STUDENT";
-const SET_DATA_SCHEDULE_STUDENT_EXTRAMURAL = "SET_DATA_SCHEDULE_STUDENT_EXTRAMURAL";
-const RESET_DATA_SCHEDULE_STUDENT_EXTRAMURAL = "RESET_DATA_SCHEDULE_STUDENT_EXTRAMURAL";
+const SET_DATA_SCHEDULE_STUDENT_EXTRAMURAL =
+  "SET_DATA_SCHEDULE_STUDENT_EXTRAMURAL";
+const RESET_DATA_SCHEDULE_STUDENT_EXTRAMURAL =
+  "RESET_DATA_SCHEDULE_STUDENT_EXTRAMURAL";
 const SET_SELECT_ID_GROUP = "SET_SELECT_ID_GROUP";
 const SET_IS_FULL_SCHEDULE_STUDENT = "SET_IS_FULL_SCHEDULE_STUDENT";
+const SET_LAST_CACHE_ENTRY_STUDENT = "SET_LAST_CACHE_ENTRY_STUDENT";
 interface IScheduleInfo {
   idPair: number;
   roomNumber: string | null;
@@ -38,6 +41,10 @@ interface IScheduleExtramuralInfo {
 }
 interface IState {
   dataSchedule: {
+    lastCacheEntry: {
+      currentDateCache: string;
+      currentTimeCache: string;
+    };
     groupType: string;
     scheduleResident: {
       numerator: IScheduleInfo[];
@@ -52,6 +59,10 @@ interface IState {
 
 export const initialScheduleState: IState = {
   dataSchedule: {
+    lastCacheEntry: {
+      currentDateCache: "",
+      currentTimeCache: "",
+    },
     groupType: "resident",
     scheduleResident: {
       numerator: [],
@@ -91,7 +102,7 @@ const scheduleInfoStudentReducer: Reducer<IState> = (
         ...state,
         typeGroup: action.typeGroup,
       };
-   
+
     case SET_SELECT_ID_GROUP:
       return {
         ...state,
@@ -121,6 +132,14 @@ const scheduleInfoStudentReducer: Reducer<IState> = (
       return {
         ...state,
         isFullSchedule: action.isFullSchedule,
+      };
+    case SET_LAST_CACHE_ENTRY_STUDENT:
+      return {
+        ...state,
+        dataSchedule: {
+          ...state.dataSchedule,
+          lastCacheEntry: action.lastCacheEntryStudent,
+        },
       };
     default:
       return state;
@@ -157,5 +176,9 @@ export const setDataStudentExtramural = (dataScheduleExtramural: IState) => ({
 export const setIsFullScheduleStudent = (isFullSchedule: boolean) => ({
   type: SET_IS_FULL_SCHEDULE_STUDENT,
   isFullSchedule,
+});
+export const setLastCacheEntryStudent = (lastCacheEntryStudent: any) => ({
+  type: SET_LAST_CACHE_ENTRY_STUDENT,
+  lastCacheEntryStudent,
 });
 export default scheduleInfoStudentReducer;

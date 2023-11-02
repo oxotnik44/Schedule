@@ -30,7 +30,7 @@ export const NameDepartments = styled.Text`
   color: ${(props) => props.theme.textColor};
   font-size: ${screenWidth * 0.04}px;
   font-family: "Montserrat-SemiBold";
-  padding-vertical:10px;
+  padding-vertical: 10px;
 `;
 
 export const ContainerSearchGroups = styled.View`
@@ -76,4 +76,11 @@ export const SearchContainer = styled.View`
   background-color: ${(props) => props.theme.containerSearchColor};
   elevation: 4;
   padding-horizontal: ${screenWidth * 0.03}px;
+`;
+export const NoConnected = styled.Text`
+  font-size: ${screenWidth * 0.055}px;
+  color: ${(props) => props.theme.textColor};
+  font-family: "Montserrat-SemiBold";
+  text-align: center;
+  width: ${screenWidth * 0.95}px;
 `;

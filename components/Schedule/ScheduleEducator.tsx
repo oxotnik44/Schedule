@@ -3,7 +3,13 @@ import "moment/locale/ru";
 import "moment-timezone";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { View, ScrollView, Text, TouchableOpacity } from "react-native";
+import {
+  View,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  ToastAndroid,
+} from "react-native";
 import { Dimensions } from "react-native";
 import {
   BtnGetScheduleExtramural,
@@ -13,6 +19,7 @@ import {
   ContainerPair,
   ContainerRight,
   DateText,
+  NoConnected,
   TextNameGroup,
   TextNamePair,
   TextNumberPair,
@@ -37,8 +44,13 @@ import {
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../Navigate";
 import { lightTheme } from "../../redux/reducers/settingsReducer";
-import { setIsFullScheduleEducator } from "../../redux/reducers/scheduleEducatorInfo";
+import {
+  setIsFullScheduleEducator,
+  setLastCacheEntryEducator,
+} from "../../redux/reducers/scheduleEducatorInfo";
 import { setSelectIdGroup } from "../../redux/reducers/scheduleStudentInfo";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { setFavoriteSchedule } from "../../redux/reducers/favoritesReducer/favoriteScheduleEducator";
 
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
@@ -78,6 +90,10 @@ interface IScheduleExtramuralInfo {
 interface ScheduleState {
   scheduleInfoEducatorReducer: {
     dataSchedule: {
+      lastCacheEntry: {
+        currentDateCache: string;
+        currentTimeCache: string;
+      };
       groupType: string;
       scheduleResident: {
         numerator: IScheduleInfo[];
@@ -106,10 +122,22 @@ type ITheme = {
     theme: any;
   };
 };
+interface Settings {
+  settingsReducer: {
+    isConnected: boolean;
+  };
+}
+interface FavoriteEducatorsState {
+  favoriteEducatorReducer: {
+    favoriteEducators: { idEducator: number; nameEducator: string }[];
+  };
+}
 const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
   const theme = useSelector((state: ITheme) => state.settingsReducer.theme);
   const dispatch = useDispatch();
-
+  const isConnected = useSelector(
+    (state: Settings) => state.settingsReducer.isConnected
+  );
   moment.tz.setDefault("Asia/Novosibirsk");
   const dataScheduleEducator = useSelector(
     (state: ScheduleState) => state.scheduleInfoEducatorReducer.dataSchedule
@@ -147,6 +175,10 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
     "Пятница",
     "Суббота",
   ];
+  const favoriteEducators = useSelector(
+    (state: FavoriteEducatorsState) =>
+      state.favoriteEducatorReducer.favoriteEducators
+  );
   const fetchSchedule = async (idGroup: number, groupName: string) => {
     try {
       dispatch(setNameGroup(groupName));
@@ -250,6 +282,89 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
       }
     }
   }, [currentTime, resultArray]);
+  let updateFavoriteEducator;
+  const STORAGE_KEY_SCHEDULE = "favoriteSchedule";
+
+  useEffect(() => {
+    if (isConnected) {
+      updateFavoriteEducator = async (idEducator: number) => {
+        try {
+          const storedSchedule = await AsyncStorage.getItem("favoriteSchedule");
+          let scheduleEducator = storedSchedule
+            ? JSON.parse(storedSchedule)
+            : {
+                groups: [],
+                educators: [],
+              };
+          const isFavoriteEducator = favoriteEducators.some(
+            (educatorFavorite) => educatorFavorite.idEducator === idEducator
+          );
+          const isFavoriteScheduleEducator = scheduleEducator.educators.some(
+            (educator: any) => educator.hasOwnProperty(idEducator)
+          );
+          const NovosibirskTime = moment.tz("Asia/Novosibirsk");
+
+          const currentTimeCache = NovosibirskTime.format("HH:mm:ss");
+          const currentDateCache = NovosibirskTime.format("D MMMM YYYY");
+          const lastCacheEntry = {
+            currentTimeCache,
+            currentDateCache,
+          };
+          if (isFavoriteScheduleEducator && isFavoriteEducator) {
+            const newDataSchedule = {
+              ...dataScheduleEducator,
+              lastCacheEntry,
+            };
+            const educatorIndex = scheduleEducator.educators.findIndex(
+              (educator: any) =>
+                Object.keys(educator)[0] === idEducator.toString()
+            );
+            if (educatorIndex !== -1) {
+              console.log("Обновление");
+              scheduleEducator.educators[educatorIndex][idEducator] =
+                newDataSchedule;
+              console.log(scheduleEducator);
+              await AsyncStorage.setItem(
+                STORAGE_KEY_SCHEDULE,
+                JSON.stringify(scheduleEducator)
+              );
+            }
+          } else if (!isFavoriteScheduleEducator && isFavoriteEducator) {
+            console.log("Создание");
+            setFavoriteSchedule(dataScheduleEducator, idEducator); // Добавление новой записи
+          }
+        } catch (error) {
+          console.error("Ошибка при обновлении расписания", error);
+        }
+      };
+
+      updateFavoriteEducator(selectIdEducator);
+    }
+  }, [dataScheduleEducator, selectIdEducator]);
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!isConnected) {
+        const storedSchedule = await AsyncStorage.getItem("favoriteSchedule");
+        if (storedSchedule) {
+          const scheduleEducator = JSON.parse(storedSchedule);
+          if (scheduleEducator && scheduleEducator.educators) {
+            const foundEducator = scheduleEducator.educators.find(
+              (item: any) =>
+                Object.keys(item)[0] === selectIdEducator.toString()
+            );
+            if (foundEducator) {
+              const lastCacheEntry =
+                foundEducator[selectIdEducator.toString()].lastCacheEntry;
+              dispatch(setLastCacheEntryEducator(lastCacheEntry));
+              // Здесь вы можете использовать lastCacheEntry по вашему усмотрению
+            }
+          }
+        }
+      }
+    };
+
+    fetchData();
+  }, [isConnected, selectIdEducator]);
   return (
     <Container>
       <ToggleContainer>
@@ -350,6 +465,20 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
       )}
 
       <ScrollView>
+        {!isConnected && (
+          <View>
+            <NoConnected>
+              Отсутствует соединение. 
+            </NoConnected>
+            <NoConnected>
+              Расписание актуально на {" "}
+              {dataScheduleEducator.lastCacheEntry &&
+                dataScheduleEducator.lastCacheEntry.currentDateCache +
+                  " в " +
+                  dataScheduleEducator.lastCacheEntry.currentTimeCache}
+            </NoConnected>
+          </View>
+        )}
         {groupType === "resident" ? (
           <View>
             {weekdays.map((weekday) => {
@@ -422,8 +551,20 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
                               <ContainerLeft>
                                 <TouchableOpacity
                                   onPress={() => {
-                                    dispatch(setSelectIdGroup(item.idGroup));
-                                    fetchSchedule(item.idGroup, item.groupName);
+                                    if (!isConnected) {
+                                      {
+                                        ToastAndroid.show(
+                                          "Нет соединения с интернетом",
+                                          ToastAndroid.SHORT
+                                        );
+                                      }
+                                    } else {
+                                      dispatch(setSelectIdGroup(item.idGroup));
+                                      fetchSchedule(
+                                        item.idGroup,
+                                        item.groupName
+                                      );
+                                    }
                                   }}
                                 >
                                   <TextNameGroup>

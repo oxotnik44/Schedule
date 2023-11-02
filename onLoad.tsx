@@ -1,8 +1,9 @@
 import { Provider, useDispatch, useSelector } from "react-redux";
 import store from "./redux/store";
 import React, { useEffect, useState } from "react";
-import Navigate from "./Navigate";
+import Navigate, { RootStackParamList } from "./Navigate";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import NetInfo from "@react-native-community/netinfo";
 
 import { getDepartments } from "./api/apiDepartments";
 import { getSchedule } from "./api/apiSchedule";
@@ -12,9 +13,23 @@ import { getGroups } from "./api/apiGroups";
 import { setFavoriteGroupsAC } from "./redux/reducers/favoritesReducer/favoriteGroupsReducer";
 import { setFavoriteEducatorAC } from "./redux/reducers/favoritesReducer/favoriteEducatorsReducer";
 import { useFonts } from "expo-font";
-import { setTheme } from "./redux/reducers/settingsReducer";
-
-const Load = () => {
+import {
+  setConnectionStatus,
+  setTheme,
+} from "./redux/reducers/settingsReducer";
+import { StackNavigationProp } from "@react-navigation/stack";
+type GroupsProps = {
+  navigation: StackNavigationProp<RootStackParamList, "Settings">;
+};
+interface Settings {
+  settingsReducer: {
+    isConnected: boolean;
+  };
+}
+const Load = ({ navigation }: GroupsProps) => {
+  const isConnected = useSelector(
+    (state: Settings) => state.settingsReducer.isConnected
+  );
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
   const [fontsLoaded] = useFonts({
@@ -48,7 +63,7 @@ const Load = () => {
         console.error("Error while getting theme:", error);
       }
     };
-    
+
     const fetchDepartments = async (): Promise<void> => {
       try {
         await getDepartments(dispatch);
@@ -100,15 +115,22 @@ const Load = () => {
 
     const onLoad = async (): Promise<void> => {
       if (loading) {
-        await getTheme()
-        await fetchDepartments();
+        await getTheme();
         await getFavoritesGroups();
         await getFavoritesEducators();
         // await fetchScheduleIfNeeded();
-        await fetchEducator();
-        await News();
-        await Groups();
-        setLoading(false);
+        NetInfo.fetch().then(async (state) => {
+          dispatch(setConnectionStatus(state.isConnected));
+
+          if (state.isConnected) {
+            console.log(state.isConnected);
+            await fetchEducator();
+            await fetchDepartments();
+            await News();
+            await Groups();
+          }
+          setLoading(false);
+        });
       }
     };
 
@@ -118,10 +140,11 @@ const Load = () => {
   if (!fontsLoaded) {
     return null;
   }
+
   if (loading) {
     return <></>; // Или можно отображать индикатор загрузки
   } else {
-    return <Navigate />;
+    return <Navigate navigation={navigation} />;
   }
 };
 

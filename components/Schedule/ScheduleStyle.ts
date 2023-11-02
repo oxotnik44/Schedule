@@ -64,7 +64,7 @@ export const ContainerRight = styled.View`
   width: 35%;
   height: auto;
   align-items: flex-end;
-  justifycontent: center;
+  justify-content: center;
 `;
 export const TextNameEducator = styled.Text`
   color: ${(props) => props.theme.textColor};
@@ -205,4 +205,12 @@ export const TimeToLesson = styled.Text`
   font-size: ${screenWidth * 0.03}px;
   font-family: "Montserrat-SemiBold";
   text-align: center;
+`;
+export const NoConnected = styled.Text`
+  font-size: ${screenWidth * 0.045}px;
+  justify-content: center;
+  color: ${(props) => props.theme.textColor};
+  font-family: "Montserrat-Bold";
+  width: ${screenWidth * 0.95}px;
+  text-align:center;
 `;

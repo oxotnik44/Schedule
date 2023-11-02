@@ -4,9 +4,10 @@ import styled from "styled-components/native";
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 export const Container = styled.View`
-  align-items: center;
   flex: 1;
   background-color: ${(props) => props.theme.backgroundColor};
+  justify-content: center;
+  align-items: center;
 `;
 export const PhotoNews = styled.Image`
   width: ${screenWidth * 0.9}px;
@@ -46,4 +47,11 @@ export const TextNews = styled.Text`
   text-align: left;
   height: auto;
   padding-horizontal: ${screenWidth * 0.05}px;
+`;
+export const NoConnected = styled.Text`
+  font-size: ${screenWidth * 0.055}px;
+  color: ${(props) => props.theme.textColor};
+  font-family: "Montserrat-SemiBold";
+  text-align: center;
+  width: ${screenWidth * 0.95}px;
 `;

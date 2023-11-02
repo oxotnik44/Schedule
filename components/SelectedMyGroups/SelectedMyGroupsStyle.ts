@@ -57,6 +57,7 @@ export const TextNoFavorites = styled.Text`
   font-size: ${screenWidth * 0.06}px;
   justify-content: center;
   color: ${(props) => props.theme.textColor};
+  font-family: Montserrat-SemiBold;
 `;
 export const CenteredContainer = styled.View`
   flex: 1;

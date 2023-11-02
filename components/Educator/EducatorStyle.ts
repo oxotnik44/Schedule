@@ -73,3 +73,10 @@ export const SelectEducator = styled.Image`
   height: ${screenHeight * 0.053}px;
   tint-color: ${(props) => props.theme.imageColor};
 `;
+export const NoConnected = styled.Text`
+  font-size: ${screenWidth * 0.055}px;
+  color: ${(props) => props.theme.textColor};
+  font-family: "Montserrat-SemiBold";
+  text-align: center;
+  width: ${screenWidth * 0.95}px;
+`;

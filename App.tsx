@@ -1,13 +1,21 @@
-import { Provider, useSelector } from "react-redux";
+import { Provider } from "react-redux";
 import store from "./redux/store";
-import React from "react";
+import React, { useEffect } from "react";
 import Load from "./onLoad";
 import { StatusBar } from "react-native";
-const App = (): JSX.Element => {
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RootStackParamList } from "./Navigate";
+
+type GroupsProps = {
+  navigation: StackNavigationProp<RootStackParamList, "Settings">;
+};
+
+const App = ({ navigation }: GroupsProps): JSX.Element => {
+  
   return (
     <Provider store={store}>
       <StatusBar hidden />
-      <Load />
+      <Load navigation={navigation} />
     </Provider>
   );
 };

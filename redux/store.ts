@@ -19,7 +19,7 @@ let rootReducer = combineReducers({
   newsReducer: newsReducer,
   settingsReducer: settingsReducer,
   scheduleInfoStudentReducer: scheduleInfoStudentReducer,
-  scheduleInfoEducatorReducer:scheduleInfoEducatorReducer
+  scheduleInfoEducatorReducer: scheduleInfoEducatorReducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

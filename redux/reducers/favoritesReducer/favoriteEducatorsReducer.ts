@@ -1,6 +1,7 @@
 import { Reducer } from "redux";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Alert } from "react-native";
+import { removeFavoriteEducatorSchedule } from "./favoriteScheduleEducator";
 
 const STORAGE_KEY_EDUCATOR = "favoriteEducators";
 
@@ -45,12 +46,15 @@ export const handleAddFavoriteEduactor = (
   if (isFavoriteEducator) {
     Alert.alert(
       "Подтверждение удаления",
-      "Вы точно хотите удалить группу из избранных?",
+      "Вы точно хотите удалить преподавателя из избранного?",
       [
         { text: "Отмена", style: "cancel" },
         {
           text: "Удалить",
-          onPress: () => dispatch(removeFavoriteEducatorAC(idEducator)),
+          onPress: () => {
+            dispatch(removeFavoriteEducatorAC(idEducator)),
+              removeFavoriteEducatorSchedule(idEducator);
+          },
         },
       ]
     );
@@ -71,7 +75,10 @@ export const setFavoriteEducator = async (
     const educator = storedEducator ? JSON.parse(storedEducator) : [];
     if (educator.length < 5) {
       educator.push(newEducator);
-      await AsyncStorage.setItem(STORAGE_KEY_EDUCATOR, JSON.stringify(educator));
+      await AsyncStorage.setItem(
+        STORAGE_KEY_EDUCATOR,
+        JSON.stringify(educator)
+      );
       dispatch(setFavoriteEducatorAC(educator));
       Alert.alert("Преподаватель добавлен в избранное");
     } else {

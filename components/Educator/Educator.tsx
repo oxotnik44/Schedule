@@ -11,6 +11,7 @@ import {
   ContainerEducators,
   ContainerSearchGroups,
   NameEducators,
+  NoConnected,
   RegaliaEducators,
   SearchContainer,
   SearchImage,
@@ -20,7 +21,10 @@ import { getScheduleEducator } from "../../api/apiSchedule";
 import { ThemeProvider } from "styled-components/native";
 
 import AddFavoriteGroups from "../Hoc/AddFavorite/AddFavorite";
-import { setIsFullScheduleEducator, setSelectIdEducator } from "../../redux/reducers/scheduleEducatorInfo";
+import {
+  setIsFullScheduleEducator,
+  setSelectIdEducator,
+} from "../../redux/reducers/scheduleEducatorInfo";
 const screenWidth = Dimensions.get("window").width;
 
 type EducatorProps = {
@@ -50,11 +54,18 @@ type ITheme = {
     theme: any;
   };
 };
+interface Settings {
+  settingsReducer: {
+    isConnected: boolean;
+  };
+}
 const Educator: React.FC<EducatorProps> = ({ navigation }) => {
   const { dataEducator } = useSelector(
     (state: EducatorState) => state.educatorInfoReducer
   );
-
+  const isConnected = useSelector(
+    (state: Settings) => state.settingsReducer.isConnected
+  );
   const [searchEducator, setSearchEducator] = useState("");
   const dispatch = useDispatch();
   const theme = useSelector((state: ITheme) => state.settingsReducer.theme);
@@ -97,32 +108,38 @@ const Educator: React.FC<EducatorProps> = ({ navigation }) => {
   return (
     <ThemeProvider theme={theme}>
       <Container>
-        <ContainerSearchGroups>
-          <SearchContainer>
-            <SearchInput
-              value={searchEducator}
-              onChangeText={(value) => setSearchEducator(value)}
-              placeholder="Поиск преподователя"
-              placeholderTextColor={theme.textSearchColor}
-              style={{
-                fontFamily: "Montserrat-Bold",
-                fontSize: screenWidth * 0.04,
-              }}
-            />
+        {!isConnected ? (
+          <NoConnected>Нет соединения с интернетом</NoConnected>
+        ) : (
+          <View>
+            <ContainerSearchGroups>
+              <SearchContainer>
+                <SearchInput
+                  value={searchEducator}
+                  onChangeText={(value) => setSearchEducator(value)}
+                  placeholder="Поиск преподавателя"
+                  placeholderTextColor={theme.textSearchColor}
+                  style={{
+                    fontFamily: "Montserrat-Bold",
+                    fontSize: screenWidth * 0.04,
+                  }}
+                />
 
-            <SearchImage
-              source={require("../../assets/Loup.png")}
-              resizeMode="contain"
-            />
-          </SearchContainer>
-        </ContainerSearchGroups>
+                <SearchImage
+                  source={require("../../assets/Loup.png")}
+                  resizeMode="contain"
+                />
+              </SearchContainer>
+            </ContainerSearchGroups>
 
-        <FlatList
-          data={filteredData}
-          keyExtractor={(item) => item.idEducator.toString()}
-          renderItem={renderItemEducator}
-          showsHorizontalScrollIndicator={false} // Удаление полоски прокрутки
-        />
+            <FlatList
+              data={filteredData}
+              keyExtractor={(item) => item.idEducator.toString()}
+              renderItem={renderItemEducator}
+              showsHorizontalScrollIndicator={false} // Удаление полоски прокрутки
+            />
+          </View>
+        )}
       </Container>
     </ThemeProvider>
   );

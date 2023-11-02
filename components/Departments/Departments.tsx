@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { FlatList, Dimensions } from "react-native";
+import { FlatList, Dimensions, Text, View } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -21,6 +21,7 @@ import {
   ContainerDepartments,
   ContainerSearchGroups,
   NameDepartments,
+  NoConnected,
   SearchContainer,
   SearchImage,
   SearchInput,
@@ -67,12 +68,20 @@ type ITheme = {
     theme: any;
   };
 };
+interface Settings {
+  settingsReducer: {
+    isConnected: boolean;
+  };
+}
 const Departments: React.FC<DepartmentsProps> = ({ navigation }) => {
   const { dataDepartment, textSearchGroup } = useSelector(
     (state: DepartmentsState) => state.departmentInfoReducer
   );
   const dataGroups = useSelector(
     (state: GroupsState) => state.groupsInfoReducer
+  );
+  const isConnected = useSelector(
+    (state: Settings) => state.settingsReducer.isConnected
   );
   const theme = useSelector((state: ITheme) => state.settingsReducer.theme);
 
@@ -100,12 +109,18 @@ const Departments: React.FC<DepartmentsProps> = ({ navigation }) => {
     return (
       <ContainerDepartments
         key={idDepartment}
-        onPress={() => {
-          dispatch(setNumberDepartment(idDepartment));
-          dispatch(setSelectNameDepartments(fullnameDepartment));
-          navigation.navigate("Groups");
-          dispatch(setResidentGroupOpen(false));
-          dispatch(setExtramuralGroupOpen(false));
+        onPress={async () => {
+          if (idDepartment === 18) {
+            await getSchedule(3430, dispatch);
+            dispatch(setSelectIdGroup(3430));
+            navigation.navigate("Schedule");
+          } else {
+            dispatch(setNumberDepartment(idDepartment));
+            dispatch(setSelectNameDepartments(fullnameDepartment));
+            navigation.navigate("Groups");
+            dispatch(setResidentGroupOpen(false));
+            dispatch(setExtramuralGroupOpen(false));
+          }
         }}
       >
         <NameDepartments>{fullnameDepartment}</NameDepartments>
@@ -143,42 +158,48 @@ const Departments: React.FC<DepartmentsProps> = ({ navigation }) => {
   return (
     <ThemeProvider theme={theme}>
       <Container>
-        <ContainerSearchGroups>
-          <SearchContainer>
-            <SearchInput
-              value={textSearchGroup}
-              onChangeText={(value) => dispatch(setTextSearchGroup(value))}
-              placeholder="Поиск группы"
-              placeholderTextColor={theme.textSearchColor}
-              style={{
-                fontFamily: "Montserrat-Bold",
-                fontSize: screenWidth * 0.04,
-              }}
-            />
-
-            <SearchImage
-              source={require("../../assets/Loup.png")}
-              resizeMode="contain"
-            />
-          </SearchContainer>
-        </ContainerSearchGroups>
-
-        {isSearchInputEmpty ? (
-          <FlatList
-            data={dataDepartment}
-            keyExtractor={(item) => item.idDepartment.toString()}
-            renderItem={renderItemDepartment}
-            showsHorizontalScrollIndicator={false} // Удаление полоски прокрутки
-          />
+        {!isConnected ? (
+          <NoConnected>Нет соединения с интернетом</NoConnected>
         ) : (
-          <FlatList
-            data={filteredData}
-            keyExtractor={(item, index) =>
-              `${item.idGroup}-${index.toString()}`
-            }
-            renderItem={renderItemGroup}
-            showsHorizontalScrollIndicator={false} // Удаление полоски прокрутки
-          />
+          <View>
+            <ContainerSearchGroups>
+              <SearchContainer>
+                <SearchInput
+                  value={textSearchGroup}
+                  onChangeText={(value) => dispatch(setTextSearchGroup(value))}
+                  placeholder="Поиск группы"
+                  placeholderTextColor={theme.textSearchColor}
+                  style={{
+                    fontFamily: "Montserrat-Bold",
+                    fontSize: screenWidth * 0.04,
+                  }}
+                />
+
+                <SearchImage
+                  source={require("../../assets/Loup.png")}
+                  resizeMode="contain"
+                />
+              </SearchContainer>
+            </ContainerSearchGroups>
+
+            {isSearchInputEmpty ? (
+              <FlatList
+                data={dataDepartment}
+                keyExtractor={(item) => item.idDepartment.toString()}
+                renderItem={renderItemDepartment}
+                showsHorizontalScrollIndicator={false} // Удаление полоски прокрутки
+              />
+            ) : (
+              <FlatList
+                data={filteredData}
+                keyExtractor={(item, index) =>
+                  `${item.idGroup}-${index.toString()}`
+                }
+                renderItem={renderItemGroup}
+                showsHorizontalScrollIndicator={false} // Удаление полоски прокрутки
+              />
+            )}
+          </View>
         )}
       </Container>
     </ThemeProvider>

@@ -1,6 +1,7 @@
 import { Reducer } from "redux";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Alert } from "react-native";
+import { removeFavoriteStudentSchedule } from "./favoriteScheduleStudent";
 
 const STORAGE_KEY_GROUPS = "favoriteGroups";
 const SET_FAVORITE_GROUPS = "SET_FAVORITE_GROUPS";
@@ -51,7 +52,10 @@ export const handleAddFavoriteGroup = (
         { text: "Отмена", style: "cancel" },
         {
           text: "Удалить",
-          onPress: () => dispatch(removeFavoriteGroupAC(idGroup)),
+          onPress: () => {
+            dispatch(removeFavoriteGroupAC(idGroup)),
+              removeFavoriteStudentSchedule(idGroup);
+          },
         },
       ]
     );

@@ -1,10 +1,11 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Image,
   Pressable,
   TouchableOpacity,
   Text,
   Dimensions,
+  ToastAndroid,
 } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
@@ -20,12 +21,17 @@ import News from "./components/News/News";
 import { resetTextSearchGroup } from "./redux/reducers/departmentsInfoReducer";
 import ScheduleEducator from "./components/Schedule/ScheduleEducator";
 import { ThemeProvider } from "styled-components/native";
-import { useNavigation } from "@react-navigation/native";
 import Settings from "./components/Settings/Settings";
 import {
   StackNavigationProp,
   createStackNavigator,
 } from "@react-navigation/stack";
+import NetInfo, { useNetInfo } from "@react-native-community/netinfo";
+import { setConnectionStatus } from "./redux/reducers/settingsReducer";
+import { getDepartments } from "./api/apiDepartments";
+import { getEducator } from "./api/apiEducator";
+import { getNews } from "./api/apiNews";
+import { getGroups } from "./api/apiGroups";
 
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
@@ -70,8 +76,13 @@ type ITheme = {
     theme: any;
   };
 };
+interface Settings {
+  settingsReducer: {
+    isConnected: boolean;
+  };
+}
 type GroupsProps = {
-  navigation: StackNavigationProp<RootStackParamList, "Settings">;
+  navigation: StackNavigationProp<RootStackParamList>;
 };
 const Navigate = ({ navigation }: GroupsProps) => {
   const getTabIcon = ({ route, focused, size, color }: TabIconProps) => {
@@ -93,7 +104,7 @@ const Navigate = ({ navigation }: GroupsProps) => {
       <Image
         source={iconSource}
         style={{
-          width: screenWidth * 0.06,
+          width: screenWidth * 0.065,
           height: screenHeight * 0.05,
           tintColor: color,
           resizeMode: "contain",
@@ -113,7 +124,9 @@ const Navigate = ({ navigation }: GroupsProps) => {
     (state: DepartmentsState) =>
       state.departmentInfoReducer.selectNameDepartments
   );
-
+  const isConnected = useSelector(
+    (state: Settings) => state.settingsReducer.isConnected
+  );
   const getHeaderTitle = (route: { name: string }) => {
     if (route.name === "ScheduleMyGroups") {
       return "Моя группа";
@@ -128,7 +141,7 @@ const Navigate = ({ navigation }: GroupsProps) => {
     } else if (route.name === "ScheduleEducator") {
       return selectEducator;
     } else if (route.name === "Educator") {
-      return "Преподователи";
+      return "Преподаватели";
     } else if (route.name === "SelectedMyGroups") {
       return "Избранное";
     } else if (route.name === "News") {
@@ -137,6 +150,35 @@ const Navigate = ({ navigation }: GroupsProps) => {
       return "Настройки";
     }
   };
+  const getInitialData = async () => {
+    await getDepartments(dispatch);
+    await getEducator(dispatch);
+    await getNews(dispatch);
+    await getGroups(dispatch);
+  };
+  const [pastConnection, setPastConnection] = useState<boolean | null>(null);
+  const [currentConnection, setCurrentConnection] = useState<boolean | null>(
+    null
+  );
+
+  useEffect(() => {
+    const Connection = NetInfo.addEventListener((state) => {
+      dispatch(setConnectionStatus(state.isConnected));
+      setPastConnection(currentConnection);
+      setCurrentConnection(state.isConnected);
+      console.log(pastConnection, currentConnection);
+      if (pastConnection === false && currentConnection) {
+        ToastAndroid.show("Соединение восстановлено", ToastAndroid.SHORT);
+        getInitialData();
+      } else if (pastConnection === true && !currentConnection) {
+        ToastAndroid.show("Нет соединения с интернетом", ToastAndroid.SHORT);
+      }
+    });
+
+    return () => {
+      Connection();
+    };
+  }, [currentConnection,isConnected]);
 
   return (
     <ThemeProvider theme={theme}>
@@ -150,7 +192,6 @@ const Navigate = ({ navigation }: GroupsProps) => {
               paddingBottom: 5,
               backgroundColor: theme.mainColor,
               height: screenHeight * 0.08,
-              // Цвет tabBar
             },
             tabBarInactiveTintColor: "#FFFFFF",
             tabBarActiveTintColor: "#FFFFFF", // Цвет активной иконки в tabBar
@@ -188,10 +229,10 @@ const Navigate = ({ navigation }: GroupsProps) => {
             name="SelectedMyGroups"
             component={SelectedMyGroups}
             options={({ navigation }) => ({
-              tabBarLabel: "Моя группа",
+              tabBarLabel: "Избранное",
               tabBarLabelStyle: {
-                fontSize: screenWidth * 0.03,
-
+                fontSize: screenWidth * 0.025,
+                fontFamily: "Montserrat-Bold",
                 color: theme.navigateColor,
               },
               tabBarButton: (props) => (
@@ -211,8 +252,8 @@ const Navigate = ({ navigation }: GroupsProps) => {
             options={({ navigation }) => ({
               tabBarLabel: "Расписание",
               tabBarLabelStyle: {
-                fontSize: screenWidth * 0.03,
-
+                fontSize: screenWidth * 0.025,
+                fontFamily: "Montserrat-Bold",
                 color: theme.navigateColor,
               },
               tabBarButton: (props) => (
@@ -231,9 +272,10 @@ const Navigate = ({ navigation }: GroupsProps) => {
             name="Educator"
             component={Educator}
             options={({ navigation }) => ({
-              tabBarLabel: "Преподватели",
+              tabBarLabel: "Преподаватели",
               tabBarLabelStyle: {
-                fontSize: screenWidth * 0.03,
+                fontSize: screenWidth * 0.025,
+                fontFamily: "Montserrat-Bold",
                 color: theme.navigateColor,
               },
               tabBarButton: (props) => (
@@ -272,8 +314,8 @@ const Navigate = ({ navigation }: GroupsProps) => {
             options={({ navigation }) => ({
               tabBarLabel: "Новости",
               tabBarLabelStyle: {
-                fontSize: screenWidth * 0.03,
-
+                fontSize: screenWidth * 0.025,
+                fontFamily: "Montserrat-Bold",
                 color: theme.navigateColor,
               },
               tabBarButton: (props) => (

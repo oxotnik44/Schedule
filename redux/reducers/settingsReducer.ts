@@ -2,9 +2,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Reducer } from "redux";
 
 const SET_THEME = "SET_THEME";
-
+const SET_CONNECTION_STATUS = "SET_CONNECTION_STATUS"
 interface ITheme {
   theme: any;
+  isConnected: boolean;
 }
 export const lightTheme = {
   backgroundColor: "#FFFFFF",
@@ -29,6 +30,7 @@ export const darkTheme = {
 
 const initialSettingsState: ITheme = {
   theme: lightTheme,
+  isConnected: false,
 };
 
 const settingsReducer: Reducer<ITheme> = (
@@ -39,12 +41,17 @@ const settingsReducer: Reducer<ITheme> = (
     case SET_THEME:
       const theme = action.theme === "lightTheme" ? lightTheme : darkTheme;
       AsyncStorage.setItem("selectedTheme", action.theme);
-      return { theme };
+      return { ...state, theme };
+    case SET_CONNECTION_STATUS:
+      return { ...state, isConnected: action.isConnected };
     default:
       return state;
   }
 };
-
+export const setConnectionStatus = (isConnected: boolean|null) => ({
+  type: SET_CONNECTION_STATUS,
+  isConnected,
+});
 export const setTheme = (theme: string) => ({
   type: SET_THEME,
   theme,

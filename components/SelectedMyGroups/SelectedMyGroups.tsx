@@ -8,6 +8,7 @@ import {
   Dimensions,
   FlatList,
   Pressable,
+  ToastAndroid,
 } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -35,9 +36,19 @@ import {
   lightTheme,
   setTheme,
 } from "../../redux/reducers/settingsReducer";
-import { setIsFullScheduleStudent, setSelectIdGroup } from "../../redux/reducers/scheduleStudentInfo";
-import { setIsFullScheduleEducator, setSelectIdEducator } from "../../redux/reducers/scheduleEducatorInfo";
-
+import {
+  setDataScheduleStudent,
+  setIsFullScheduleStudent,
+  setSelectIdGroup,
+} from "../../redux/reducers/scheduleStudentInfo";
+import {
+  setDataScheduleEducator,
+  setIsFullScheduleEducator,
+  setSelectIdEducator,
+} from "../../redux/reducers/scheduleEducatorInfo";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { removeFavoriteStudentSchedule } from "../../redux/reducers/favoritesReducer/favoriteScheduleStudent";
+import { removeFavoriteEducatorSchedule } from "../../redux/reducers/favoritesReducer/favoriteScheduleEducator";
 
 type RootStackParamList = {
   Schedule: undefined;
@@ -74,10 +85,17 @@ type SchuduleProps = {
 interface ContainerProps {
   currentState: "groups" | "educators"; // Замените 'other' на другие варианты, если нужно
 }
-
+interface Settings {
+  settingsReducer: {
+    isConnected: boolean;
+  };
+}
 const SelectedMyGroups = ({ navigation }: SchuduleProps) => {
   const [currentState, setCurrentState] = useState<"groups" | "educators">(
     "groups"
+  );
+  const isConnected = useSelector(
+    (state: Settings) => state.settingsReducer.isConnected
   );
   const dispatch = useDispatch();
   const theme = useSelector((state: ITheme) => state.settingsReducer.theme);
@@ -91,7 +109,7 @@ const SelectedMyGroups = ({ navigation }: SchuduleProps) => {
     (idGroupToRemove: number) => {
       Alert.alert(
         "Подтверждение удаления",
-        "Вы точно хотите удалить из избранных?",
+        "Вы точно хотите удалить группу из избранных?",
         [
           {
             text: "Отмена",
@@ -100,6 +118,7 @@ const SelectedMyGroups = ({ navigation }: SchuduleProps) => {
           {
             text: "Удалить",
             onPress: () => {
+              removeFavoriteStudentSchedule(idGroupToRemove);
               dispatch(removeFavoriteGroupAC(idGroupToRemove));
             },
           },
@@ -112,7 +131,7 @@ const SelectedMyGroups = ({ navigation }: SchuduleProps) => {
     (idEducatorToRemove: number) => {
       Alert.alert(
         "Подтверждение удаления",
-        "Вы точно хотите удалить из избранных?",
+        "Вы точно хотите удалить преподавателя из избранного?",
         [
           {
             text: "Отмена",
@@ -121,6 +140,7 @@ const SelectedMyGroups = ({ navigation }: SchuduleProps) => {
           {
             text: "Удалить",
             onPress: () => {
+              removeFavoriteEducatorSchedule(idEducatorToRemove);
               dispatch(removeFavoriteEducatorAC(idEducatorToRemove));
             },
           },
@@ -138,15 +158,75 @@ const SelectedMyGroups = ({ navigation }: SchuduleProps) => {
       alert("Произошла ошибка: " + error);
     }
   };
+  let hasDataStudent = false; // Объявляем переменную hasDataStudent за пределами функции
+  let hasDataEducator = false; // Объявляем переменную hasDataStudent за пределами функции
+
+  const fetchNoConnectedGroup = async (
+    idGroup: number,
+    hasDataStudent: boolean
+  ) => {
+    const storedScheduleStudent = await AsyncStorage.getItem(
+      "favoriteSchedule"
+    );
+    const scheduleStudent = storedScheduleStudent
+      ? JSON.parse(storedScheduleStudent)
+      : { groups: [], educators: [] };
+    scheduleStudent.groups.forEach((item: any) => {
+      const keys = Object.keys(item);
+      if (keys.includes(idGroup.toString())) {
+        hasDataStudent = true;
+        dispatch(setDataScheduleStudent(item[idGroup.toString()]));
+      }
+    });
+    return hasDataStudent; // Возвращаем hasDataStudent
+  };
+  const fetchNoConnectedEducator = async (
+    idEducator: number,
+    hasDataEducator: boolean
+  ) => {
+    const storedScheduleEducator = await AsyncStorage.getItem(
+      "favoriteSchedule"
+    );
+    const scheduleEducator = storedScheduleEducator
+      ? JSON.parse(storedScheduleEducator)
+      : { groups: [], educators: [] };
+    scheduleEducator.educators.forEach((item: any) => {
+      const keys = Object.keys(item);
+      if (keys.includes(idEducator.toString())) {
+        hasDataEducator = true;
+        dispatch(setDataScheduleEducator(item[idEducator.toString()]));
+      }
+    });
+    return hasDataEducator; // Возвращаем hasDataStudent
+  };
   const renderGroupItem = useCallback(
     ({ item }: { item: { idGroup: number; nameGroup: string } }) => (
       <TouchableOpacity
         onPress={() => {
-          fetchSchedule(item.idGroup).then(() => {
-            dispatch(setNameGroup(item.nameGroup));
-            dispatch(setIsFullScheduleStudent(false));
-            navigation.navigate("Schedule");
-          });
+          if (!isConnected) {
+            fetchNoConnectedGroup(item.idGroup, hasDataStudent).then(
+              (hasDataStudent) => {
+                if (!hasDataStudent) {
+                  ToastAndroid.show(
+                    "Нет сохранённого расписания",
+                    ToastAndroid.SHORT
+                  );
+                } else {
+                  dispatch(setNameGroup(item.nameGroup));
+                  dispatch(setIsFullScheduleStudent(false));
+                  dispatch(setSelectIdGroup(item.idGroup));
+                  navigation.navigate("Schedule");
+                }
+              }
+            );
+          } else {
+            fetchSchedule(item.idGroup).then(() => {
+              dispatch(setNameGroup(item.nameGroup));
+              dispatch(setIsFullScheduleStudent(false));
+              dispatch(setSelectIdGroup(item.idGroup));
+              navigation.navigate("Schedule");
+            });
+          }
         }}
       >
         <ContainerGroup>
@@ -170,11 +250,27 @@ const SelectedMyGroups = ({ navigation }: SchuduleProps) => {
       <TouchableOpacity
         style={{ flexDirection: "row" }}
         onPress={async () => {
-          await getScheduleEducator(dispatch, item.idEducator);
-          dispatch(setNameEducator(item.nameEducator));
-          dispatch(setSelectIdEducator(item.idEducator));
-          dispatch(setIsFullScheduleEducator(false));
-          navigation.navigate("ScheduleEducator"); // Добавляем переход
+          if (!isConnected) {
+            fetchNoConnectedEducator(item.idEducator, hasDataEducator).then(
+              (hasDataEducator) => {
+                if (!hasDataEducator) {
+                  ToastAndroid.show(
+                    "Нет сохранённого расписания",
+                    ToastAndroid.SHORT
+                  );
+                } else {
+                  dispatch(setSelectIdEducator(item.idEducator));
+                  dispatch(setNameEducator(item.nameEducator));
+                  dispatch(setIsFullScheduleEducator(false));
+                  navigation.navigate("ScheduleEducator"); // Добавляем переход
+                }
+              }
+            );
+          } else {
+            await getScheduleEducator(dispatch, item.idEducator);
+            dispatch(setSelectIdEducator(item.idEducator));
+            navigation.navigate("ScheduleEducator"); // Добавляем переход
+          }
         }}
       >
         <ContainerGroup>

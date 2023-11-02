@@ -9,6 +9,9 @@ import {
   Text,
   TouchableOpacity,
   FlatList,
+  ToastAndroid,
+  Linking,
+  Alert,
 } from "react-native";
 import { Dimensions } from "react-native";
 import {
@@ -19,6 +22,7 @@ import {
   ContainerPair,
   ContainerRight,
   DateText,
+  NoConnected,
   TextNameEducator,
   TextNameGroup,
   TextNamePair,
@@ -43,8 +47,13 @@ import {
 import { lightTheme } from "../../redux/reducers/settingsReducer";
 import { ThemeProvider } from "styled-components/native";
 import { setSelectIdEducator } from "../../redux/reducers/scheduleEducatorInfo";
-import { setIsFullScheduleStudent } from "../../redux/reducers/scheduleStudentInfo";
-import { useNavigation } from "@react-navigation/native";
+import {
+  setIsFullScheduleStudent,
+  setLastCacheEntryStudent,
+} from "../../redux/reducers/scheduleStudentInfo";
+import { Link, useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { setFavoriteSchedule } from "../../redux/reducers/favoritesReducer/favoriteScheduleStudent";
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 
@@ -77,6 +86,10 @@ interface IScheduleExtramuralInfo {
 interface ScheduleState {
   scheduleInfoStudentReducer: {
     dataSchedule: {
+      lastCacheEntry: {
+        currentDateCache: string;
+        currentTimeCache: string;
+      };
       groupType: string;
       scheduleResident: {
         numerator: IScheduleInfo[];
@@ -92,7 +105,11 @@ interface ScheduleState {
     isFullSchedule: boolean;
   };
 }
-
+interface FavoriteGroupsState {
+  favoriteGroupReducer: {
+    favoriteGroups: { idGroup: number; nameGroup: string }[];
+  };
+}
 // Тип ScheduleProps
 type ScheduleProps = {
   navigation: StackNavigationProp<RootStackParamList, "Schedule">;
@@ -102,11 +119,18 @@ type ITheme = {
     theme: any;
   };
 };
+interface Settings {
+  settingsReducer: {
+    isConnected: boolean;
+  };
+}
 const Schedule = ({ navigation }: ScheduleProps) => {
   const theme = useSelector((state: ITheme) => state.settingsReducer.theme);
   moment.tz.setDefault("Asia/Novosibirsk");
   const dispatch = useDispatch();
-
+  const isConnected = useSelector(
+    (state: Settings) => state.settingsReducer.isConnected
+  );
   const dataSchedule = useSelector(
     (state: ScheduleState) => state.scheduleInfoStudentReducer.dataSchedule
   );
@@ -120,7 +144,9 @@ const Schedule = ({ navigation }: ScheduleProps) => {
   const isFullSchedule = useSelector(
     (state: ScheduleState) => state.scheduleInfoStudentReducer.isFullSchedule
   );
-
+  const favoriteGroups = useSelector(
+    (state: FavoriteGroupsState) => state.favoriteGroupReducer.favoriteGroups
+  );
   const [typeWeek, setTypeWeek] = useState("");
   const [currentTypeWeek, setCurrentTypeWeek] = useState<
     "numerator" | "denominator"
@@ -129,10 +155,11 @@ const Schedule = ({ navigation }: ScheduleProps) => {
     useState<string>("Понедельник");
   const [currentDayForExtramuralist, setCurrentDayForExtramuralist] =
     useState<string>("");
-  const [currentTime, setCurrentTime] = useState<string>("9:59:58");
+  const [currentTime, setCurrentTime] = useState<string>("");
   const resultArray: any[] = [];
   const [timeArray, setTimeArray] = useState("");
   const [timeDifferences, setTimeDifference] = useState<string>("");
+
   const weekdays = [
     "Понедельник",
     "Вторник",
@@ -191,6 +218,90 @@ const Schedule = ({ navigation }: ScheduleProps) => {
       }
     }
   }, [currentTime, resultArray]);
+  let updateFavoriteGroup;
+  const STORAGE_KEY_SCHEDULE = "favoriteSchedule";
+
+  useEffect(() => {
+    if (isConnected) {
+      updateFavoriteGroup = async (idGroup: number) => {
+        try {
+          const storedSchedule = await AsyncStorage.getItem(
+            STORAGE_KEY_SCHEDULE
+          );
+          let scheduleStudent = storedSchedule
+            ? JSON.parse(storedSchedule)
+            : { groups: [], educators: [] };
+          const isFavoriteGroup = favoriteGroups.some(
+            (groupFavorite) => groupFavorite.idGroup === idGroup
+          );
+
+          const isFavoriteScheduleGroup = scheduleStudent.groups.some(
+            (group: any) => group.hasOwnProperty(idGroup)
+          );
+          const NovosibirskTime = moment.tz("Asia/Novosibirsk");
+
+          const currentTimeCache = NovosibirskTime.format("HH:mm:ss");
+          const currentDateCache = NovosibirskTime.format("D MMMM YYYY");
+          const lastCacheEntry = {
+            currentTimeCache,
+            currentDateCache,
+          };
+          if (isFavoriteGroup && isFavoriteScheduleGroup) {
+            const newDataSchedule = {
+              ...dataSchedule,
+              lastCacheEntry,
+            };
+            const groupIndex = scheduleStudent.groups.findIndex(
+              (group: any) => Object.keys(group)[0] === idGroup.toString()
+            );
+
+            if (groupIndex !== -1) {
+              console.log("Обновление");
+              scheduleStudent.groups[groupIndex][idGroup] = newDataSchedule;
+              console.log(scheduleStudent);
+              await AsyncStorage.setItem(
+                STORAGE_KEY_SCHEDULE,
+                JSON.stringify(scheduleStudent)
+              );
+            }
+          } else if (!isFavoriteScheduleGroup && isFavoriteGroup) {
+            console.log("Создание");
+
+            setFavoriteSchedule(dataSchedule, idGroup, lastCacheEntry); // Добавление новой записи
+          }
+        } catch (error) {
+          console.error("Ошибка при обновлении расписания", error);
+        }
+      };
+
+      updateFavoriteGroup(selectIdGroup);
+    }
+  }, [selectIdGroup, dataSchedule]);
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!isConnected) {
+        const storedSchedule = await AsyncStorage.getItem("favoriteSchedule");
+        if (storedSchedule) {
+          const scheduleStudent = JSON.parse(storedSchedule);
+          if (scheduleStudent && scheduleStudent.groups) {
+            const foundGroup = scheduleStudent.groups.find(
+              (item: any) => Object.keys(item)[0] === selectIdGroup.toString()
+            );
+            if (foundGroup) {
+              const lastCacheEntry =
+                foundGroup[selectIdGroup.toString()].lastCacheEntry;
+              dispatch(setLastCacheEntryStudent(lastCacheEntry));
+              // Здесь вы можете использовать lastCacheEntry по вашему усмотрению
+            }
+          }
+        }
+      }
+    };
+
+    fetchData();
+  }, [isConnected, selectIdGroup]);
+
+  // Добавлен isFavoriteGroup в зависимости
 
   const fetchScheduleEducator = async (
     fullNameEducator: string,
@@ -204,7 +315,6 @@ const Schedule = ({ navigation }: ScheduleProps) => {
       console.log(error);
     }
   };
-
   const getFilteredSchedule = () => {
     const filteredSchedule =
       typeWeek === "numerator"
@@ -217,7 +327,6 @@ const Schedule = ({ navigation }: ScheduleProps) => {
       )
     );
   };
-
   weekdays.forEach((weekday, index) => {
     const timeFilteredSchedule = getFilteredSchedule()[index];
     timeFilteredSchedule.forEach((scheduleItem) => {
@@ -240,7 +349,6 @@ const Schedule = ({ navigation }: ScheduleProps) => {
 
     return `${hours}:${minutes}:${seconds}`;
   };
-
   return (
     <ThemeProvider theme={theme}>
       <Container>
@@ -310,6 +418,18 @@ const Schedule = ({ navigation }: ScheduleProps) => {
         )}
 
         <ScrollView>
+          {!isConnected && (
+            <View>
+              <NoConnected>Отсутствует соединение.</NoConnected>
+              <NoConnected>
+                Расписание актуально на{" "}
+                {dataSchedule.lastCacheEntry &&
+                  dataSchedule.lastCacheEntry.currentDateCache +
+                    " в " +
+                    dataSchedule.lastCacheEntry.currentTimeCache}
+              </NoConnected>
+            </View>
+          )}
           <View>
             {groupType === "resident" ? (
               <View>
@@ -387,7 +507,10 @@ const Schedule = ({ navigation }: ScheduleProps) => {
                           .padStart(8, "0");
 
                         return (
-                          <View key={item.idPair}>
+                          <View
+                            key={item.idPair}
+                            style={{ alignItems: "center" }}
+                          >
                             <ContainerPair
                               isColorPair={
                                 theme === lightTheme
@@ -410,13 +533,22 @@ const Schedule = ({ navigation }: ScheduleProps) => {
                                 <ContainerLeft>
                                   <TouchableOpacity
                                     onPress={() => {
-                                      dispatch(
-                                        setSelectIdEducator(item.idEducator)
-                                      );
-                                      fetchScheduleEducator(
-                                        item.fullNameEducator,
-                                        item.idEducator
-                                      );
+                                      if (!isConnected) {
+                                        {
+                                          ToastAndroid.show(
+                                            "Нет соединения с интернетом",
+                                            ToastAndroid.SHORT
+                                          );
+                                        }
+                                      } else {
+                                        dispatch(
+                                          setSelectIdEducator(item.idEducator)
+                                        );
+                                        fetchScheduleEducator(
+                                          item.fullNameEducator,
+                                          item.idEducator
+                                        );
+                                      }
                                     }}
                                   >
                                     <TextNameEducator>
@@ -457,7 +589,19 @@ const Schedule = ({ navigation }: ScheduleProps) => {
 
                               {item.comments && (
                                 <CommentsText style={{ textAlign: "center" }}>
-                                  {item.comments}
+                                  {/^(https?:\/\/|www\.|https?:\/\/www\.)[\w\-.]+\.[a-zA-Z]{2,}(\/\S*)?$/.test(
+                                    item.comments
+                                  ) ? (
+                                    <Text
+                                      onPress={() =>
+                                        Linking.openURL(item.comments)
+                                      }
+                                    >
+                                      {item.comments}
+                                    </Text>
+                                  ) : (
+                                    item.comments
+                                  )}
                                 </CommentsText>
                               )}
                             </ContainerPair>
@@ -603,7 +747,17 @@ const Schedule = ({ navigation }: ScheduleProps) => {
                           </View>
                           {item.comments && (
                             <CommentsText style={{ textAlign: "center" }}>
-                              {item.comments}
+                              {/^(https?:\/\/|www\.|https?:\/\/www\.)[\w\-.]+\.[a-zA-Z]{2,}(\/\S*)?$/.test(
+                                item.comments
+                              ) ? (
+                                <Text
+                                  onPress={() => Linking.openURL(item.comments)}
+                                >
+                                  {item.comments}
+                                </Text>
+                              ) : (
+                                item.comments
+                              )}
                             </CommentsText>
                           )}
                         </ContainerPair>

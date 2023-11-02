@@ -4,11 +4,13 @@ const SET_DATA_SCHEDULE_EDUCATOR = "SET_DATA_SCHEDULE_EDUCATOR";
 const RESET_SCHEDULE_EDUCATOR = "RESET_SCHEDULE_EDUCATOR";
 const SET_SELECT_ID_EDUCATOR = "SET_SELECT_ID_EDUCATOR";
 const SET_TYPE_GROUP_EDUCATOR = "SET_TYPE_GROUP_EDUCATOR";
-const SET_DATA_SCHEDULE_EDUCATOR_EXTRAMURAL = "SET_DATA_SCHEDULE_EDUCATOR_EXTRAMURAL";
-const RESET_DATA_SCHEDULE_EDUCATOR_EXTRAMURAL = "RESET_DATA_SCHEDULE_EDUCATOR_EXTRAMURAL";
+const SET_DATA_SCHEDULE_EDUCATOR_EXTRAMURAL =
+  "SET_DATA_SCHEDULE_EDUCATOR_EXTRAMURAL";
+const RESET_DATA_SCHEDULE_EDUCATOR_EXTRAMURAL =
+  "RESET_DATA_SCHEDULE_EDUCATOR_EXTRAMURAL";
 const SET_SELECT_ID_GROUP = "SET_SELECT_ID_GROUP";
 const SET_IS_FULL_SCHEDULE_EDUCATOR = "SET_IS_FULL_SCHEDULE_EDUCATOR";
-
+const SET_LAST_CACHE_ENTRY_EDUCATOR = "SET_LAST_CACHE_ENTRY_EDUCATOR";
 interface IScheduleInfo {
   idPair: number;
   roomNumber: string | null;
@@ -42,6 +44,10 @@ interface IScheduleExtramuralInfo {
 
 interface IState {
   dataSchedule: {
+    lastCacheEntry: {
+      currentDateCache: string;
+      currentTimeCache: string;
+    };
     groupType: string;
     scheduleResident: {
       numerator: IScheduleInfo[];
@@ -57,6 +63,10 @@ interface IState {
 
 export const initialScheduleState: IState = {
   dataSchedule: {
+    lastCacheEntry: {
+      currentDateCache: "",
+      currentTimeCache: "",
+    },
     groupType: "resident",
     scheduleResident: {
       numerator: [],
@@ -132,6 +142,14 @@ const scheduleInfoEducatorReducer: Reducer<IState> = (
         ...state,
         isFullSchedule: action.isFullSchedule,
       };
+    case SET_LAST_CACHE_ENTRY_EDUCATOR:
+      return {
+        ...state,
+        dataSchedule: {
+          ...state.dataSchedule,
+          lastCacheEntry: action.lastCacheEntryEducator,
+        },
+      };
     default:
       return state;
   }
@@ -169,5 +187,8 @@ export const setIsFullScheduleEducator = (isFullSchedule: boolean) => ({
   type: SET_IS_FULL_SCHEDULE_EDUCATOR,
   isFullSchedule,
 });
-
+export const setLastCacheEntryEducator = (lastCacheEntryEducator: any) => ({
+  type: SET_LAST_CACHE_ENTRY_EDUCATOR,
+  lastCacheEntryEducator,
+});
 export default scheduleInfoEducatorReducer;
