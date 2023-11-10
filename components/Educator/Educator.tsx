@@ -1,5 +1,5 @@
-import React, { useCallback, memo, useState } from "react";
-import { View, TouchableOpacity, FlatList, Dimensions } from "react-native";
+import React, { useState } from "react";
+import { View, FlatList, Dimensions } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -44,11 +44,7 @@ interface EducatorState {
     loading: boolean; // Флаг загрузки для отображения анимации
   };
 }
-interface FavoriteEducatorState {
-  favoriteEducatorReducer: {
-    favoriteEducators: { idEducator: number; nameEducator: string }[];
-  };
-}
+
 type ITheme = {
   settingsReducer: {
     theme: any;

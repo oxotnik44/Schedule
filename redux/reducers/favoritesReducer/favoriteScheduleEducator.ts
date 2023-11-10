@@ -4,15 +4,19 @@ const STORAGE_KEY_SCHEDULE = "favoriteSchedule";
 
 export const setFavoriteSchedule = async (
   newSchedule: any,
-  idEducator: number
+  idEducator: number,
+  lastCacheEntry: any
 ) => {
   try {
     const storedSchedule = await AsyncStorage.getItem(STORAGE_KEY_SCHEDULE);
     let scheduleEducator = storedSchedule
       ? JSON.parse(storedSchedule)
       : { groups: [], educators: [] };
-
-    scheduleEducator.educators.push({ [idEducator]: newSchedule });
+    const dataScheduleEducator = {
+      ...newSchedule,
+      lastCacheEntry,
+    };
+    scheduleEducator.educators.push({ [idEducator]: dataScheduleEducator });
     console.log(scheduleEducator);
     await AsyncStorage.setItem(
       STORAGE_KEY_SCHEDULE,

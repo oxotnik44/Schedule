@@ -9,6 +9,7 @@ import {
   Text,
   TouchableOpacity,
   ToastAndroid,
+  FlatList,
 } from "react-native";
 import { Dimensions } from "react-native";
 import {
@@ -331,7 +332,11 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
             }
           } else if (!isFavoriteScheduleEducator && isFavoriteEducator) {
             console.log("Создание");
-            setFavoriteSchedule(dataScheduleEducator, idEducator); // Добавление новой записи
+            setFavoriteSchedule(
+              dataScheduleEducator,
+              idEducator,
+              lastCacheEntry
+            ); // Добавление новой записи
           }
         } catch (error) {
           console.error("Ошибка при обновлении расписания", error);
@@ -340,7 +345,7 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
 
       updateFavoriteEducator(selectIdEducator);
     }
-  }, [dataScheduleEducator, selectIdEducator]);
+  }, [selectIdEducator, dataScheduleEducator]);
   useEffect(() => {
     const fetchData = async () => {
       if (!isConnected) {
@@ -464,24 +469,31 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
         </TypeWeekContainer>
       )}
 
-      <ScrollView>
-        {!isConnected && (
-          <View>
-            <NoConnected>
-              Отсутствует соединение. 
-            </NoConnected>
-            <NoConnected>
-              Расписание актуально на {" "}
-              {dataScheduleEducator.lastCacheEntry &&
-                dataScheduleEducator.lastCacheEntry.currentDateCache +
-                  " в " +
-                  dataScheduleEducator.lastCacheEntry.currentTimeCache}
-            </NoConnected>
-          </View>
-        )}
-        {groupType === "resident" ? (
-          <View>
-            {weekdays.map((weekday) => {
+      {!isConnected && (
+        <View>
+          <NoConnected>Отсутствует соединение.</NoConnected>
+          <NoConnected>
+            {dataScheduleEducator.lastCacheEntry &&
+              dataScheduleEducator.lastCacheEntry.currentDateCache +
+                " в " +
+                dataScheduleEducator.lastCacheEntry.currentTimeCache}
+          </NoConnected>
+        </View>
+      )}
+      {groupType === "resident" ? (
+        <View>
+          <FlatList
+            data={weekdays}
+            keyExtractor={(weekday) => weekday}
+            initialNumToRender={2}
+            maxToRenderPerBatch={10}
+            windowSize={10}
+            contentContainerStyle={{
+              paddingBottom: isConnected
+                ? screenHeight * 0.13
+                : screenHeight * 0.19,
+            }}
+            renderItem={({ item: weekday }) => {
               const filteredSchedule =
                 typeWeek === "numerator"
                   ? dataScheduleEducator.scheduleResident.numerator
@@ -489,6 +501,7 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
               const timeFilteredSchedule = filteredSchedule.filter(
                 (item) => item.weekday === weekday || item.date === weekday
               );
+
               if (timeFilteredSchedule.length === 0) {
                 return (
                   <View key={weekday}>
@@ -508,240 +521,302 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
                   </View>
                 );
               }
+
               return (
                 <View key={weekday}>
                   <TextWeekday>{weekday}</TextWeekday>
-                  {timeFilteredSchedule.map((item, index) => {
-                    const [start, end] = item.numberPair.split("-");
-                    const startTime = moment(start, "HH:mm");
-                    const endTime = moment(end, "HH:mm");
-                    const isCurrent =
-                      currentDayForResident ===
-                        (hasWeekday ? item.weekday : item.date) &&
-                      moment(currentTime, "HH:mm").isSameOrAfter(startTime) &&
-                      moment(currentTime, "HH:mm").isSameOrBefore(endTime);
-                    const isColorPair = isCurrent;
-                    const timeDifference = moment.utc(
-                      moment(endTime, "HH:mm:ss").diff(
-                        moment(currentTime, "HH:mm:ss")
-                      )
-                    );
-                    const formattedTimeDifference = timeDifference
-                      .format("HH:mm:ss")
-                      .padStart(8, "0");
+                  <FlatList
+                    data={timeFilteredSchedule}
+                    keyExtractor={(item) => item.idPair.toString()}
+                    initialNumToRender={5}
+                    maxToRenderPerBatch={10}
+                    windowSize={10}
+                    renderItem={({ item }) => {
+                      const [start, end] = item.numberPair.split("-");
+                      const startTime = moment(start, "HH:mm");
+                      const endTime = moment(end, "HH:mm");
+                      const isCurrent =
+                        currentDayForResident ===
+                          (hasWeekday ? item.weekday : item.date) &&
+                        moment(currentTime, "HH:mm").isSameOrAfter(startTime) &&
+                        moment(currentTime, "HH:mm").isSameOrBefore(endTime);
+                      const isColorPair = isCurrent;
+                      const timeDifference = moment.utc(
+                        moment(endTime, "HH:mm:ss").diff(
+                          moment(currentTime, "HH:mm:ss")
+                        )
+                      );
+                      const formattedTimeDifference = timeDifference
+                        .format("HH:mm:ss")
+                        .padStart(8, "0");
 
-                    return (
-                      <View key={item.idPair}>
-                        <ContainerPair
-                          isColorPair={
-                            theme === lightTheme
-                              ? isColorPair
-                                ? "#C3C9DE"
-                                : "#d9d9d999"
-                              : isColorPair
-                              ? "#4B61B0"
-                              : "#46464699"
-                          }
-                        >
-                          <View>
-                            <TextNamePair ellipsizeMode="tail">
-                              {item.namePair}
-                            </TextNamePair>
-                            <View style={{ flexDirection: "row" }}>
-                              <ContainerLeft>
-                                <TouchableOpacity
-                                  onPress={() => {
-                                    if (!isConnected) {
-                                      {
-                                        ToastAndroid.show(
-                                          "Нет соединения с интернетом",
-                                          ToastAndroid.SHORT
+                      return (
+                        <View key={item.idPair}>
+                          <ContainerPair
+                            isColorPair={
+                              theme === lightTheme
+                                ? isColorPair
+                                  ? "#C3C9DE"
+                                  : "#d9d9d999"
+                                : isColorPair
+                                ? "#4B61B0"
+                                : "#46464699"
+                            }
+                          >
+                            <View>
+                              <TextNamePair ellipsizeMode="tail">
+                                {item.namePair}
+                              </TextNamePair>
+                              <View style={{ flexDirection: "row" }}>
+                                <ContainerLeft>
+                                  <TouchableOpacity
+                                    onPress={() => {
+                                      if (!isConnected) {
+                                        {
+                                          ToastAndroid.show(
+                                            "Нет соединения с интернетом",
+                                            ToastAndroid.SHORT
+                                          );
+                                        }
+                                      } else {
+                                        dispatch(
+                                          setSelectIdGroup(item.idGroup)
+                                        );
+                                        fetchSchedule(
+                                          item.idGroup,
+                                          item.groupName
                                         );
                                       }
-                                    } else {
-                                      dispatch(setSelectIdGroup(item.idGroup));
-                                      fetchSchedule(
-                                        item.idGroup,
-                                        item.groupName
-                                      );
-                                    }
-                                  }}
-                                >
-                                  <TextNameGroup>
-                                    {item.groupName &&
-                                      "Группа: " + item.groupName}
-                                  </TextNameGroup>
-                                </TouchableOpacity>
+                                    }}
+                                  >
+                                    <TextNameGroup>
+                                      {item.groupName &&
+                                        "Группа: " + item.groupName}
+                                    </TextNameGroup>
+                                  </TouchableOpacity>
 
-                                <TextRoomNumber>
-                                  {item.roomNumber &&
-                                    "Кабинет №" + item.roomNumber}
-                                </TextRoomNumber>
-                              </ContainerLeft>
-                              <ContainerRight>
-                                <TextNumberPair>
-                                  {item.numberPair && item.numberPair}
-                                </TextNumberPair>
-                                <TextTypePair>
-                                  {item.typePair &&
-                                    "Тип пары: " + item.typePair}
-                                </TextTypePair>
-                                {weekday === currentDayForResident &&
-                                  timeArray === start && (
+                                  <TextRoomNumber>
+                                    {item.roomNumber &&
+                                      "Кабинет №" + item.roomNumber}
+                                  </TextRoomNumber>
+                                </ContainerLeft>
+                                <ContainerRight>
+                                  <TextNumberPair>
+                                    {item.numberPair && item.numberPair}
+                                  </TextNumberPair>
+                                  <TextTypePair>
+                                    {item.typePair &&
+                                      "Тип пары: " + item.typePair}
+                                  </TextTypePair>
+                                  {weekday === currentDayForResident &&
+                                    timeArray === start && (
+                                      <TimeToLesson>
+                                        До начала пары: {timeDifferences}
+                                      </TimeToLesson>
+                                    )}
+
+                                  {isCurrent && (
                                     <TimeToLesson>
-                                      До начала пары: {timeDifferences}
+                                      До окончания пары:{" "}
+                                      {formattedTimeDifference}
                                     </TimeToLesson>
                                   )}
-
-                                {isCurrent && (
-                                  <TimeToLesson>
-                                    До окончания пары: {formattedTimeDifference}
-                                  </TimeToLesson>
-                                )}
-                              </ContainerRight>
+                                </ContainerRight>
+                              </View>
+                              <Text style={{ textAlign: "center" }}>
+                                {item.nameDepartments}
+                              </Text>
+                              {item.comments && (
+                                <CommentsText style={{ textAlign: "center" }}>
+                                  {item.comments}
+                                </CommentsText>
+                              )}
                             </View>
-                            <Text style={{ textAlign: "center" }}>
-                              {item.nameDepartments}
-                            </Text>
-                            {item.comments && (
-                              <CommentsText style={{ textAlign: "center" }}>
-                                {item.comments}
-                              </CommentsText>
-                            )}
-                          </View>
-                        </ContainerPair>
-                      </View>
-                    );
-                  })}
+                          </ContainerPair>
+                        </View>
+                      );
+                    }}
+                  />
                 </View>
               );
-            })}
-          </View>
-        ) : (
-          <View>
-            {isFullSchedule ? (
-              <View style={{ paddingHorizontal: screenWidth * 0.05 }}>
-                <Text
-                  style={{
-                    fontFamily: "Montserrat-Bold",
-                    color: "#004c6f",
-                    marginTop: screenHeight * 0.01,
-                    fontSize: screenWidth * 0.04,
-                  }}
-                >
-                  Что бы скрыть прошедшие пары нажмите
-                </Text>
-                <BtnGetScheduleExtramural
-                  onPress={async () => {
+            }}
+          />
+        </View>
+      ) : (
+        <View>
+          {isFullSchedule ? (
+            <View style={{ paddingHorizontal: screenWidth * 0.05 }}>
+              <Text
+                style={{
+                  fontFamily: "Montserrat-Bold",
+                  color: theme.textColor,
+                  marginTop: screenHeight * 0.01,
+                  fontSize: screenWidth * 0.04,
+                }}
+              >
+                Что бы скрыть прошедшие пары нажмите
+              </Text>
+              <BtnGetScheduleExtramural
+                onPress={async () => {
+                  if (!isConnected) {
+                    {
+                      ToastAndroid.show(
+                        "Нет соединения с интернетом",
+                        ToastAndroid.SHORT
+                      );
+                    }
+                  } else {
                     await getScheduleEducator(dispatch, selectIdEducator);
                     dispatch(setIsFullScheduleEducator(!isFullSchedule));
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontSize: screenWidth * 0.04,
-                      color: "white",
-                      textAlign: "center",
-                    }}
-                  >
-                    Здесь
-                  </Text>
-                </BtnGetScheduleExtramural>
-              </View>
-            ) : (
-              <View style={{ paddingHorizontal: screenWidth * 0.05 }}>
+                  }
+                }}
+              >
                 <Text
                   style={{
-                    fontFamily: "Montserrat-Bold",
-                    color: "#004c6f",
-                    marginTop: screenHeight * 0.01,
                     fontSize: screenWidth * 0.04,
+                    color: theme === lightTheme ? "#FFFFFF" : "#004C6F",
+                    fontFamily: "Montserrat-SemiBold",
+                    textAlign: "center",
                   }}
                 >
-                  Скрыты уже прошедшие занятия. Чтобы увидеть расписание ранее
-                  сегодняшней даты нажмите
+                  Здесь
                 </Text>
-                <BtnGetScheduleExtramural
-                  onPress={async () => {
+              </BtnGetScheduleExtramural>
+            </View>
+          ) : (
+            <View style={{ paddingHorizontal: screenWidth * 0.05 }}>
+              <Text
+                style={{
+                  fontFamily: "Montserrat-Bold",
+                  color: theme.textColor,
+                  marginTop: screenHeight * 0.01,
+                  fontSize: screenWidth * 0.04,
+                }}
+              >
+                Скрыты уже прошедшие занятия. Чтобы увидеть расписание ранее
+                сегодняшней даты нажмите
+              </Text>
+              <BtnGetScheduleExtramural
+                onPress={async () => {
+                  if (!isConnected) {
+                    {
+                      ToastAndroid.show(
+                        "Нет соединения с интернетом",
+                        ToastAndroid.SHORT
+                      );
+                    }
+                  } else {
                     await getFullScheduleEducatorExtramural(
                       dispatch,
                       selectIdEducator
                     );
                     dispatch(setIsFullScheduleEducator(!isFullSchedule));
+                  }
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: screenWidth * 0.04,
+                    color: theme === lightTheme ? "#FFFFFF" : "#004C6F",
+                    fontFamily: "Montserrat-SemiBold",
+                    textAlign: "center",
                   }}
                 >
-                  <Text
-                    style={{
-                      fontSize: screenWidth * 0.04,
-                      color: "white",
-                      textAlign: "center",
-                    }}
-                  >
-                    Здесь
-                  </Text>
-                </BtnGetScheduleExtramural>
-              </View>
-            )}
-
-            {dataScheduleEducator.scheduleExtramural.map((item, index) => (
+                  Здесь
+                </Text>
+              </BtnGetScheduleExtramural>
+            </View>
+          )}
+          <FlatList
+            data={dataScheduleEducator.scheduleExtramural}
+            keyExtractor={(item, index) => index.toString()}
+            initialNumToRender={3}
+            maxToRenderPerBatch={10}
+            windowSize={10}
+            contentContainerStyle={{
+              paddingBottom: isConnected
+                ? screenHeight * 0.04
+                : screenHeight * 0.13,
+            }}
+            renderItem={({ item, index }) => (
               <View key={index}>
                 <DateText>{item.date && item.date}</DateText>
-                {item.schedule.map((item, index) => {
-                  const [start, end] = item.numberPair.split("-");
-                  const startTime = moment(start, "HH:mm");
-                  const endTime = moment(end, "HH:mm");
+                <FlatList
+                  data={item.schedule}
+                  keyExtractor={(item) => item.idPair.toString()}
+                  initialNumToRender={5}
+                  maxToRenderPerBatch={10}
+                  windowSize={10}
+                  renderItem={({ item, index }) => {
+                    const [start, end] = item.numberPair.split("-");
+                    const startTime = moment(start, "HH:mm");
+                    const endTime = moment(end, "HH:mm");
 
-                  const isCurrent =
-                    currentDayForExtramuralist === item.date &&
-                    moment(currentTime, "HH:mm").isBetween(startTime, endTime);
-                  const isColorPair = isCurrent;
+                    const isCurrent =
+                      currentDayForExtramuralist === item.date &&
+                      moment(currentTime, "HH:mm").isBetween(
+                        startTime,
+                        endTime
+                      );
+                    const isColorPair = isCurrent;
 
-                  return (
-                    <ContainerPair
-                      key={item.idPair}
-                      isColorPair={
-                        theme === lightTheme
-                          ? isColorPair
-                            ? "#C3C9DE"
-                            : "#d9d9d999"
-                          : isColorPair
-                          ? "#4B61B0"
-                          : "#46464699"
-                      }
-                    >
-                      <TextNamePair>{item.namePair}</TextNamePair>
-                      <View style={{ flexDirection: "row" }}>
-                        <ContainerLeft>
-                          <TouchableOpacity
-                            onPress={() =>
-                              fetchSchedule(item.idGroup, item.groupName)
-                            }
-                          >
-                            <TextNameGroup>
-                              {item.groupName && "Группа " + item.groupName}
-                            </TextNameGroup>
-                          </TouchableOpacity>
-                          <TextRoomNumber>
-                            {item.roomNumber && "Кабинет № " + item.roomNumber}
-                          </TextRoomNumber>
-                        </ContainerLeft>
-                        <ContainerRight>
-                          <TextNumberPair>
-                            {item.numberPair && item.numberPair}
-                          </TextNumberPair>
-                          <TextTypePair>
-                            {item.typePair && "Тип пары " + item.typePair}
-                          </TextTypePair>
-                        </ContainerRight>
-                      </View>
-                    </ContainerPair>
-                  );
-                })}
+                    return (
+                      <ContainerPair
+                        key={item.idPair}
+                        isColorPair={
+                          theme === lightTheme
+                            ? isColorPair
+                              ? "#C3C9DE"
+                              : "#d9d9d999"
+                            : isColorPair
+                            ? "#4B61B0"
+                            : "#46464699"
+                        }
+                      >
+                        <TextNamePair>{item.namePair}</TextNamePair>
+                        <View style={{ flexDirection: "row" }}>
+                          <ContainerLeft>
+                            <TouchableOpacity
+                              onPress={() => {
+                                if (!isConnected) {
+                                  {
+                                    ToastAndroid.show(
+                                      "Нет соединения с интернетом",
+                                      ToastAndroid.SHORT
+                                    );
+                                  }
+                                } else {
+                                  fetchSchedule(item.idGroup, item.groupName);
+                                }
+                              }}
+                            >
+                              <TextNameGroup>
+                                {item.groupName && "Группа " + item.groupName}
+                              </TextNameGroup>
+                            </TouchableOpacity>
+                            <TextRoomNumber>
+                              {item.roomNumber &&
+                                "Кабинет № " + item.roomNumber}
+                            </TextRoomNumber>
+                          </ContainerLeft>
+                          <ContainerRight>
+                            <TextNumberPair>
+                              {item.numberPair && item.numberPair}
+                            </TextNumberPair>
+                            <TextTypePair>
+                              {item.typePair && "Тип пары " + item.typePair}
+                            </TextTypePair>
+                          </ContainerRight>
+                        </View>
+                      </ContainerPair>
+                    );
+                  }}
+                />
               </View>
-            ))}
-          </View>
-        )}
-      </ScrollView>
+            )}
+          />
+        </View>
+      )}
     </Container>
   );
 };

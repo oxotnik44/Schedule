@@ -6,6 +6,7 @@ import {
   Text,
   Dimensions,
   ToastAndroid,
+  Alert,
 } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
@@ -156,30 +157,27 @@ const Navigate = ({ navigation }: GroupsProps) => {
     await getNews(dispatch);
     await getGroups(dispatch);
   };
-  const [pastConnection, setPastConnection] = useState<boolean | null>(null);
-  const [currentConnection, setCurrentConnection] = useState<boolean | null>(
-    null
-  );
-
+  let pastConnection: boolean | null = null;
+  let currentConnection: boolean | null = null;
+  const netInfo = useNetInfo();
   useEffect(() => {
     const Connection = NetInfo.addEventListener((state) => {
-      dispatch(setConnectionStatus(state.isConnected));
-      setPastConnection(currentConnection);
-      setCurrentConnection(state.isConnected);
-      console.log(pastConnection, currentConnection);
-      if (pastConnection === false && currentConnection) {
+      pastConnection = currentConnection;
+      currentConnection = state.isConnected;
+      if (pastConnection === false && state.isConnected) {
         ToastAndroid.show("Соединение восстановлено", ToastAndroid.SHORT);
         getInitialData();
-      } else if (pastConnection === true && !currentConnection) {
+        dispatch(setConnectionStatus(state.isConnected));
+      } else if (pastConnection === true && !state.isConnected) {
         ToastAndroid.show("Нет соединения с интернетом", ToastAndroid.SHORT);
+        dispatch(setConnectionStatus(state.isConnected));
       }
     });
 
     return () => {
       Connection();
     };
-  }, [currentConnection,isConnected]);
-
+  }, [netInfo.isConnected, isConnected]);
   return (
     <ThemeProvider theme={theme}>
       <NavigationContainer>

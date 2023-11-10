@@ -1,13 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  Switch,
-  Dimensions,
-  Linking,
-  Pressable,
-} from "react-native";
-import { TouchableOpacity } from "react-native-gesture-handler";
+import { View, Text, Switch, Dimensions, Linking } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import {
   lightTheme,

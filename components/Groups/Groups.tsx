@@ -1,5 +1,11 @@
 import React, { useEffect } from "react";
-import { View, ScrollView, Dimensions, ToastAndroid } from "react-native";
+import {
+  View,
+  ScrollView,
+  Dimensions,
+  ToastAndroid,
+  FlatList,
+} from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import { StackNavigationProp } from "@react-navigation/stack";
 import {
@@ -32,35 +38,9 @@ import {
 } from "../../redux/reducers/scheduleStudentInfo";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { setFavoriteSchedule } from "../../redux/reducers/favoritesReducer/favoriteScheduleStudent";
-
 const screenWidth = Dimensions.get("window").width;
-interface IFavoriteSchedule {
-  idPair: number;
-  comments: string;
-  roomNumber: string;
-  weekday: string;
-  numberPair: string;
-  typePair: string;
-  namePair: string;
-  idEducator: number;
-  nameEducator: string;
-  fullNameEducator: string;
-  regaliaEducator: string;
-  date: string;
-}
-interface IFavoriteState {
-  favoriteStudentSchedule: {
-    groupType: string;
-    scheduleResident: {
-      numerator: IFavoriteSchedule[];
-      denominator: IFavoriteSchedule[];
-    };
-    scheduleExtramural: {
-      date: string;
-      schedule: IFavoriteSchedule[];
-    }[];
-  };
-}
+const screenHeight = Dimensions.get("window").height;
+
 type GroupsProps = {
   navigation: StackNavigationProp<RootStackParamList, "Groups">;
 };
@@ -90,51 +70,22 @@ interface DepartmentNumberState {
     numberDepartment: number;
   };
 }
-interface FavoriteGroupsState {
-  favoriteGroupReducer: {
-    favoriteGroups: { idGroup: number; nameGroup: string }[];
-  };
-}
-interface ArrowIconProps {
-  isRotate: boolean;
-}
-interface FavoriteGroupsState {
-  favoriteGroupReducer: {
-    favoriteGroups: { idGroup: number; nameGroup: string }[];
-  };
-}
-interface ScheduleState {
-  scheduleInfoStudentReducer: {
-    selectIdGroup: number;
-  };
-}
+
 interface Settings {
   settingsReducer: {
     isConnected: boolean;
   };
 }
 const Groups = ({ navigation }: GroupsProps) => {
-  const STORAGE_KEY_SCHEDULE = "favoriteSchedule";
-
   const numberDepartment = useSelector(
     (state: DepartmentNumberState) =>
       state.departmentInfoReducer.numberDepartment
   );
-  const selectIdGroup = useSelector(
-    (state: ScheduleState) => state.scheduleInfoStudentReducer.selectIdGroup
-  );
-  const { selectedGroupNumber } = useSelector(
-    (state: GroupsState) => state.groupsInfoReducer
-  );
+
   const dataGroups = useSelector(
     (state: GroupsState) => state.groupsInfoReducer
   );
-  const dataSchedule = useSelector(
-    (state: IFavoriteState) => state.favoriteStudentSchedule
-  );
-  const favoriteGroups = useSelector(
-    (state: FavoriteGroupsState) => state.favoriteGroupReducer.favoriteGroups
-  );
+
   const isConnected = useSelector(
     (state: Settings) => state.settingsReducer.isConnected
   );
@@ -184,9 +135,6 @@ const Groups = ({ navigation }: GroupsProps) => {
     const scheduleStudent = storedSchedule
       ? JSON.parse(storedSchedule)
       : { groups: [], educators: [] };
-    const isFavoriteScheduleGroup = scheduleStudent.groups.some((group: any) =>
-      group.hasOwnProperty(idGroup)
-    );
 
     scheduleStudent.groups.forEach((item: any) => {
       const keys = Object.keys(item);
@@ -200,20 +148,27 @@ const Groups = ({ navigation }: GroupsProps) => {
 
   return (
     <Container>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <ContainerChoiceGroup onPress={() => handleGroupToggle(true)}>
-          <TextChoiceGroups>Очные группы</TextChoiceGroups>
-          <ArrowIcon
-            source={require("../../assets/ArrowBack.png")}
-            isRotate={dataGroups.isResidentGroupOpen}
-          />
-        </ContainerChoiceGroup>
+      <ContainerChoiceGroup onPress={() => handleGroupToggle(true)}>
+        <TextChoiceGroups>Очные группы</TextChoiceGroups>
+        <ArrowIcon
+          source={require("../../assets/ArrowBack.png")}
+          isRotate={dataGroups.isResidentGroupOpen}
+        />
+      </ContainerChoiceGroup>
 
-        {dataGroups.isResidentGroupOpen && (
-          <View>
-            {dataGroups.dataGroupsResidents.map((group: any) => (
+      {dataGroups.isResidentGroupOpen && (
+        <View>
+          <FlatList
+            data={dataGroups.dataGroupsResidents}
+            keyExtractor={(group) => group.idGroup.toString()}
+            initialNumToRender={6}
+            maxToRenderPerBatch={10}
+            windowSize={10}
+            contentContainerStyle={{
+              paddingBottom: screenHeight * 0.16,
+            }}
+            renderItem={({ item: group }) => (
               <ContainerGroups
-                key={group.idGroup}
                 onPress={() => {
                   if (!isConnected) {
                     fetchNoConnected(group.idGroup, hasData).then((hasData) => {
@@ -247,23 +202,32 @@ const Groups = ({ navigation }: GroupsProps) => {
                   nameEducator={null}
                 />
               </ContainerGroups>
-            ))}
-          </View>
-        )}
-
-        <ContainerChoiceGroup onPress={() => handleGroupToggle(false)}>
-          <TextChoiceGroups>Заочные группы</TextChoiceGroups>
-          <ArrowIcon
-            source={require("../../assets/ArrowBack.png")}
-            isRotate={dataGroups.isExtramuralGroupOpen}
+            )}
           />
-        </ContainerChoiceGroup>
+        </View>
+      )}
 
-        {dataGroups.isExtramuralGroupOpen && (
-          <View>
-            {dataGroups.dataGroupsExtramuralists.map((group: any) => (
+      <ContainerChoiceGroup onPress={() => handleGroupToggle(false)}>
+        <TextChoiceGroups>Заочные группы</TextChoiceGroups>
+        <ArrowIcon
+          source={require("../../assets/ArrowBack.png")}
+          isRotate={dataGroups.isExtramuralGroupOpen}
+        />
+      </ContainerChoiceGroup>
+
+      {dataGroups.isExtramuralGroupOpen && (
+        <View>
+          <FlatList
+            data={dataGroups.dataGroupsExtramuralists}
+            keyExtractor={(group) => group.idGroup.toString()}
+            initialNumToRender={6}
+            maxToRenderPerBatch={10}
+            windowSize={10}
+            contentContainerStyle={{
+              paddingBottom: screenHeight * 0.16,
+            }}
+            renderItem={({ item: group }) => (
               <ContainerGroups
-                key={group.idGroup}
                 onPress={() => {
                   if (!isConnected) {
                     ToastAndroid.show(
@@ -276,9 +240,8 @@ const Groups = ({ navigation }: GroupsProps) => {
                       dispatch(setIsFullScheduleStudent(false));
                       dispatch(setSelectIdGroup(group.idGroup));
                       dispatch(setTypeGroupStudent("extramural"));
+                      navigation.navigate("Schedule");
                     });
-                    navigation.navigate("Schedule");
-
                   }
                 }}
               >
@@ -292,10 +255,10 @@ const Groups = ({ navigation }: GroupsProps) => {
                   />
                 </View>
               </ContainerGroups>
-            ))}
-          </View>
-        )}
-      </ScrollView>
+            )}
+          />
+        </View>
+      )}
     </Container>
   );
 };

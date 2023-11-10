@@ -9,7 +9,6 @@ interface ArrowIconProps {
 export const Container = styled.View`
   align-items: center;
   flex: 1;
-  justify-content: center;
   background-color: ${(props) => props.theme.backgroundColor};
 `;
 

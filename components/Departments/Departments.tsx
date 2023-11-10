@@ -33,6 +33,7 @@ import {
 } from "../../redux/reducers/scheduleStudentInfo";
 
 const screenWidth = Dimensions.get("window").width;
+const screenHeight = Dimensions.get("window").height;
 type DepartmentsProps = {
   navigation: StackNavigationProp<RootStackParamList, "Departments">;
 };
@@ -113,6 +114,9 @@ const Departments: React.FC<DepartmentsProps> = ({ navigation }) => {
           if (idDepartment === 18) {
             await getSchedule(3430, dispatch);
             dispatch(setSelectIdGroup(3430));
+            dispatch(setNameGroup("Технопарк"));
+            dispatch(setIsFullScheduleStudent(false));
+
             navigation.navigate("Schedule");
           } else {
             dispatch(setNumberDepartment(idDepartment));
@@ -187,7 +191,13 @@ const Departments: React.FC<DepartmentsProps> = ({ navigation }) => {
                 data={dataDepartment}
                 keyExtractor={(item) => item.idDepartment.toString()}
                 renderItem={renderItemDepartment}
-                showsHorizontalScrollIndicator={false} // Удаление полоски прокрутки
+                showsHorizontalScrollIndicator={false}
+                initialNumToRender={10}
+                maxToRenderPerBatch={10}
+                windowSize={15}
+                contentContainerStyle={{
+                  paddingBottom: screenHeight * 0.02,
+                }}
               />
             ) : (
               <FlatList
@@ -195,6 +205,9 @@ const Departments: React.FC<DepartmentsProps> = ({ navigation }) => {
                 keyExtractor={(item, index) =>
                   `${item.idGroup}-${index.toString()}`
                 }
+                initialNumToRender={10}
+                maxToRenderPerBatch={10}
+                windowSize={15}
                 renderItem={renderItemGroup}
                 showsHorizontalScrollIndicator={false} // Удаление полоски прокрутки
               />

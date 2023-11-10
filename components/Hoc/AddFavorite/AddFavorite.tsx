@@ -1,5 +1,5 @@
-import React, { useCallback, memo } from "react";
-import { Dimensions, Image, TouchableOpacity } from "react-native";
+import React from "react";
+import { Dimensions,  TouchableOpacity } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { SelectGroup } from "./AddFavoriteStyle";
 import { handleAddFavoriteGroup } from "../../../redux/reducers/favoritesReducer/favoriteGroupsReducer";

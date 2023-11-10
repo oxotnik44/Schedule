@@ -193,12 +193,13 @@ export const DateText = styled.Text`
   margin-bottom: ${screenHeight * 0.01}px;
 `;
 export const BtnGetScheduleExtramural = styled.TouchableOpacity`
-  background-color: #004c6f;
+  background-color: ${(props) => props.theme.mainColor};
   border-radius: 15px;
   width: ${screenWidth * 0.2}px;
   height: ${screenHeight * 0.05}px;
   justify-content: center;
   margin-top: ${screenHeight * 0.01}px;
+  align-items: center;
 `;
 export const TimeToLesson = styled.Text`
   color: ${(props) => props.theme.textColor};
@@ -212,5 +213,5 @@ export const NoConnected = styled.Text`
   color: ${(props) => props.theme.textColor};
   font-family: "Montserrat-Bold";
   width: ${screenWidth * 0.95}px;
-  text-align:center;
+  text-align: center;
 `;

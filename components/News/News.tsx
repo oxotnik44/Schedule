@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, Image, FlatList, Pressable, Linking } from "react-native";
+import { View, FlatList, Pressable, Linking } from "react-native";
 import { useSelector } from "react-redux";
 import {
   Container,
@@ -42,16 +42,14 @@ const NewsItem = ({ item }: { item: INewsItem }) => {
 
   return (
     <View>
-      <View>
-        <Pressable onPress={handlePress}>
-          <PublicationDateContainer>
-            <PublicationDate>{item.publicationDate}</PublicationDate>
-          </PublicationDateContainer>
-          <PhotoNews source={{ uri: item.photoNews }} resizeMode="cover" />
-          <Title>{item.title}</Title>
-        </Pressable>
-        <TextNews style={{ alignSelf: "center" }}>{item.textNews}</TextNews>
-      </View>
+      <Pressable onPress={handlePress}>
+        <PublicationDateContainer>
+          <PublicationDate>{item.publicationDate}</PublicationDate>
+        </PublicationDateContainer>
+        <PhotoNews source={{ uri: item.photoNews }} resizeMode="cover" />
+        <Title>{item.title}</Title>
+      </Pressable>
+      <TextNews style={{ alignSelf: "center" }}>{item.textNews}</TextNews>
     </View>
   );
 };

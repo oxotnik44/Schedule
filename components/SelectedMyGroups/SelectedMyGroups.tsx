@@ -1,15 +1,5 @@
 import React, { useCallback, useState } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Alert,
-  Image,
-  Dimensions,
-  FlatList,
-  Pressable,
-  ToastAndroid,
-} from "react-native";
+import { TouchableOpacity, Alert, FlatList, ToastAndroid } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { getSchedule, getScheduleEducator } from "../../api/apiSchedule";
@@ -18,7 +8,7 @@ import { removeFavoriteGroupAC } from "../../redux/reducers/favoritesReducer/fav
 import { removeFavoriteEducatorAC } from "../../redux/reducers/favoritesReducer/favoriteEducatorsReducer";
 import { setNameEducator } from "../../redux/reducers/educatorReducer";
 
-import styled, { ThemeProvider } from "styled-components/native";
+import { ThemeProvider } from "styled-components/native";
 import {
   CenteredContainer,
   Container,
@@ -31,11 +21,7 @@ import {
   ToggleButtonText,
   ToggleContainer,
 } from "./SelectedMyGroupsStyle";
-import {
-  darkTheme,
-  lightTheme,
-  setTheme,
-} from "../../redux/reducers/settingsReducer";
+import { lightTheme } from "../../redux/reducers/settingsReducer";
 import {
   setDataScheduleStudent,
   setIsFullScheduleStudent,
@@ -82,9 +68,7 @@ type SchuduleProps = {
     "ScheduleEducator"
   >;
 };
-interface ContainerProps {
-  currentState: "groups" | "educators"; // Замените 'other' на другие варианты, если нужно
-}
+
 interface Settings {
   settingsReducer: {
     isConnected: boolean;
@@ -269,6 +253,8 @@ const SelectedMyGroups = ({ navigation }: SchuduleProps) => {
           } else {
             await getScheduleEducator(dispatch, item.idEducator);
             dispatch(setSelectIdEducator(item.idEducator));
+            dispatch(setNameEducator(item.nameEducator));
+
             navigation.navigate("ScheduleEducator"); // Добавляем переход
           }
         }}
