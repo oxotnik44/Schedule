@@ -91,6 +91,7 @@ interface ScheduleState {
       scheduleResident: {
         numerator: IScheduleInfo[];
         denominator: IScheduleInfo[];
+        session: IScheduleExtramuralInfo[];
       };
       scheduleExtramural: {
         date: string;
@@ -299,7 +300,6 @@ const Schedule = ({ navigation }: ScheduleProps) => {
   }, [isConnected, selectIdGroup]);
 
   // Добавлен isFavoriteGroup в зависимости
-
   const fetchScheduleEducator = async (
     fullNameEducator: string,
     idEducator: number
@@ -317,7 +317,6 @@ const Schedule = ({ navigation }: ScheduleProps) => {
       typeWeek === "numerator"
         ? dataSchedule.scheduleResident.numerator
         : dataSchedule.scheduleResident.denominator;
-
     return weekdays.map((weekday) =>
       filteredSchedule.filter(
         (item) => item.weekday === weekday || item.date === weekday
@@ -363,7 +362,9 @@ const Schedule = ({ navigation }: ScheduleProps) => {
                 {currentTypeWeek === "numerator" && "Текущая"}
               </Text>
               <TypeWeekButton
-                onPress={() => setTypeWeek("numerator")}
+                onPress={() => {
+                  setTypeWeek("numerator"), getFilteredSchedule();
+                }}
                 activeOpacity={0.9}
               >
                 <TypeWeekText
@@ -393,7 +394,10 @@ const Schedule = ({ navigation }: ScheduleProps) => {
                 {currentTypeWeek === "denominator" && "Текущая"}
               </Text>
               <TypeWeekButton
-                onPress={() => setTypeWeek("denominator")}
+                onPress={() => {
+                  setTypeWeek("denominator");
+                  getFilteredSchedule();
+                }}
                 activeOpacity={0.9}
               >
                 <TypeWeekText
@@ -408,6 +412,34 @@ const Schedule = ({ navigation }: ScheduleProps) => {
                   }
                 >
                   Знаменатель
+                </TypeWeekText>
+              </TypeWeekButton>
+            </View>
+            <View style={{ flexDirection: "column", flex: 1 }}>
+              <Text
+                style={{
+                  color: theme.textColor,
+                  fontSize: screenWidth * 0.05,
+                  textAlign: "center",
+                  fontFamily: "Montserrat-SemiBold",
+                }}
+              ></Text>
+              <TypeWeekButton
+                onPress={() => setTypeWeek("session")}
+                activeOpacity={0.9}
+              >
+                <TypeWeekText
+                  typeWeek={
+                    theme === lightTheme
+                      ? typeWeek === "session"
+                        ? "#FFFFFF"
+                        : "#FFFFFFB2"
+                      : typeWeek === "session"
+                      ? "#004C6F"
+                      : "#004C6FB2"
+                  }
+                >
+                  Сессия
                 </TypeWeekText>
               </TypeWeekButton>
             </View>
@@ -427,8 +459,8 @@ const Schedule = ({ navigation }: ScheduleProps) => {
           </View>
         )}
         <View>
-          {groupType === "resident" ? (
-            <View>
+          {typeWeek !== "session" ? (
+            groupType === "resident" ? (
               <FlatList
                 data={weekdays}
                 keyExtractor={(item, index) => index.toString()}
@@ -620,211 +652,214 @@ const Schedule = ({ navigation }: ScheduleProps) => {
                   );
                 }}
               />
-            </View>
-          ) : (
-            <View>
-              {isFullSchedule ? (
-                <View style={{ paddingHorizontal: screenWidth * 0.04 }}>
-                  <Text
-                    style={{
-                      fontFamily: "Montserrat-Bold",
-                      color: theme.textColor,
-                      marginTop: screenHeight * 0.01,
-                      fontSize: screenWidth * 0.04,
-                    }}
-                  >
-                    Что бы скрыть прошедшие пары нажмите
-                  </Text>
-                  <BtnGetScheduleExtramural
-                    onPress={async () => {
-                      if (!isConnected) {
-                        {
-                          ToastAndroid.show(
-                            "Нет соединения с интернетом",
-                            ToastAndroid.SHORT
-                          );
-                        }
-                      } else {
-                        await getSchedule(selectIdGroup, dispatch);
-                        dispatch(setIsFullScheduleStudent(!isFullSchedule));
-                      }
-                    }}
-                  >
+            ) : (
+              <View>
+                {isFullSchedule ? (
+                  <View style={{ paddingHorizontal: screenWidth * 0.04 }}>
                     <Text
                       style={{
+                        fontFamily: "Montserrat-Bold",
+                        color: theme.textColor,
+                        marginTop: screenHeight * 0.01,
                         fontSize: screenWidth * 0.04,
-                        color: theme === lightTheme ? "#FFFFFF" : "#004C6F",
-                        fontFamily: "Montserrat-SemiBold",
-                        textAlign: "center",
                       }}
                     >
-                      Здесь
+                      Что бы скрыть прошедшие пары нажмите
                     </Text>
-                  </BtnGetScheduleExtramural>
-                </View>
-              ) : (
-                <View style={{ paddingHorizontal: screenWidth * 0.05 }}>
-                  <Text
-                    style={{
-                      fontFamily: "Montserrat-Bold",
-                      color: theme.textColor,
-                      marginTop: screenHeight * 0.01,
-                      fontSize: screenWidth * 0.04,
-                    }}
-                  >
-                    Скрыты уже прошедшие занятия. Чтобы увидеть расписание ранее
-                    сегодняшней даты нажмите
-                  </Text>
-                  <BtnGetScheduleExtramural
-                    onPress={async () => {
-                      if (!isConnected) {
-                        {
-                          ToastAndroid.show(
-                            "Нет соединения с интернетом",
-                            ToastAndroid.SHORT
-                          );
+                    <BtnGetScheduleExtramural
+                      onPress={async () => {
+                        if (!isConnected) {
+                          {
+                            ToastAndroid.show(
+                              "Нет соединения с интернетом",
+                              ToastAndroid.SHORT
+                            );
+                          }
+                        } else {
+                          await getSchedule(selectIdGroup, dispatch);
+                          dispatch(setIsFullScheduleStudent(!isFullSchedule));
                         }
-                      } else {
-                        await getFullScheduleStudentExtramuralist(
-                          dispatch,
-                          selectIdGroup
-                        );
-                        dispatch(setIsFullScheduleStudent(!isFullSchedule));
-                      }
-                    }}
-                  >
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: screenWidth * 0.04,
+                          color: theme === lightTheme ? "#FFFFFF" : "#004C6F",
+                          fontFamily: "Montserrat-SemiBold",
+                          textAlign: "center",
+                        }}
+                      >
+                        Здесь
+                      </Text>
+                    </BtnGetScheduleExtramural>
+                  </View>
+                ) : (
+                  <View style={{ paddingHorizontal: screenWidth * 0.05 }}>
                     <Text
                       style={{
+                        fontFamily: "Montserrat-Bold",
+                        color: theme.textColor,
+                        marginTop: screenHeight * 0.01,
                         fontSize: screenWidth * 0.04,
-                        color: theme === lightTheme ? "#FFFFFF" : "#004C6F",
-                        fontFamily: "Montserrat-SemiBold",
-                        textAlign: "center",
                       }}
                     >
-                      Здесь
+                      Скрыты уже прошедшие занятия. Чтобы увидеть расписание
+                      ранее сегодняшней даты нажмите
                     </Text>
-                  </BtnGetScheduleExtramural>
-                </View>
-              )}
-              <FlatList
-                data={dataSchedule.scheduleExtramural}
-                keyExtractor={(item, index) => index.toString()}
-                initialNumToRender={2}
-                maxToRenderPerBatch={10}
-                windowSize={10}
-                contentContainerStyle={{
-                  paddingBottom: isConnected
-                    ? screenHeight * 0
-                    : screenHeight * 0.09,
-                }}
-                renderItem={({ item, index }) => (
-                  <View
-                    key={index}
-                    style={{
-                      flex: 1,
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    <DateText>{item.date && item.date}</DateText>
-
-                    <FlatList
-                      data={item.schedule}
-                      keyExtractor={(item, index) => item.idPair.toString()}
-                      initialNumToRender={5}
-                      maxToRenderPerBatch={10}
-                      windowSize={10}
-                      renderItem={({ item, index }) => {
-                        const [start, end] = item.numberPair.split("-");
-                        const startTime = moment(start, "HH:mm");
-                        const endTime = moment(end, "HH:mm");
-
-                        const isCurrent =
-                          currentDayForExtramuralist === item.date &&
-                          moment(currentTime, "HH:mm").isBetween(
-                            startTime,
-                            endTime
+                    <BtnGetScheduleExtramural
+                      onPress={async () => {
+                        if (!isConnected) {
+                          {
+                            ToastAndroid.show(
+                              "Нет соединения с интернетом",
+                              ToastAndroid.SHORT
+                            );
+                          }
+                        } else {
+                          await getFullScheduleStudentExtramuralist(
+                            dispatch,
+                            selectIdGroup
                           );
-                        const isColorPair = isCurrent;
-
-                        return (
-                          <ContainerPair
-                            key={item.idPair}
-                            isColorPair={
-                              theme === lightTheme
-                                ? isColorPair
-                                  ? "#C3C9DE"
-                                  : "#d9d9d999"
-                                : isColorPair
-                                ? "#4B61B0"
-                                : "#46464699"
-                            }
-                          >
-                            <TextNamePair>{item.namePair}</TextNamePair>
-                            <View style={{ flexDirection: "row" }}>
-                              <ContainerLeft>
-                                <TextNameGroup>
-                                  <TouchableOpacity
-                                    onPress={() => {
-                                      if (!isConnected) {
-                                        {
-                                          ToastAndroid.show(
-                                            "Нет соединения с интернетом",
-                                            ToastAndroid.SHORT
-                                          );
-                                        }
-                                      } else {
-                                        fetchScheduleEducator(
-                                          item.fullNameEducator,
-                                          item.idEducator
-                                        );
-                                      }
-                                    }}
-                                  >
-                                    <TextNameEducator>
-                                      {item.nameEducator && item.nameEducator}
-                                    </TextNameEducator>
-                                  </TouchableOpacity>
-                                </TextNameGroup>
-                                <TextRoomNumber>
-                                  {item.roomNumber &&
-                                    "Кабинет № " + item.roomNumber}
-                                </TextRoomNumber>
-                              </ContainerLeft>
-                              <ContainerRight>
-                                <TextNumberPair>
-                                  {item.numberPair && item.numberPair}
-                                </TextNumberPair>
-                                <TextTypePair>
-                                  {item.typePair && "Тип пары " + item.typePair}
-                                </TextTypePair>
-                              </ContainerRight>
-                            </View>
-                            {item.comments && (
-                              <CommentsText style={{ textAlign: "center" }}>
-                                {/^(https?:\/\/|www\.|https?:\/\/www\.)[\w\-.]+\.[a-zA-Z]{2,}(\/\S*)?$/.test(
-                                  item.comments
-                                ) ? (
-                                  <Text
-                                    onPress={() =>
-                                      Linking.openURL(item.comments)
-                                    }
-                                  >
-                                    {item.comments}
-                                  </Text>
-                                ) : (
-                                  item.comments
-                                )}
-                              </CommentsText>
-                            )}
-                          </ContainerPair>
-                        );
+                          dispatch(setIsFullScheduleStudent(!isFullSchedule));
+                        }
                       }}
-                    />
+                    >
+                      <Text
+                        style={{
+                          fontSize: screenWidth * 0.04,
+                          color: theme === lightTheme ? "#FFFFFF" : "#004C6F",
+                          fontFamily: "Montserrat-SemiBold",
+                          textAlign: "center",
+                        }}
+                      >
+                        Здесь
+                      </Text>
+                    </BtnGetScheduleExtramural>
                   </View>
                 )}
-              />
-            </View>
+                <FlatList
+                  data={dataSchedule.scheduleExtramural}
+                  keyExtractor={(item, index) => index.toString()}
+                  initialNumToRender={2}
+                  maxToRenderPerBatch={10}
+                  windowSize={10}
+                  contentContainerStyle={{
+                    paddingBottom: isConnected
+                      ? screenHeight * 0
+                      : screenHeight * 0.09,
+                  }}
+                  renderItem={({ item, index }) => (
+                    <View
+                      key={index}
+                      style={{
+                        flex: 1,
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      <DateText>{item.date && item.date}</DateText>
+
+                      <FlatList
+                        data={item.schedule}
+                        keyExtractor={(item, index) => item.idPair.toString()}
+                        initialNumToRender={5}
+                        maxToRenderPerBatch={10}
+                        windowSize={10}
+                        renderItem={({ item, index }) => {
+                          const [start, end] = item.numberPair.split("-");
+                          const startTime = moment(start, "HH:mm");
+                          const endTime = moment(end, "HH:mm");
+
+                          const isCurrent =
+                            currentDayForExtramuralist === item.date &&
+                            moment(currentTime, "HH:mm").isBetween(
+                              startTime,
+                              endTime
+                            );
+                          const isColorPair = isCurrent;
+
+                          return (
+                            <ContainerPair
+                              key={item.idPair}
+                              isColorPair={
+                                theme === lightTheme
+                                  ? isColorPair
+                                    ? "#C3C9DE"
+                                    : "#d9d9d999"
+                                  : isColorPair
+                                  ? "#4B61B0"
+                                  : "#46464699"
+                              }
+                            >
+                              <TextNamePair>{item.namePair}</TextNamePair>
+                              <View style={{ flexDirection: "row" }}>
+                                <ContainerLeft>
+                                  <TextNameGroup>
+                                    <TouchableOpacity
+                                      onPress={() => {
+                                        if (!isConnected) {
+                                          {
+                                            ToastAndroid.show(
+                                              "Нет соединения с интернетом",
+                                              ToastAndroid.SHORT
+                                            );
+                                          }
+                                        } else {
+                                          fetchScheduleEducator(
+                                            item.fullNameEducator,
+                                            item.idEducator
+                                          );
+                                        }
+                                      }}
+                                    >
+                                      <TextNameEducator>
+                                        {item.nameEducator && item.nameEducator}
+                                      </TextNameEducator>
+                                    </TouchableOpacity>
+                                  </TextNameGroup>
+                                  <TextRoomNumber>
+                                    {item.roomNumber &&
+                                      "Кабинет № " + item.roomNumber}
+                                  </TextRoomNumber>
+                                </ContainerLeft>
+                                <ContainerRight>
+                                  <TextNumberPair>
+                                    {item.numberPair && item.numberPair}
+                                  </TextNumberPair>
+                                  <TextTypePair>
+                                    {item.typePair &&
+                                      "Тип пары " + item.typePair}
+                                  </TextTypePair>
+                                </ContainerRight>
+                              </View>
+                              {item.comments && (
+                                <CommentsText style={{ textAlign: "center" }}>
+                                  {/^(https?:\/\/|www\.|https?:\/\/www\.)[\w\-.]+\.[a-zA-Z]{2,}(\/\S*)?$/.test(
+                                    item.comments
+                                  ) ? (
+                                    <Text
+                                      onPress={() =>
+                                        Linking.openURL(item.comments)
+                                      }
+                                    >
+                                      {item.comments}
+                                    </Text>
+                                  ) : (
+                                    item.comments
+                                  )}
+                                </CommentsText>
+                              )}
+                            </ContainerPair>
+                          );
+                        }}
+                      />
+                    </View>
+                  )}
+                />
+              </View>
+            )
+          ) : (
+            <Text>qwe</Text>
           )}
         </View>
       </Container>

@@ -171,7 +171,7 @@ export const TypeWeekContainer = styled.View`
 
 export const TypeWeekText = styled.Text<ContainerProps>`
   color: ${(props) => props.typeWeek};
-  font-size: ${screenWidth * 0.045}px;
+  font-size: ${screenWidth * 0.043}px;
   padding: 4px;
   text-align: center;
   font-family: Montserrat-SemiBold;
