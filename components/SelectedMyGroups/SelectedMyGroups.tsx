@@ -24,7 +24,7 @@ import {
 import { lightTheme } from "../../redux/reducers/settingsReducer";
 import {
   setDataScheduleStudent,
-  setIsFullScheduleStudent,
+  setIsExtramuralScheduleUntilTodayStudent,
   setSelectIdGroup,
 } from "../../redux/reducers/scheduleStudentInfo";
 import {
@@ -197,7 +197,7 @@ const SelectedMyGroups = ({ navigation }: SchuduleProps) => {
                   );
                 } else {
                   dispatch(setNameGroup(item.nameGroup));
-                  dispatch(setIsFullScheduleStudent(false));
+                  dispatch(setIsExtramuralScheduleUntilTodayStudent(false));
                   dispatch(setSelectIdGroup(item.idGroup));
                   navigation.navigate("Schedule");
                 }
@@ -206,7 +206,7 @@ const SelectedMyGroups = ({ navigation }: SchuduleProps) => {
           } else {
             fetchSchedule(item.idGroup).then(() => {
               dispatch(setNameGroup(item.nameGroup));
-              dispatch(setIsFullScheduleStudent(false));
+              dispatch(setIsExtramuralScheduleUntilTodayStudent(false));
               dispatch(setSelectIdGroup(item.idGroup));
               navigation.navigate("Schedule");
             });

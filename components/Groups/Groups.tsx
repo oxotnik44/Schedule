@@ -32,7 +32,7 @@ import {
 } from "./GroupsStyle";
 import {
   setDataScheduleStudent,
-  setIsFullScheduleStudent,
+  setIsExtramuralScheduleUntilTodayStudent,
   setSelectIdGroup,
   setTypeGroupStudent,
 } from "../../redux/reducers/scheduleStudentInfo";
@@ -179,14 +179,14 @@ const Groups = ({ navigation }: GroupsProps) => {
                         );
                       } else {
                         dispatch(setNameGroup(group.nameGroup));
-                        dispatch(setIsFullScheduleStudent(false));
+                        dispatch(setIsExtramuralScheduleUntilTodayStudent(false));
                         navigation.navigate("Schedule");
                       }
                     });
                   } else {
                     fetchSchedule(group.idGroup).then(() => {
                       dispatch(setNameGroup(group.nameGroup));
-                      dispatch(setIsFullScheduleStudent(false));
+                      dispatch(setIsExtramuralScheduleUntilTodayStudent(false));
                       dispatch(setSelectIdGroup(group.idGroup));
                       dispatch(setTypeGroupStudent("resident"));
                       navigation.navigate("Schedule");
@@ -237,7 +237,7 @@ const Groups = ({ navigation }: GroupsProps) => {
                   } else {
                     fetchSchedule(group.idGroup).then(() => {
                       dispatch(setNameGroup(group.nameGroup));
-                      dispatch(setIsFullScheduleStudent(false));
+                      dispatch(setIsExtramuralScheduleUntilTodayStudent(false));
                       dispatch(setSelectIdGroup(group.idGroup));
                       dispatch(setTypeGroupStudent("extramural"));
                       navigation.navigate("Schedule");

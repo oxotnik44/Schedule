@@ -49,12 +49,13 @@ interface IState {
     scheduleResident: {
       numerator: IScheduleInfo[];
       denominator: IScheduleInfo[];
+      session: IScheduleExtramuralInfo[];
     };
     scheduleExtramural: { date: string; schedule: IScheduleExtramuralInfo[] }[];
   };
   typeGroupStudent: string;
   selectIdGroup: number;
-  isFullSchedule: boolean;
+  isExtramuralScheduleUntilToday: boolean;
 }
 
 export const initialScheduleState: IState = {
@@ -67,12 +68,13 @@ export const initialScheduleState: IState = {
     scheduleResident: {
       numerator: [],
       denominator: [],
+      session: [],
     },
     scheduleExtramural: [],
   },
   typeGroupStudent: "",
   selectIdGroup: 0,
-  isFullSchedule: false,
+  isExtramuralScheduleUntilToday: false,
 };
 
 const scheduleInfoStudentReducer: Reducer<IState> = (
@@ -131,7 +133,7 @@ const scheduleInfoStudentReducer: Reducer<IState> = (
     case SET_IS_FULL_SCHEDULE_STUDENT:
       return {
         ...state,
-        isFullSchedule: action.isFullSchedule,
+        isExtramuralScheduleUntilToday: action.isExtramuralScheduleUntilToday,
       };
     case SET_LAST_CACHE_ENTRY_STUDENT:
       return {
@@ -173,9 +175,11 @@ export const setDataStudentExtramural = (dataScheduleExtramural: IState) => ({
   type: SET_DATA_SCHEDULE_STUDENT_EXTRAMURAL,
   dataScheduleExtramural,
 });
-export const setIsFullScheduleStudent = (isFullSchedule: boolean) => ({
+export const setIsExtramuralScheduleUntilTodayStudent = (
+  isExtramuralScheduleUntilToday: boolean
+) => ({
   type: SET_IS_FULL_SCHEDULE_STUDENT,
-  isFullSchedule,
+  isExtramuralScheduleUntilToday,
 });
 export const setLastCacheEntryStudent = (lastCacheEntryStudent: any) => ({
   type: SET_LAST_CACHE_ENTRY_STUDENT,

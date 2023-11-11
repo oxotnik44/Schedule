@@ -28,7 +28,7 @@ import {
 } from "./DepartmentsStyle";
 import { ThemeProvider } from "styled-components/native";
 import {
-  setIsFullScheduleStudent,
+  setIsExtramuralScheduleUntilTodayStudent,
   setSelectIdGroup,
 } from "../../redux/reducers/scheduleStudentInfo";
 
@@ -115,7 +115,7 @@ const Departments: React.FC<DepartmentsProps> = ({ navigation }) => {
             await getSchedule(3430, dispatch);
             dispatch(setSelectIdGroup(3430));
             dispatch(setNameGroup("Технопарк"));
-            dispatch(setIsFullScheduleStudent(false));
+            dispatch(setIsExtramuralScheduleUntilTodayStudent(false));
 
             navigation.navigate("Schedule");
           } else {
@@ -143,7 +143,7 @@ const Departments: React.FC<DepartmentsProps> = ({ navigation }) => {
           fetchSchedule(idGroup).then(() => {
             navigation.navigate("Schedule");
             dispatch(setNameGroup(nameGroup));
-            dispatch(setIsFullScheduleStudent(false));
+            dispatch(setIsExtramuralScheduleUntilTodayStudent(false));
             dispatch(setSelectIdGroup(idGroup));
           });
         }}

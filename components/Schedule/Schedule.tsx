@@ -1,7 +1,7 @@
 import moment from "moment";
 import "moment/locale/ru";
 import "moment-timezone";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   View,
@@ -46,7 +46,7 @@ import { lightTheme } from "../../redux/reducers/settingsReducer";
 import { ThemeProvider } from "styled-components/native";
 import { setSelectIdEducator } from "../../redux/reducers/scheduleEducatorInfo";
 import {
-  setIsFullScheduleStudent,
+  setIsExtramuralScheduleUntilTodayStudent,
   setLastCacheEntryStudent,
 } from "../../redux/reducers/scheduleStudentInfo";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -70,6 +70,7 @@ interface IScheduleInfo {
 }
 interface IScheduleExtramuralInfo {
   idPair: number;
+  weekday: string;
   comments: string;
   roomNumber: string | null;
   numberPair: string;
@@ -78,6 +79,7 @@ interface IScheduleExtramuralInfo {
   idEducator: number;
   nameEducator: string;
   fullNameEducator: string;
+  regaliaEducator: string;
   date: string | null;
 }
 interface ScheduleState {
@@ -100,7 +102,7 @@ interface ScheduleState {
     };
     selectIdEducator: number;
     selectIdGroup: number;
-    isFullSchedule: boolean;
+    isExtramuralScheduleUntilToday: boolean;
   };
 }
 interface FavoriteGroupsState {
@@ -126,6 +128,7 @@ const Schedule = ({ navigation }: ScheduleProps) => {
   const theme = useSelector((state: ITheme) => state.settingsReducer.theme);
   moment.tz.setDefault("Asia/Novosibirsk");
   const dispatch = useDispatch();
+  //есть ли подключение к инету
   const isConnected = useSelector(
     (state: Settings) => state.settingsReducer.isConnected
   );
@@ -139,25 +142,33 @@ const Schedule = ({ navigation }: ScheduleProps) => {
   const selectIdGroup = useSelector(
     (state: ScheduleState) => state.scheduleInfoStudentReducer.selectIdGroup
   );
-  const isFullSchedule = useSelector(
-    (state: ScheduleState) => state.scheduleInfoStudentReducer.isFullSchedule
+  //для заочников расписание с текущей даты или до текущей
+  const isExtramuralScheduleUntilToday = useSelector(
+    (state: ScheduleState) =>
+      state.scheduleInfoStudentReducer.isExtramuralScheduleUntilToday
   );
   const favoriteGroups = useSelector(
     (state: FavoriteGroupsState) => state.favoriteGroupReducer.favoriteGroups
   );
-  const [typeWeek, setTypeWeek] = useState("");
+  //изменяемая для переключения между неделями
+  const [typeWeekToSwitch, setTypeWeekToSwitch] = useState("numerator");
+  //не изменяемая для показа текущей недели
   const [currentTypeWeek, setCurrentTypeWeek] = useState<
     "numerator" | "denominator"
   >();
+
+  //проверка дня для времени до и после пары
   const [currentDayForResident, setСurrentDayForResident] =
     useState<string>("Понедельник");
+  //проверка дня для текущей пары
   const [currentDayForExtramuralist, setCurrentDayForExtramuralist] =
     useState<string>("");
+  //просто текущее время
   const [currentTime, setCurrentTime] = useState<string>("");
-  const resultArray: any[] = [];
+  //массив с началом пар для времени до и после пары
+  const arrayStartsPairs: any[] = [];
   const [timeArray, setTimeArray] = useState("");
   const [timeDifferences, setTimeDifference] = useState<string>("");
-
   const weekdays = [
     "Понедельник",
     "Вторник",
@@ -166,16 +177,15 @@ const Schedule = ({ navigation }: ScheduleProps) => {
     "Пятница",
     "Суббота",
   ];
-
   useEffect(() => {
-    setTypeWeek(() => {
+    setTypeWeekToSwitch(() => {
       const currentDate = moment();
       const dayOfWeek = currentDate.weekday();
       const isNumeratorWeek = dayOfWeek <= currentDate.date() % 7;
       setCurrentTypeWeek(isNumeratorWeek ? "numerator" : "denominator");
       return isNumeratorWeek ? "numerator" : "denominator";
     });
-  }, [dataSchedule]);
+  }, []);
 
   useEffect(() => {
     const updateCurrentTime = () => {
@@ -187,7 +197,6 @@ const Schedule = ({ navigation }: ScheduleProps) => {
       setСurrentDayForResident(day);
       setCurrentTime(time);
     };
-
     const interval = setInterval(updateCurrentTime, 1000);
     return () => {
       clearInterval(interval);
@@ -201,8 +210,8 @@ const Schedule = ({ navigation }: ScheduleProps) => {
       currentTimeParts[1] * 60 +
       currentTimeParts[2];
 
-    for (let i = 0; i < resultArray.length; i++) {
-      const scheduleParts = resultArray[i].split("-");
+    for (let i = 0; i < arrayStartsPairs.length; i++) {
+      const scheduleParts = arrayStartsPairs[i].split("-");
       const startParts = scheduleParts[0].split(":").map(Number);
       const scheduleTimeInSeconds = startParts[0] * 3600 + startParts[1] * 60;
 
@@ -215,10 +224,9 @@ const Schedule = ({ navigation }: ScheduleProps) => {
         break;
       }
     }
-  }, [currentTime, resultArray]);
+  }, [currentTime, arrayStartsPairs]);
   let updateFavoriteGroup;
   const STORAGE_KEY_SCHEDULE = "favoriteSchedule";
-
   useEffect(() => {
     if (isConnected) {
       updateFavoriteGroup = async (idGroup: number) => {
@@ -312,24 +320,26 @@ const Schedule = ({ navigation }: ScheduleProps) => {
       console.log(error);
     }
   };
-  const getFilteredSchedule = () => {
-    const filteredSchedule =
-      typeWeek === "numerator"
-        ? dataSchedule.scheduleResident.numerator
-        : dataSchedule.scheduleResident.denominator;
-    return weekdays.map((weekday) =>
-      filteredSchedule.filter(
-        (item) => item.weekday === weekday || item.date === weekday
-      )
-    );
-  };
+  let currentWeekSchedule =
+    typeWeekToSwitch === "numerator"
+      ? dataSchedule.scheduleResident.numerator
+      : typeWeekToSwitch === "denominator"
+      ? dataSchedule.scheduleResident.denominator
+      : typeWeekToSwitch === "session"
+      ? dataSchedule.scheduleResident.session
+      : dataSchedule.scheduleResident.session; 
+  const initialFilteredSchedule = weekdays.map((weekday) =>
+    currentWeekSchedule.filter(
+      (item) => item.weekday === weekday || item.date === weekday
+    )
+  );
+
   weekdays.forEach((weekday, index) => {
-    const timeFilteredSchedule = getFilteredSchedule()[index];
+    const timeFilteredSchedule = initialFilteredSchedule[index];
     timeFilteredSchedule.forEach((scheduleItem) => {
       const [start] = scheduleItem.numberPair.split("-");
-
       if (scheduleItem.weekday === currentDayForResident) {
-        resultArray.push(start);
+        arrayStartsPairs.push(start);
       }
     });
   });
@@ -363,17 +373,17 @@ const Schedule = ({ navigation }: ScheduleProps) => {
               </Text>
               <TypeWeekButton
                 onPress={() => {
-                  setTypeWeek("numerator"), getFilteredSchedule();
+                  setTypeWeekToSwitch("numerator");
                 }}
                 activeOpacity={0.9}
               >
                 <TypeWeekText
                   typeWeek={
                     theme === lightTheme
-                      ? typeWeek === "numerator"
+                      ? typeWeekToSwitch === "numerator"
                         ? "#FFFFFF"
                         : "#FFFFFFB2"
-                      : typeWeek === "numerator"
+                      : typeWeekToSwitch === "numerator"
                       ? "#004C6F"
                       : "#004C6FB2"
                   }
@@ -395,18 +405,17 @@ const Schedule = ({ navigation }: ScheduleProps) => {
               </Text>
               <TypeWeekButton
                 onPress={() => {
-                  setTypeWeek("denominator");
-                  getFilteredSchedule();
+                  setTypeWeekToSwitch("denominator");
                 }}
                 activeOpacity={0.9}
               >
                 <TypeWeekText
                   typeWeek={
                     theme === lightTheme
-                      ? typeWeek === "denominator"
+                      ? typeWeekToSwitch === "denominator"
                         ? "#FFFFFF"
                         : "#FFFFFFB2"
-                      : typeWeek === "denominator"
+                      : typeWeekToSwitch === "denominator"
                       ? "#004C6F"
                       : "#004C6FB2"
                   }
@@ -425,16 +434,16 @@ const Schedule = ({ navigation }: ScheduleProps) => {
                 }}
               ></Text>
               <TypeWeekButton
-                onPress={() => setTypeWeek("session")}
+                onPress={() => setTypeWeekToSwitch("session")}
                 activeOpacity={0.9}
               >
                 <TypeWeekText
                   typeWeek={
                     theme === lightTheme
-                      ? typeWeek === "session"
+                      ? typeWeekToSwitch === "session"
                         ? "#FFFFFF"
                         : "#FFFFFFB2"
-                      : typeWeek === "session"
+                      : typeWeekToSwitch === "session"
                       ? "#004C6F"
                       : "#004C6FB2"
                   }
@@ -459,7 +468,7 @@ const Schedule = ({ navigation }: ScheduleProps) => {
           </View>
         )}
         <View>
-          {typeWeek !== "session" ? (
+          {typeWeekToSwitch !== "session" ? (
             groupType === "resident" ? (
               <FlatList
                 data={weekdays}
@@ -473,7 +482,7 @@ const Schedule = ({ navigation }: ScheduleProps) => {
                     : screenHeight * 0.19,
                 }}
                 renderItem={({ item, index }) => {
-                  const timeFilteredSchedule = getFilteredSchedule()[index];
+                  const timeFilteredSchedule = initialFilteredSchedule[index];
 
                   if (timeFilteredSchedule.length === 0) {
                     return (
@@ -654,7 +663,7 @@ const Schedule = ({ navigation }: ScheduleProps) => {
               />
             ) : (
               <View>
-                {isFullSchedule ? (
+                {isExtramuralScheduleUntilToday ? (
                   <View style={{ paddingHorizontal: screenWidth * 0.04 }}>
                     <Text
                       style={{
@@ -677,7 +686,11 @@ const Schedule = ({ navigation }: ScheduleProps) => {
                           }
                         } else {
                           await getSchedule(selectIdGroup, dispatch);
-                          dispatch(setIsFullScheduleStudent(!isFullSchedule));
+                          dispatch(
+                            setIsExtramuralScheduleUntilTodayStudent(
+                              !isExtramuralScheduleUntilToday
+                            )
+                          );
                         }
                       }}
                     >
@@ -720,7 +733,11 @@ const Schedule = ({ navigation }: ScheduleProps) => {
                             dispatch,
                             selectIdGroup
                           );
-                          dispatch(setIsFullScheduleStudent(!isFullSchedule));
+                          dispatch(
+                            setIsExtramuralScheduleUntilTodayStudent(
+                              !isExtramuralScheduleUntilToday
+                            )
+                          );
                         }
                       }}
                     >
