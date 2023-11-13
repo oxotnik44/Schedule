@@ -97,6 +97,7 @@ interface ScheduleState {
       };
       groupType: string;
       scheduleResident: {
+        weekCorrection: number;
         numerator: IScheduleInfo[];
         denominator: IScheduleInfo[];
       };
@@ -155,7 +156,7 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
   const handleSwitchGroupType = (type: "resident" | "extramural") => {
     setGroupType(type);
   };
-  const [typeWeek, setTypeWeek] = useState("");
+  const [typeWeek, setTypeWeekToSwitch] = useState("");
   const [currentTypeWeek, setCurrentTypeWeek] = useState<
     "numerator" | "denominator"
   >();
@@ -237,14 +238,17 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
         );
 
   useEffect(() => {
-    setTypeWeek(() => {
+    setTypeWeekToSwitch(() => {
       const currentDate = moment();
-      const dayOfWeek = currentDate.weekday();
-      const isNumeratorWeek = dayOfWeek <= currentDate.date() % 7;
+      const weekNumber = currentDate.isoWeek();
+      const isNumeratorWeek =
+        (weekNumber + dataScheduleEducator.scheduleResident.weekCorrection) %
+          2 ===
+        1; // Если номер недели нечетный, то это "numerator"
       setCurrentTypeWeek(isNumeratorWeek ? "numerator" : "denominator");
       return isNumeratorWeek ? "numerator" : "denominator";
     });
-  }, [dataScheduleEducator]);
+  }, []);
 
   useEffect(() => {
     const updateCurrentTime = () => {
@@ -418,7 +422,7 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
               {currentTypeWeek === "numerator" && "Текущая"}
             </Text>
             <TypeWeekButton
-              onPress={() => setTypeWeek("numerator")}
+              onPress={() => setTypeWeekToSwitch("numerator")}
               activeOpacity={0.9}
             >
               <TypeWeekText
@@ -448,7 +452,7 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
               {currentTypeWeek === "denominator" && "Текущая"}
             </Text>
             <TypeWeekButton
-              onPress={() => setTypeWeek("denominator")}
+              onPress={() => setTypeWeekToSwitch("denominator")}
               activeOpacity={0.9}
             >
               <TypeWeekText
@@ -490,7 +494,7 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
             windowSize={10}
             contentContainerStyle={{
               paddingBottom: isConnected
-                ? screenHeight * 0.13
+                ? screenHeight * 0.14
                 : screenHeight * 0.19,
             }}
             renderItem={({ item: weekday }) => {

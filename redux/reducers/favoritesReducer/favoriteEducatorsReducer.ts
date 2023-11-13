@@ -73,7 +73,7 @@ export const setFavoriteEducator = async (
   try {
     const storedEducator = await AsyncStorage.getItem(STORAGE_KEY_EDUCATOR);
     const educator = storedEducator ? JSON.parse(storedEducator) : [];
-    if (educator.length < 5) {
+    if (educator.length < 15) {
       educator.push(newEducator);
       await AsyncStorage.setItem(
         STORAGE_KEY_EDUCATOR,

@@ -13,6 +13,7 @@ const api = axios.create({
 
 export const getSchedule = async (idGroup: number, dispatch: Function) => {
   try {
+
     const response = await api.post("/getScheduleStudent", {
       id_group: idGroup,
     });

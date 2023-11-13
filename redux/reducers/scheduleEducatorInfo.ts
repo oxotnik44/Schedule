@@ -50,6 +50,7 @@ interface IState {
     };
     groupType: string;
     scheduleResident: {
+      weekCorrection:number;
       numerator: IScheduleInfo[];
       denominator: IScheduleInfo[];
     };
@@ -69,6 +70,7 @@ export const initialScheduleState: IState = {
     },
     groupType: "resident",
     scheduleResident: {
+      weekCorrection:0,
       numerator: [],
       denominator: [],
     },

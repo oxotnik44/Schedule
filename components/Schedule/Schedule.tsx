@@ -91,6 +91,7 @@ interface ScheduleState {
       };
       groupType: string;
       scheduleResident: {
+        weekCorrection: number;
         numerator: IScheduleInfo[];
         denominator: IScheduleInfo[];
         session: IScheduleExtramuralInfo[];
@@ -180,8 +181,9 @@ const Schedule = ({ navigation }: ScheduleProps) => {
   useEffect(() => {
     setTypeWeekToSwitch(() => {
       const currentDate = moment();
-      const dayOfWeek = currentDate.weekday();
-      const isNumeratorWeek = dayOfWeek <= currentDate.date() % 7;
+      const weekNumber = currentDate.isoWeek();
+      const isNumeratorWeek =
+        (weekNumber + dataSchedule.scheduleResident.weekCorrection) % 2 === 1; // Если номер недели нечетный, то это "numerator"
       setCurrentTypeWeek(isNumeratorWeek ? "numerator" : "denominator");
       return isNumeratorWeek ? "numerator" : "denominator";
     });
@@ -327,13 +329,12 @@ const Schedule = ({ navigation }: ScheduleProps) => {
       ? dataSchedule.scheduleResident.denominator
       : typeWeekToSwitch === "session"
       ? dataSchedule.scheduleResident.session
-      : dataSchedule.scheduleResident.session; 
+      : dataSchedule.scheduleResident.session;
   const initialFilteredSchedule = weekdays.map((weekday) =>
     currentWeekSchedule.filter(
       (item) => item.weekday === weekday || item.date === weekday
     )
   );
-
   weekdays.forEach((weekday, index) => {
     const timeFilteredSchedule = initialFilteredSchedule[index];
     timeFilteredSchedule.forEach((scheduleItem) => {
@@ -424,7 +425,7 @@ const Schedule = ({ navigation }: ScheduleProps) => {
                 </TypeWeekText>
               </TypeWeekButton>
             </View>
-            <View style={{ flexDirection: "column", flex: 1 }}>
+            {/* <View style={{ flexDirection: "column", flex: 1 }}>
               <Text
                 style={{
                   color: theme.textColor,
@@ -451,7 +452,7 @@ const Schedule = ({ navigation }: ScheduleProps) => {
                   Сессия
                 </TypeWeekText>
               </TypeWeekButton>
-            </View>
+            </View> */}
           </TypeWeekContainer>
         )}
 
