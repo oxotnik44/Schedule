@@ -134,9 +134,9 @@ const SelectedMyGroups = ({ navigation }: SchuduleProps) => {
     [dispatch]
   );
 
-  const fetchSchedule = async (idGroup: number) => {
+  const fetchSchedule = async (idGroup: number, nameGroup: string) => {
     try {
-      await getSchedule(idGroup, dispatch);
+      await getSchedule(idGroup, dispatch, nameGroup);
       dispatch(setSelectIdGroup(idGroup));
     } catch (error) {
       alert("Произошла ошибка: " + error);
@@ -204,7 +204,7 @@ const SelectedMyGroups = ({ navigation }: SchuduleProps) => {
               }
             );
           } else {
-            fetchSchedule(item.idGroup).then(() => {
+            fetchSchedule(item.idGroup, item.nameGroup).then(() => {
               dispatch(setNameGroup(item.nameGroup));
               dispatch(setIsExtramuralScheduleUntilTodayStudent(false));
               dispatch(setSelectIdGroup(item.idGroup));

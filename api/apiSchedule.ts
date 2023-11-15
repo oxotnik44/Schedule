@@ -5,17 +5,23 @@ import {
   setDataScheduleStudent,
   setDataStudentExtramural,
 } from "../redux/reducers/scheduleStudentInfo";
-import { resetDataScheduleEducatorExtramural, resetScheduleEducator, setDataEducatorExtramural, setDataScheduleEducator } from "../redux/reducers/scheduleEducatorInfo";
+import {
+  resetDataScheduleEducatorExtramural,
+  resetScheduleEducator,
+  setDataEducatorExtramural,
+  setDataScheduleEducator,
+} from "../redux/reducers/scheduleEducatorInfo";
+import { api } from "./baseUrl";
 
-const api = axios.create({
-  baseURL: "http://83.234.107.43:5000/",
-});
-
-export const getSchedule = async (idGroup: number, dispatch: Function) => {
+export const getSchedule = async (
+  idGroup: number,
+  dispatch: Function,
+  nameGroup: string
+) => {
   try {
-
     const response = await api.post("/getScheduleStudent", {
       id_group: idGroup,
+      name: nameGroup,
     });
     const data = response.data;
     dispatch(resetScheduleStudent());
@@ -30,7 +36,7 @@ export const getScheduleEducator = async (
   idEducator: number
 ) => {
   try {
-    console.log(idEducator)
+    console.log(idEducator);
     const responce = await api.post("/getScheduleEducator", {
       id_prep: idEducator,
     });
@@ -58,6 +64,7 @@ export const getFullScheduleStudentExtramuralist = async (
     console.error("Error while getting scheduleExtramural:", error);
   }
 };
+
 export const getFullScheduleEducatorExtramural = async (
   dispatch: Function,
   idEducator: number

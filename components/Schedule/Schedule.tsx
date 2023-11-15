@@ -59,6 +59,7 @@ interface IScheduleInfo {
   comments: string;
   roomNumber: string;
   weekday: string;
+  nameGroup: string;
   numberPair: string;
   typePair: string;
   namePair: string;
@@ -72,10 +73,13 @@ interface IScheduleExtramuralInfo {
   idPair: number;
   weekday: string;
   comments: string;
+  nameGroup: string;
   roomNumber: string | null;
   numberPair: string;
   typePair: string;
   namePair: string;
+  roomName: string;
+  typePairRetake: string;
   idEducator: number;
   nameEducator: string;
   fullNameEducator: string;
@@ -94,7 +98,10 @@ interface ScheduleState {
         weekCorrection: number;
         numerator: IScheduleInfo[];
         denominator: IScheduleInfo[];
-        session: IScheduleExtramuralInfo[];
+        session: {
+          date: string;
+          schedule: IScheduleExtramuralInfo[];
+        }[];
       };
       scheduleExtramural: {
         date: string;
@@ -125,6 +132,11 @@ interface Settings {
     isConnected: boolean;
   };
 }
+interface Namegroup {
+  groupsInfoReducer: {
+    selectedGroupName: string;
+  };
+}
 const Schedule = ({ navigation }: ScheduleProps) => {
   const theme = useSelector((state: ITheme) => state.settingsReducer.theme);
   moment.tz.setDefault("Asia/Novosibirsk");
@@ -151,8 +163,14 @@ const Schedule = ({ navigation }: ScheduleProps) => {
   const favoriteGroups = useSelector(
     (state: FavoriteGroupsState) => state.favoriteGroupReducer.favoriteGroups
   );
-  //изменяемая для переключения между неделями
-  const [typeWeekToSwitch, setTypeWeekToSwitch] = useState("numerator");
+  const dataScheduleSession = useSelector(
+    (state: ScheduleState) =>
+      state.scheduleInfoStudentReducer.dataSchedule.scheduleResident.session
+  );
+  const nameGroup = useSelector(
+    (state: Namegroup) => state.groupsInfoReducer.selectedGroupName
+  );
+  const [typeWeekToSwitch, setTypeWeekToSwitch] = useState("");
   //не изменяемая для показа текущей недели
   const [currentTypeWeek, setCurrentTypeWeek] = useState<
     "numerator" | "denominator"
@@ -187,7 +205,7 @@ const Schedule = ({ navigation }: ScheduleProps) => {
       setCurrentTypeWeek(isNumeratorWeek ? "numerator" : "denominator");
       return isNumeratorWeek ? "numerator" : "denominator";
     });
-  }, []);
+  }, [dataSchedule]);
 
   useEffect(() => {
     const updateCurrentTime = () => {
@@ -308,7 +326,6 @@ const Schedule = ({ navigation }: ScheduleProps) => {
 
     fetchData();
   }, [isConnected, selectIdGroup]);
-
   // Добавлен isFavoriteGroup в зависимости
   const fetchScheduleEducator = async (
     fullNameEducator: string,
@@ -325,11 +342,7 @@ const Schedule = ({ navigation }: ScheduleProps) => {
   let currentWeekSchedule =
     typeWeekToSwitch === "numerator"
       ? dataSchedule.scheduleResident.numerator
-      : typeWeekToSwitch === "denominator"
-      ? dataSchedule.scheduleResident.denominator
-      : typeWeekToSwitch === "session"
-      ? dataSchedule.scheduleResident.session
-      : dataSchedule.scheduleResident.session;
+      : dataSchedule.scheduleResident.denominator;
   const initialFilteredSchedule = weekdays.map((weekday) =>
     currentWeekSchedule.filter(
       (item) => item.weekday === weekday || item.date === weekday
@@ -425,7 +438,7 @@ const Schedule = ({ navigation }: ScheduleProps) => {
                 </TypeWeekText>
               </TypeWeekButton>
             </View>
-            {/* <View style={{ flexDirection: "column", flex: 1 }}>
+            <View style={{ flexDirection: "column", flex: 1 }}>
               <Text
                 style={{
                   color: theme.textColor,
@@ -452,7 +465,7 @@ const Schedule = ({ navigation }: ScheduleProps) => {
                   Сессия
                 </TypeWeekText>
               </TypeWeekButton>
-            </View> */}
+            </View>
           </TypeWeekContainer>
         )}
 
@@ -469,336 +482,103 @@ const Schedule = ({ navigation }: ScheduleProps) => {
           </View>
         )}
         <View>
-          {typeWeekToSwitch !== "session" ? (
-            groupType === "resident" ? (
-              <FlatList
-                data={weekdays}
-                keyExtractor={(item, index) => index.toString()}
-                initialNumToRender={2}
-                maxToRenderPerBatch={5}
-                windowSize={10}
-                contentContainerStyle={{
-                  paddingBottom: isConnected
-                    ? screenHeight * 0.09
-                    : screenHeight * 0.19,
-                }}
-                renderItem={({ item, index }) => {
-                  const timeFilteredSchedule = initialFilteredSchedule[index];
+          {groupType === "resident" && typeWeekToSwitch !== "session" && (
+            <FlatList
+              data={weekdays}
+              keyExtractor={(item, index) => index.toString()}
+              initialNumToRender={2}
+              maxToRenderPerBatch={5}
+              windowSize={10}
+              contentContainerStyle={{
+                paddingBottom: isConnected
+                  ? screenHeight * 0.09
+                  : screenHeight * 0.19,
+              }}
+              renderItem={({ item, index }) => {
+                const timeFilteredSchedule = initialFilteredSchedule[index];
 
-                  if (timeFilteredSchedule.length === 0) {
-                    return (
-                      <View key={item}>
-                        <Text
-                          style={{
-                            color: theme.textColor,
-                            fontSize: screenWidth * 0.06,
-                            textAlign: "center",
-                            marginBottom: screenHeight * 0.01,
-                            fontFamily: "Montserrat-Bold",
-                          }}
-                        >
-                          {item}
-                        </Text>
-
-                        <ContainerPair
-                          isColorPair={
-                            theme === lightTheme ? "#d9d9d999" : "#46464699"
-                          }
-                          style={{
-                            height: 60,
-                            alignItems: "center",
-                            justifyContent: "center",
-                          }}
-                        >
-                          <TextSelfStudy>
-                            День самостоятельной работы
-                          </TextSelfStudy>
-                        </ContainerPair>
-                      </View>
-                    );
-                  }
-
+                if (timeFilteredSchedule.length === 0) {
                   return (
                     <View key={item}>
                       <Text
                         style={{
+                          color: theme.textColor,
                           fontSize: screenWidth * 0.06,
                           textAlign: "center",
-                          color: theme.textColor,
                           marginBottom: screenHeight * 0.01,
                           fontFamily: "Montserrat-Bold",
                         }}
                       >
                         {item}
                       </Text>
-                      <FlatList
-                        data={timeFilteredSchedule}
-                        keyExtractor={(item, index) => item.idPair.toString()}
-                        initialNumToRender={6}
-                        maxToRenderPerBatch={5}
-                        windowSize={10}
-                        renderItem={({ item }) => {
-                          const [start, end] = item.numberPair.split("-");
-                          const startTime = moment(start, "HH:mm");
-                          const endTime = moment(end, "HH:mm");
-                          const isCurrent =
-                            currentDayForResident ===
-                              (item.weekday || item.date) &&
-                            moment(currentTime, "HH:mm:ss").isSameOrAfter(
-                              startTime
-                            ) &&
-                            moment(currentTime, "HH:mm:ss").isSameOrBefore(
-                              endTime
-                            );
 
-                          const isColorPair = isCurrent;
-                          const timeDifference = moment.utc(
-                            moment(endTime, "HH:mm:ss").diff(
-                              moment(currentTime, "HH:mm:ss")
-                            )
-                          );
-                          const formattedTimeDifference = timeDifference
-                            .format("HH:mm:ss")
-                            .padStart(8, "0");
-
-                          return (
-                            <View
-                              key={item.idPair}
-                              style={{ alignItems: "center" }}
-                            >
-                              <ContainerPair
-                                isColorPair={
-                                  theme === lightTheme
-                                    ? isColorPair
-                                      ? "#C3C9DE"
-                                      : "#d9d9d999"
-                                    : isColorPair
-                                    ? "#4B61B0"
-                                    : "#46464699"
-                                }
-                              >
-                                <TextNamePair ellipsizeMode="tail">
-                                  {item.namePair}
-                                </TextNamePair>
-                                <View style={{ flexDirection: "row" }}>
-                                  <ContainerLeft>
-                                    <TouchableOpacity
-                                      onPress={() => {
-                                        if (!isConnected) {
-                                          ToastAndroid.show(
-                                            "Нет соединения с интернетом",
-                                            ToastAndroid.SHORT
-                                          );
-                                        } else {
-                                          dispatch(
-                                            setSelectIdEducator(item.idEducator)
-                                          );
-                                          fetchScheduleEducator(
-                                            item.fullNameEducator,
-                                            item.idEducator
-                                          );
-                                        }
-                                      }}
-                                    >
-                                      <TextNameEducator>
-                                        {item.nameEducator &&
-                                          item.nameEducator +
-                                            " " +
-                                            item.regaliaEducator}
-                                      </TextNameEducator>
-                                    </TouchableOpacity>
-                                    <TextRoomNumber>
-                                      {item.roomNumber &&
-                                        "Кабинет №" + item.roomNumber}
-                                    </TextRoomNumber>
-                                  </ContainerLeft>
-                                  <ContainerRight>
-                                    <TextNumberPair>
-                                      {item.numberPair && item.numberPair}
-                                    </TextNumberPair>
-                                    <TextTypePair>
-                                      {item.typePair &&
-                                        "Тип пары: " + item.typePair}
-                                    </TextTypePair>
-                                    {item.weekday === currentDayForResident &&
-                                      timeArray === start && (
-                                        <TimeToLesson>
-                                          До начала пары: {timeDifferences}
-                                        </TimeToLesson>
-                                      )}
-
-                                    {isCurrent && (
-                                      <TimeToLesson>
-                                        До окончания пары:{" "}
-                                        {formattedTimeDifference}
-                                      </TimeToLesson>
-                                    )}
-                                  </ContainerRight>
-                                </View>
-
-                                {item.comments && (
-                                  <CommentsText style={{ textAlign: "center" }}>
-                                    {/^(https?:\/\/|www\.|https?:\/\/www\.)[\w\-.]+\.[a-zA-Z]{2,}(\/\S*)?$/.test(
-                                      item.comments
-                                    ) ? (
-                                      <Text
-                                        onPress={() =>
-                                          Linking.openURL(item.comments)
-                                        }
-                                      >
-                                        {item.comments}
-                                      </Text>
-                                    ) : (
-                                      item.comments
-                                    )}
-                                  </CommentsText>
-                                )}
-                              </ContainerPair>
-                            </View>
-                          );
+                      <ContainerPair
+                        isColorPair={
+                          theme === lightTheme ? "#d9d9d999" : "#46464699"
+                        }
+                        style={{
+                          height: 60,
+                          alignItems: "center",
+                          justifyContent: "center",
                         }}
-                      />
+                      >
+                        <TextSelfStudy>
+                          День самостоятельной работы
+                        </TextSelfStudy>
+                      </ContainerPair>
                     </View>
                   );
-                }}
-              />
-            ) : (
-              <View>
-                {isExtramuralScheduleUntilToday ? (
-                  <View style={{ paddingHorizontal: screenWidth * 0.04 }}>
+                }
+
+                return (
+                  <View key={item}>
                     <Text
                       style={{
-                        fontFamily: "Montserrat-Bold",
+                        fontSize: screenWidth * 0.06,
+                        textAlign: "center",
                         color: theme.textColor,
-                        marginTop: screenHeight * 0.01,
-                        fontSize: screenWidth * 0.04,
-                      }}
-                    >
-                      Что бы скрыть прошедшие пары нажмите
-                    </Text>
-                    <BtnGetScheduleExtramural
-                      onPress={async () => {
-                        if (!isConnected) {
-                          {
-                            ToastAndroid.show(
-                              "Нет соединения с интернетом",
-                              ToastAndroid.SHORT
-                            );
-                          }
-                        } else {
-                          await getSchedule(selectIdGroup, dispatch);
-                          dispatch(
-                            setIsExtramuralScheduleUntilTodayStudent(
-                              !isExtramuralScheduleUntilToday
-                            )
-                          );
-                        }
-                      }}
-                    >
-                      <Text
-                        style={{
-                          fontSize: screenWidth * 0.04,
-                          color: theme === lightTheme ? "#FFFFFF" : "#004C6F",
-                          fontFamily: "Montserrat-SemiBold",
-                          textAlign: "center",
-                        }}
-                      >
-                        Здесь
-                      </Text>
-                    </BtnGetScheduleExtramural>
-                  </View>
-                ) : (
-                  <View style={{ paddingHorizontal: screenWidth * 0.05 }}>
-                    <Text
-                      style={{
+                        marginBottom: screenHeight * 0.01,
                         fontFamily: "Montserrat-Bold",
-                        color: theme.textColor,
-                        marginTop: screenHeight * 0.01,
-                        fontSize: screenWidth * 0.04,
                       }}
                     >
-                      Скрыты уже прошедшие занятия. Чтобы увидеть расписание
-                      ранее сегодняшней даты нажмите
+                      {item}
                     </Text>
-                    <BtnGetScheduleExtramural
-                      onPress={async () => {
-                        if (!isConnected) {
-                          {
-                            ToastAndroid.show(
-                              "Нет соединения с интернетом",
-                              ToastAndroid.SHORT
-                            );
-                          }
-                        } else {
-                          await getFullScheduleStudentExtramuralist(
-                            dispatch,
-                            selectIdGroup
+                    <FlatList
+                      data={timeFilteredSchedule}
+                      keyExtractor={(item, index) => item.idPair.toString()}
+                      initialNumToRender={6}
+                      maxToRenderPerBatch={5}
+                      windowSize={10}
+                      renderItem={({ item }) => {
+                        const [start, end] = item.numberPair.split("-");
+                        const startTime = moment(start, "HH:mm");
+                        const endTime = moment(end, "HH:mm");
+                        const isCurrent =
+                          currentDayForResident ===
+                            (item.weekday || item.date) &&
+                          moment(currentTime, "HH:mm:ss").isSameOrAfter(
+                            startTime
+                          ) &&
+                          moment(currentTime, "HH:mm:ss").isSameOrBefore(
+                            endTime
                           );
-                          dispatch(
-                            setIsExtramuralScheduleUntilTodayStudent(
-                              !isExtramuralScheduleUntilToday
-                            )
-                          );
-                        }
-                      }}
-                    >
-                      <Text
-                        style={{
-                          fontSize: screenWidth * 0.04,
-                          color: theme === lightTheme ? "#FFFFFF" : "#004C6F",
-                          fontFamily: "Montserrat-SemiBold",
-                          textAlign: "center",
-                        }}
-                      >
-                        Здесь
-                      </Text>
-                    </BtnGetScheduleExtramural>
-                  </View>
-                )}
-                <FlatList
-                  data={dataSchedule.scheduleExtramural}
-                  keyExtractor={(item, index) => index.toString()}
-                  initialNumToRender={2}
-                  maxToRenderPerBatch={10}
-                  windowSize={10}
-                  contentContainerStyle={{
-                    paddingBottom: isConnected
-                      ? screenHeight * 0
-                      : screenHeight * 0.09,
-                  }}
-                  renderItem={({ item, index }) => (
-                    <View
-                      key={index}
-                      style={{
-                        flex: 1,
-                        justifyContent: "center",
-                        alignItems: "center",
-                      }}
-                    >
-                      <DateText>{item.date && item.date}</DateText>
 
-                      <FlatList
-                        data={item.schedule}
-                        keyExtractor={(item, index) => item.idPair.toString()}
-                        initialNumToRender={5}
-                        maxToRenderPerBatch={10}
-                        windowSize={10}
-                        renderItem={({ item, index }) => {
-                          const [start, end] = item.numberPair.split("-");
-                          const startTime = moment(start, "HH:mm");
-                          const endTime = moment(end, "HH:mm");
+                        const isColorPair = isCurrent;
+                        const timeDifference = moment.utc(
+                          moment(endTime, "HH:mm:ss").diff(
+                            moment(currentTime, "HH:mm:ss")
+                          )
+                        );
+                        const formattedTimeDifference = timeDifference
+                          .format("HH:mm:ss")
+                          .padStart(8, "0");
 
-                          const isCurrent =
-                            currentDayForExtramuralist === item.date &&
-                            moment(currentTime, "HH:mm").isBetween(
-                              startTime,
-                              endTime
-                            );
-                          const isColorPair = isCurrent;
-
-                          return (
+                        return (
+                          <View
+                            key={item.idPair}
+                            style={{ alignItems: "center" }}
+                          >
                             <ContainerPair
-                              key={item.idPair}
                               isColorPair={
                                 theme === lightTheme
                                   ? isColorPair
@@ -809,35 +589,39 @@ const Schedule = ({ navigation }: ScheduleProps) => {
                                   : "#46464699"
                               }
                             >
-                              <TextNamePair>{item.namePair}</TextNamePair>
+                              <TextNamePair ellipsizeMode="tail">
+                                {item.namePair}
+                              </TextNamePair>
                               <View style={{ flexDirection: "row" }}>
                                 <ContainerLeft>
-                                  <TextNameGroup>
-                                    <TouchableOpacity
-                                      onPress={() => {
-                                        if (!isConnected) {
-                                          {
-                                            ToastAndroid.show(
-                                              "Нет соединения с интернетом",
-                                              ToastAndroid.SHORT
-                                            );
-                                          }
-                                        } else {
-                                          fetchScheduleEducator(
-                                            item.fullNameEducator,
-                                            item.idEducator
-                                          );
-                                        }
-                                      }}
-                                    >
-                                      <TextNameEducator>
-                                        {item.nameEducator && item.nameEducator}
-                                      </TextNameEducator>
-                                    </TouchableOpacity>
-                                  </TextNameGroup>
+                                  <TouchableOpacity
+                                    onPress={() => {
+                                      if (!isConnected) {
+                                        ToastAndroid.show(
+                                          "Нет соединения с интернетом",
+                                          ToastAndroid.SHORT
+                                        );
+                                      } else {
+                                        dispatch(
+                                          setSelectIdEducator(item.idEducator)
+                                        );
+                                        fetchScheduleEducator(
+                                          item.fullNameEducator,
+                                          item.idEducator
+                                        );
+                                      }
+                                    }}
+                                  >
+                                    <TextNameEducator>
+                                      {item.nameEducator &&
+                                        item.nameEducator +
+                                          " " +
+                                          item.regaliaEducator}
+                                    </TextNameEducator>
+                                  </TouchableOpacity>
                                   <TextRoomNumber>
                                     {item.roomNumber &&
-                                      "Кабинет № " + item.roomNumber}
+                                      "Кабинет №" + item.roomNumber}
                                   </TextRoomNumber>
                                 </ContainerLeft>
                                 <ContainerRight>
@@ -846,10 +630,24 @@ const Schedule = ({ navigation }: ScheduleProps) => {
                                   </TextNumberPair>
                                   <TextTypePair>
                                     {item.typePair &&
-                                      "Тип пары " + item.typePair}
+                                      "Тип пары: " + item.typePair}
                                   </TextTypePair>
+                                  {item.weekday === currentDayForResident &&
+                                    timeArray === start && (
+                                      <TimeToLesson>
+                                        До начала пары: {timeDifferences}
+                                      </TimeToLesson>
+                                    )}
+
+                                  {isCurrent && (
+                                    <TimeToLesson>
+                                      До окончания пары:{" "}
+                                      {formattedTimeDifference}
+                                    </TimeToLesson>
+                                  )}
                                 </ContainerRight>
                               </View>
+
                               {item.comments && (
                                 <CommentsText style={{ textAlign: "center" }}>
                                   {/^(https?:\/\/|www\.|https?:\/\/www\.)[\w\-.]+\.[a-zA-Z]{2,}(\/\S*)?$/.test(
@@ -868,16 +666,353 @@ const Schedule = ({ navigation }: ScheduleProps) => {
                                 </CommentsText>
                               )}
                             </ContainerPair>
+                          </View>
+                        );
+                      }}
+                    />
+                  </View>
+                );
+              }}
+            />
+          )}
+          {groupType === "extramural" && (
+            <View>
+              {isExtramuralScheduleUntilToday ? (
+                <View style={{ paddingHorizontal: screenWidth * 0.04 }}>
+                  <Text
+                    style={{
+                      fontFamily: "Montserrat-Bold",
+                      color: theme.textColor,
+                      marginTop: screenHeight * 0.01,
+                      fontSize: screenWidth * 0.04,
+                    }}
+                  >
+                    Что бы скрыть прошедшие пары нажмите
+                  </Text>
+                  <BtnGetScheduleExtramural
+                    onPress={async () => {
+                      if (!isConnected) {
+                        {
+                          ToastAndroid.show(
+                            "Нет соединения с интернетом",
+                            ToastAndroid.SHORT
                           );
-                        }}
-                      />
-                    </View>
-                  )}
-                />
-              </View>
-            )
-          ) : (
-            <Text>qwe</Text>
+                        }
+                      } else {
+                        await getSchedule(selectIdGroup, dispatch, nameGroup);
+                        dispatch(
+                          setIsExtramuralScheduleUntilTodayStudent(
+                            !isExtramuralScheduleUntilToday
+                          )
+                        );
+                      }
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontSize: screenWidth * 0.04,
+                        color: theme === lightTheme ? "#FFFFFF" : "#004C6F",
+                        fontFamily: "Montserrat-SemiBold",
+                        textAlign: "center",
+                      }}
+                    >
+                      Здесь
+                    </Text>
+                  </BtnGetScheduleExtramural>
+                </View>
+              ) : (
+                <View style={{ paddingHorizontal: screenWidth * 0.05 }}>
+                  <Text
+                    style={{
+                      fontFamily: "Montserrat-Bold",
+                      color: theme.textColor,
+                      marginTop: screenHeight * 0.01,
+                      fontSize: screenWidth * 0.04,
+                    }}
+                  >
+                    Скрыты уже прошедшие занятия. Чтобы увидеть расписание ранее
+                    сегодняшней даты нажмите
+                  </Text>
+                  <BtnGetScheduleExtramural
+                    onPress={async () => {
+                      if (!isConnected) {
+                        {
+                          ToastAndroid.show(
+                            "Нет соединения с интернетом",
+                            ToastAndroid.SHORT
+                          );
+                        }
+                      } else {
+                        await getFullScheduleStudentExtramuralist(
+                          dispatch,
+                          selectIdGroup
+                        );
+                        dispatch(
+                          setIsExtramuralScheduleUntilTodayStudent(
+                            !isExtramuralScheduleUntilToday
+                          )
+                        );
+                      }
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontSize: screenWidth * 0.04,
+                        color: theme === lightTheme ? "#FFFFFF" : "#004C6F",
+                        fontFamily: "Montserrat-SemiBold",
+                        textAlign: "center",
+                      }}
+                    >
+                      Здесь
+                    </Text>
+                  </BtnGetScheduleExtramural>
+                </View>
+              )}
+              <FlatList
+                data={dataSchedule.scheduleExtramural}
+                keyExtractor={(item, index) => index.toString()}
+                initialNumToRender={3}
+                maxToRenderPerBatch={10}
+                windowSize={10}
+                contentContainerStyle={{
+                  paddingBottom: isConnected
+                    ? screenHeight * 0
+                    : screenHeight * 0.09,
+                }}
+                renderItem={({ item, index }) => (
+                  <View
+                    key={index}
+                    style={{
+                      flex: 1,
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <DateText>{item.date && item.date}</DateText>
+
+                    <FlatList
+                      data={item.schedule}
+                      keyExtractor={(item, index) => item.idPair.toString()}
+                      initialNumToRender={5}
+                      maxToRenderPerBatch={10}
+                      windowSize={10}
+                      renderItem={({ item, index }) => {
+                        const [start, end] = item.numberPair.split("-");
+                        const startTime = moment(start, "HH:mm");
+                        const endTime = moment(end, "HH:mm");
+
+                        const isCurrent =
+                          currentDayForExtramuralist === item.date &&
+                          moment(currentTime, "HH:mm").isBetween(
+                            startTime,
+                            endTime
+                          );
+                        const isColorPair = isCurrent;
+
+                        return (
+                          <ContainerPair
+                            key={item.idPair}
+                            isColorPair={
+                              theme === lightTheme
+                                ? isColorPair
+                                  ? "#C3C9DE"
+                                  : "#d9d9d999"
+                                : isColorPair
+                                ? "#4B61B0"
+                                : "#46464699"
+                            }
+                          >
+                            <TextNamePair>{item.namePair}</TextNamePair>
+                            <View style={{ flexDirection: "row" }}>
+                              <ContainerLeft>
+                                <TextNameGroup>
+                                  <TouchableOpacity
+                                    onPress={() => {
+                                      if (!isConnected) {
+                                        {
+                                          ToastAndroid.show(
+                                            "Нет соединения с интернетом",
+                                            ToastAndroid.SHORT
+                                          );
+                                        }
+                                      } else {
+                                        fetchScheduleEducator(
+                                          item.fullNameEducator,
+                                          item.idEducator
+                                        );
+                                      }
+                                    }}
+                                  >
+                                    <TextNameEducator>
+                                      {item.nameEducator && item.nameEducator}
+                                    </TextNameEducator>
+                                  </TouchableOpacity>
+                                </TextNameGroup>
+                                <TextRoomNumber>
+                                  {item.roomNumber &&
+                                    "Кабинет № " + item.roomNumber}
+                                </TextRoomNumber>
+                              </ContainerLeft>
+                              <ContainerRight>
+                                <TextNumberPair>
+                                  {item.numberPair && item.numberPair}
+                                </TextNumberPair>
+                                <TextTypePair>
+                                  {item.typePair && "Тип пары " + item.typePair}
+                                </TextTypePair>
+                              </ContainerRight>
+                            </View>
+                            {item.comments && (
+                              <CommentsText style={{ textAlign: "center" }}>
+                                {/^(https?:\/\/|www\.|https?:\/\/www\.)[\w\-.]+\.[a-zA-Z]{2,}(\/\S*)?$/.test(
+                                  item.comments
+                                ) ? (
+                                  <Text
+                                    onPress={() =>
+                                      Linking.openURL(item.comments)
+                                    }
+                                  >
+                                    {item.comments}
+                                  </Text>
+                                ) : (
+                                  item.comments
+                                )}
+                              </CommentsText>
+                            )}
+                          </ContainerPair>
+                        );
+                      }}
+                    />
+                  </View>
+                )}
+              />
+            </View>
+          )}
+          {typeWeekToSwitch === "session" && (
+            <FlatList
+              data={dataScheduleSession}
+              keyExtractor={(item, index) => index.toString()}
+              initialNumToRender={3}
+              maxToRenderPerBatch={10}
+              windowSize={10}
+              contentContainerStyle={{
+                paddingBottom: isConnected
+                  ? screenHeight * 0.09
+                  : screenHeight * 0.19,
+              }}
+              renderItem={({ item, index }) => (
+                <View
+                  key={index}
+                  style={{
+                    flex: 1,
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <DateText>{item.date && item.date}</DateText>
+
+                  <FlatList
+                    data={item.schedule}
+                    keyExtractor={(item, index) => item.idPair.toString()}
+                    initialNumToRender={5}
+                    maxToRenderPerBatch={10}
+                    windowSize={10}
+                    renderItem={({ item, index }) => {
+                      const [start, end] = item.numberPair.split("-");
+                      const startTime = moment(start, "HH:mm");
+                      const endTime = moment(end, "HH:mm");
+
+                      const isCurrent =
+                        currentDayForExtramuralist === item.date &&
+                        moment(currentTime, "HH:mm").isBetween(
+                          startTime,
+                          endTime
+                        );
+                      const isColorPair = isCurrent;
+
+                      return (
+                        <ContainerPair
+                          key={item.idPair}
+                          isColorPair={
+                            theme === lightTheme
+                              ? isColorPair
+                                ? "#C3C9DE"
+                                : "#d9d9d999"
+                              : isColorPair
+                              ? "#4B61B0"
+                              : "#46464699"
+                          }
+                        >
+                          <TextNamePair>{item.namePair}</TextNamePair>
+                          <View style={{ flexDirection: "row" }}>
+                            <ContainerLeft>
+                              <TextNameGroup>
+                                <TouchableOpacity
+                                  onPress={() => {
+                                    if (!isConnected) {
+                                      {
+                                        ToastAndroid.show(
+                                          "Нет соединения с интернетом",
+                                          ToastAndroid.SHORT
+                                        );
+                                      }
+                                    } else {
+                                      fetchScheduleEducator(
+                                        item.fullNameEducator,
+                                        item.idEducator
+                                      );
+                                    }
+                                  }}
+                                >
+                                  <TextNameEducator>
+                                    {item.nameEducator &&
+                                      item.nameEducator +
+                                        " " +
+                                        item.regaliaEducator}
+                                  </TextNameEducator>
+                                </TouchableOpacity>
+                              </TextNameGroup>
+                              <TextRoomNumber>
+                                {item.roomNumber &&
+                                  "Кабинет № " + item.roomNumber}
+                              </TextRoomNumber>
+                              <TextRoomNumber>
+                                {item.roomName && item.roomName}
+                              </TextRoomNumber>
+                            </ContainerLeft>
+                            <ContainerRight>
+                              <TextNumberPair>
+                                {item.numberPair && item.numberPair}
+                              </TextNumberPair>
+                              <TextTypePair>
+                                {item.typePairRetake
+                                  ? "Тип пары " + item.typePairRetake
+                                  : "Тип пары " + item.typePair}
+                              </TextTypePair>
+                            </ContainerRight>
+                          </View>
+                          {item.comments && (
+                            <CommentsText style={{ textAlign: "center" }}>
+                              {/^(https?:\/\/|www\.|https?:\/\/www\.)[\w\-.]+\.[a-zA-Z]{2,}(\/\S*)?$/.test(
+                                item.comments
+                              ) ? (
+                                <Text
+                                  onPress={() => Linking.openURL(item.comments)}
+                                >
+                                  {item.comments}
+                                </Text>
+                              ) : (
+                                item.comments
+                              )}
+                            </CommentsText>
+                          )}
+                        </ContainerPair>
+                      );
+                    }}
+                  />
+                </View>
+              )}
+            />
           )}
         </View>
       </Container>

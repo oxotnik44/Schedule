@@ -3,15 +3,10 @@ import {
   resetEducator,
   setDataEducator,
 } from "../redux/reducers/educatorReducer";
+import { api } from "./baseUrl";
 
-const api = axios.create({
-  baseURL: "http://83.234.107.43:5000/"
 
-});
-// const api = axios.create({
-//   baseURL: "https://schedulebackend-oxotnik44.onrender.com"
 
-// });
 
 export const getEducator = async (dispatch: Function) => {
   try {

@@ -113,9 +113,9 @@ const Groups = ({ navigation }: GroupsProps) => {
     fetchGroupExtramuralists();
   }, [numberDepartment, dispatch]);
 
-  const fetchSchedule = async (idGroup: number) => {
+  const fetchSchedule = async (idGroup: number, nameGroup: string) => {
     try {
-      await getSchedule(idGroup, dispatch);
+      await getSchedule(idGroup, dispatch, nameGroup);
     } catch (error) {
       alert("Произошла ошибка");
     }
@@ -179,12 +179,14 @@ const Groups = ({ navigation }: GroupsProps) => {
                         );
                       } else {
                         dispatch(setNameGroup(group.nameGroup));
-                        dispatch(setIsExtramuralScheduleUntilTodayStudent(false));
+                        dispatch(
+                          setIsExtramuralScheduleUntilTodayStudent(false)
+                        );
                         navigation.navigate("Schedule");
                       }
                     });
                   } else {
-                    fetchSchedule(group.idGroup).then(() => {
+                    fetchSchedule(group.idGroup, group.nameGroup).then(() => {
                       dispatch(setNameGroup(group.nameGroup));
                       dispatch(setIsExtramuralScheduleUntilTodayStudent(false));
                       dispatch(setSelectIdGroup(group.idGroup));
@@ -235,7 +237,7 @@ const Groups = ({ navigation }: GroupsProps) => {
                       ToastAndroid.SHORT
                     );
                   } else {
-                    fetchSchedule(group.idGroup).then(() => {
+                    fetchSchedule(group.idGroup, group.nameGroup).then(() => {
                       dispatch(setNameGroup(group.nameGroup));
                       dispatch(setIsExtramuralScheduleUntilTodayStudent(false));
                       dispatch(setSelectIdGroup(group.idGroup));

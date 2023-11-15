@@ -19,6 +19,7 @@ interface IScheduleInfo {
   namePair: string;
   nameDepartments: string;
   groupName: string;
+  nameGroup: string;
   idEducator: number;
   nameEducator: string;
   fullNameEducator: string;
@@ -33,11 +34,14 @@ interface IScheduleExtramuralInfo {
   typePair: string;
   namePair: string;
   idEducator: number;
+  roomName: string;
+  nameGroup: string;
   nameDepartments: string;
   nameEducator: string;
   fullNameEducator: string;
   groupName: string;
   date: string | null;
+  typePairRetake: string;
 }
 interface IState {
   dataSchedule: {
@@ -50,7 +54,10 @@ interface IState {
       weekCorrection: number;
       numerator: IScheduleInfo[];
       denominator: IScheduleInfo[];
-      session: IScheduleExtramuralInfo[];
+      session: {
+        date: string;
+        schedule: IScheduleExtramuralInfo[];
+      }[];
     };
     scheduleExtramural: { date: string; schedule: IScheduleExtramuralInfo[] }[];
   };
@@ -65,7 +72,7 @@ export const initialScheduleState: IState = {
       currentDateCache: "",
       currentTimeCache: "",
     },
-    groupType: "resident",
+    groupType: "",
     scheduleResident: {
       weekCorrection: 1,
       numerator: [],
@@ -97,6 +104,7 @@ const scheduleInfoStudentReducer: Reducer<IState> = (
           scheduleResident: {
             numerator: [],
             denominator: [],
+            session: [],
           },
           scheduleExtramural: [],
         },
@@ -145,6 +153,7 @@ const scheduleInfoStudentReducer: Reducer<IState> = (
           lastCacheEntry: action.lastCacheEntryStudent,
         },
       };
+
     default:
       return state;
   }
@@ -154,10 +163,7 @@ export const setDataScheduleStudent = (dataSchedule: IState) => ({
   type: SET_DATA_SCHEDULE_STUDENT,
   dataSchedule,
 });
-export const setTypeGroup = (type: string) => ({
-  type: SET_TYPE_GROUP_STUDENT,
-  typeGroup: type,
-});
+
 export const resetScheduleStudent = () => ({
   type: RESET_SCHEDULE_STUDENT,
 });
@@ -187,4 +193,5 @@ export const setLastCacheEntryStudent = (lastCacheEntryStudent: any) => ({
   type: SET_LAST_CACHE_ENTRY_STUDENT,
   lastCacheEntryStudent,
 });
+
 export default scheduleInfoStudentReducer;

@@ -8,10 +8,9 @@ import {
   setDataGroupsExtramuralists,
   setDataGroupsResidents,
 } from "../redux/reducers/groupsInfoReducer";
+import { api } from "./baseUrl";
 
-const api = axios.create({
-  baseURL: "http://83.234.107.43:5000/",
-});
+
 
 export const getGroupsResidents = async (
   idDepartment: number,

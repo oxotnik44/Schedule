@@ -7,6 +7,7 @@ import {
   Dimensions,
   ToastAndroid,
   Alert,
+  Linking,
 } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
@@ -33,7 +34,6 @@ import { getDepartments } from "./api/apiDepartments";
 import { getEducator } from "./api/apiEducator";
 import { getNews } from "./api/apiNews";
 import { getGroups } from "./api/apiGroups";
-
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 export type RootStackParamList = {
@@ -178,6 +178,8 @@ const Navigate = ({ navigation }: GroupsProps) => {
       Connection();
     };
   }, [netInfo.isConnected, isConnected]);
+  
+
   return (
     <ThemeProvider theme={theme}>
       <NavigationContainer>

@@ -93,9 +93,9 @@ const Departments: React.FC<DepartmentsProps> = ({ navigation }) => {
     return groupsName.includes(groupsValue);
   });
   const fetchSchedule = useCallback(
-    async (idGroup: number) => {
+    async (idGroup: number, nameGroup: string) => {
       try {
-        await getSchedule(idGroup, dispatch);
+        await getSchedule(idGroup, dispatch, nameGroup);
       } catch (error) {
         console.log(error);
       }
@@ -112,7 +112,7 @@ const Departments: React.FC<DepartmentsProps> = ({ navigation }) => {
         key={idDepartment}
         onPress={async () => {
           if (idDepartment === 18) {
-            await getSchedule(3430, dispatch);
+            await getSchedule(3430, dispatch, item.nameGroup);
             dispatch(setSelectIdGroup(3430));
             dispatch(setNameGroup("Технопарк"));
             dispatch(setIsExtramuralScheduleUntilTodayStudent(false));
@@ -140,7 +140,7 @@ const Departments: React.FC<DepartmentsProps> = ({ navigation }) => {
       <ContainerDepartments
         key={idGroup.toString()}
         onPress={() => {
-          fetchSchedule(idGroup).then(() => {
+          fetchSchedule(idGroup, nameGroup).then(() => {
             navigation.navigate("Schedule");
             dispatch(setNameGroup(nameGroup));
             dispatch(setIsExtramuralScheduleUntilTodayStudent(false));
