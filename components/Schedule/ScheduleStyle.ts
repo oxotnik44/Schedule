@@ -200,6 +200,7 @@ export const BtnGetScheduleExtramural = styled.TouchableOpacity`
   justify-content: center;
   margin-top: ${screenHeight * 0.01}px;
   align-items: center;
+
 `;
 export const TimeToLesson = styled.Text`
   color: ${(props) => props.theme.textColor};
@@ -214,4 +215,22 @@ export const NoConnected = styled.Text`
   font-family: "Montserrat-Bold";
   width: ${screenWidth * 0.95}px;
   text-align: center;
+`;
+export const IsSession = styled.Text`
+  font-size: ${screenWidth * 0.06}px;
+  justify-content: center;
+  color: ${(props) => props.theme.textColor};
+  font-family: Montserrat-SemiBold;
+`;
+export const CenteredContainer = styled.View`
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  width: ${screenWidth * 0.95}px;
+`;
+export const ScheduleCloseView = styled.Text`
+  font-size: ${screenWidth * 0.05}px;
+  justify-content: center;
+  color: ${(props) => props.theme.textColor};
+  font-family: Montserrat-SemiBold;
 `;

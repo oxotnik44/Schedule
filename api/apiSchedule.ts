@@ -4,6 +4,7 @@ import {
   resetScheduleStudent,
   setDataScheduleStudent,
   setDataStudentExtramural,
+  setExtramuralIsActive,
 } from "../redux/reducers/scheduleStudentInfo";
 import {
   resetDataScheduleEducatorExtramural,
@@ -26,6 +27,7 @@ export const getSchedule = async (
     const data = response.data;
     dispatch(resetScheduleStudent());
     dispatch(setDataScheduleStudent(data));
+    getIsActive(dispatch, idGroup);
   } catch (error) {
     console.error("Error while getting schedule:", error);
   }
@@ -76,6 +78,17 @@ export const getFullScheduleEducatorExtramural = async (
     const data = responce.data;
     dispatch(resetDataScheduleEducatorExtramural());
     dispatch(setDataEducatorExtramural(data));
+  } catch (error) {
+    console.error("Error while getting scheduleExtramural:", error);
+  }
+};
+export const getIsActive = async (dispatch: Function, idGroup: number) => {
+  try {
+    const responce = await api.post("/getIsActive", {
+      id_group: idGroup,
+    });
+    const data = responce.data;
+    dispatch(setExtramuralIsActive(data));
   } catch (error) {
     console.error("Error while getting scheduleExtramural:", error);
   }

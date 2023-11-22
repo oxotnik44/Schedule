@@ -10,17 +10,21 @@ import {
   TouchableOpacity,
   ToastAndroid,
   FlatList,
+  Linking,
 } from "react-native";
 import { Dimensions } from "react-native";
 import {
   BtnGetScheduleExtramural,
+  CenteredContainer,
   CommentsText,
   Container,
   ContainerLeft,
   ContainerPair,
   ContainerRight,
   DateText,
+  IsSession,
   NoConnected,
+  ScheduleCloseView,
   TextNameGroup,
   TextNamePair,
   TextNumberPair,
@@ -66,6 +70,7 @@ interface IScheduleInfo {
   numberPair: string;
   typePair: string;
   namePair: string;
+
   idEducator: number;
   nameEducator: string;
   nameDepartments: string;
@@ -79,6 +84,7 @@ interface IScheduleExtramuralInfo {
   comments: string;
   groupName: string;
   roomNumber: string | null;
+  roomName: string;
   numberPair: string;
   typePair: string;
   namePair: string;
@@ -87,6 +93,7 @@ interface IScheduleExtramuralInfo {
   nameEducator: string;
   fullNameEducator: string;
   date: string | null;
+  typePairRetake: string | null;
 }
 interface ScheduleState {
   scheduleInfoEducatorReducer: {
@@ -96,10 +103,15 @@ interface ScheduleState {
         currentTimeCache: string;
       };
       groupType: string;
+      extramuralIsActive: boolean;
       scheduleResident: {
         weekCorrection: number;
         numerator: IScheduleInfo[];
         denominator: IScheduleInfo[];
+        session: {
+          date: string;
+          schedule: IScheduleExtramuralInfo[];
+        }[];
       };
       scheduleExtramural: {
         date: string;
@@ -150,13 +162,11 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
   const isFullSchedule = useSelector(
     (state: ScheduleState) => state.scheduleInfoEducatorReducer.isFullSchedule
   );
-  const [groupType, setGroupType] = useState<"resident" | "extramural">(
-    "resident"
-  );
-  const handleSwitchGroupType = (type: "resident" | "extramural") => {
-    setGroupType(type);
-  };
-  const [typeWeek, setTypeWeekToSwitch] = useState("");
+  const [groupType, setGroupType] = useState<
+    "resident" | "extramural" | "session"
+  >("resident");
+
+  const [typeWeekToSwitch, setTypeWeekToSwitch] = useState("");
   const [currentTypeWeek, setCurrentTypeWeek] = useState<
     "numerator" | "denominator"
   >();
@@ -184,7 +194,7 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
   const fetchSchedule = async (idGroup: number, groupName: string) => {
     try {
       dispatch(setNameGroup(groupName));
-      await getSchedule(idGroup, dispatch);
+      await getSchedule(idGroup, dispatch, groupName);
       navigation.navigate("Schedule");
     } catch (error) {
       console.log(error);
@@ -203,7 +213,7 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
   };
   const getFilteredSchedule = () => {
     const filteredSchedule =
-      typeWeek === "numerator"
+      typeWeekToSwitch === "numerator"
         ? dataScheduleEducator.scheduleResident.numerator
         : dataScheduleEducator.scheduleResident.denominator;
 
@@ -213,7 +223,6 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
       )
     );
   };
-
   weekdays.map((item, index) => {
     const timeFilteredSchedule = getFilteredSchedule()[index];
     timeFilteredSchedule.map((item) => {
@@ -225,7 +234,7 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
     });
   });
   hasWeekday =
-    typeWeek === "numerator"
+    typeWeekToSwitch === "numerator"
       ? dataScheduleEducator.scheduleResident.numerator.some(
           (item: IScheduleInfo) =>
             (item.hasOwnProperty("weekday") && item.weekday !== "") ||
@@ -377,7 +386,7 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
   return (
     <Container>
       <ToggleContainer>
-        <ToggleButton onPress={() => handleSwitchGroupType("resident")}>
+        <ToggleButton onPress={() => setGroupType("resident")}>
           <ToggleButtonText
             groupType={
               theme === lightTheme
@@ -392,7 +401,7 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
             Очные
           </ToggleButtonText>
         </ToggleButton>
-        <ToggleButton onPress={() => handleSwitchGroupType("extramural")}>
+        <ToggleButton onPress={() => setGroupType("extramural")}>
           <ToggleButtonText
             groupType={
               theme === lightTheme
@@ -405,6 +414,21 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
             }
           >
             Заочные
+          </ToggleButtonText>
+        </ToggleButton>
+        <ToggleButton onPress={() => setGroupType("session")}>
+          <ToggleButtonText
+            groupType={
+              theme === lightTheme
+                ? groupType === "session"
+                  ? "#FFFFFF"
+                  : "#FFFFFFB2"
+                : groupType === "session"
+                ? "#004C6F"
+                : "#004C6FB2"
+            }
+          >
+            Сессия
           </ToggleButtonText>
         </ToggleButton>
       </ToggleContainer>
@@ -428,10 +452,10 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
               <TypeWeekText
                 typeWeek={
                   theme === lightTheme
-                    ? typeWeek === "numerator"
+                    ? typeWeekToSwitch === "numerator"
                       ? "#FFFFFF"
                       : "#FFFFFFB2"
-                    : typeWeek === "numerator"
+                    : typeWeekToSwitch === "numerator"
                     ? "#004C6F"
                     : "#004C6FB2"
                 }
@@ -458,10 +482,10 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
               <TypeWeekText
                 typeWeek={
                   theme === lightTheme
-                    ? typeWeek === "denominator"
+                    ? typeWeekToSwitch === "denominator"
                       ? "#FFFFFF"
                       : "#FFFFFFB2"
-                    : typeWeek === "denominator"
+                    : typeWeekToSwitch === "denominator"
                     ? "#004C6F"
                     : "#004C6FB2"
                 }
@@ -484,169 +508,160 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
           </NoConnected>
         </View>
       )}
-      {groupType === "resident" ? (
-        <View>
-          <FlatList
-            data={weekdays}
-            keyExtractor={(weekday) => weekday}
-            initialNumToRender={2}
-            maxToRenderPerBatch={10}
-            windowSize={10}
-            contentContainerStyle={{
-              paddingBottom: isConnected
-                ? screenHeight * 0.14
-                : screenHeight * 0.19,
-            }}
-            renderItem={({ item: weekday }) => {
-              const filteredSchedule =
-                typeWeek === "numerator"
-                  ? dataScheduleEducator.scheduleResident.numerator
-                  : dataScheduleEducator.scheduleResident.denominator;
-              const timeFilteredSchedule = filteredSchedule.filter(
-                (item) => item.weekday === weekday || item.date === weekday
-              );
+      {groupType === "resident" && (
+        <FlatList
+          data={weekdays}
+          keyExtractor={(weekday) => weekday}
+          initialNumToRender={2}
+          maxToRenderPerBatch={10}
+          windowSize={10}
+          renderItem={({ item: weekday }) => {
+            const filteredSchedule =
+              typeWeekToSwitch === "numerator"
+                ? dataScheduleEducator.scheduleResident.numerator
+                : dataScheduleEducator.scheduleResident.denominator;
+            const timeFilteredSchedule = filteredSchedule.filter(
+              (item) => item.weekday === weekday || item.date === weekday
+            );
 
-              if (timeFilteredSchedule.length === 0) {
-                return (
-                  <View key={weekday}>
-                    <TextWeekday>{weekday}</TextWeekday>
-
-                    <ContainerPair
-                      isColorPair={
-                        theme === lightTheme ? "#d9d9d999" : "#46464699"
-                      }
-                      style={{
-                        height: 60,
-                        justifyContent: "center",
-                      }}
-                    >
-                      <TextSelfStudy>День самостоятельной работы</TextSelfStudy>
-                    </ContainerPair>
-                  </View>
-                );
-              }
-
+            if (timeFilteredSchedule.length === 0) {
               return (
                 <View key={weekday}>
                   <TextWeekday>{weekday}</TextWeekday>
-                  <FlatList
-                    data={timeFilteredSchedule}
-                    keyExtractor={(item) => item.idPair.toString()}
-                    initialNumToRender={5}
-                    maxToRenderPerBatch={10}
-                    windowSize={10}
-                    renderItem={({ item }) => {
-                      const [start, end] = item.numberPair.split("-");
-                      const startTime = moment(start, "HH:mm");
-                      const endTime = moment(end, "HH:mm");
-                      const isCurrent =
-                        currentDayForResident ===
-                          (hasWeekday ? item.weekday : item.date) &&
-                        moment(currentTime, "HH:mm").isSameOrAfter(startTime) &&
-                        moment(currentTime, "HH:mm").isSameOrBefore(endTime);
-                      const isColorPair = isCurrent;
-                      const timeDifference = moment.utc(
-                        moment(endTime, "HH:mm:ss").diff(
-                          moment(currentTime, "HH:mm:ss")
-                        )
-                      );
-                      const formattedTimeDifference = timeDifference
-                        .format("HH:mm:ss")
-                        .padStart(8, "0");
 
-                      return (
-                        <View key={item.idPair}>
-                          <ContainerPair
-                            isColorPair={
-                              theme === lightTheme
-                                ? isColorPair
-                                  ? "#C3C9DE"
-                                  : "#d9d9d999"
-                                : isColorPair
-                                ? "#4B61B0"
-                                : "#46464699"
-                            }
-                          >
-                            <View>
-                              <TextNamePair ellipsizeMode="tail">
-                                {item.namePair}
-                              </TextNamePair>
-                              <View style={{ flexDirection: "row" }}>
-                                <ContainerLeft>
-                                  <TouchableOpacity
-                                    onPress={() => {
-                                      if (!isConnected) {
-                                        {
-                                          ToastAndroid.show(
-                                            "Нет соединения с интернетом",
-                                            ToastAndroid.SHORT
-                                          );
-                                        }
-                                      } else {
-                                        dispatch(
-                                          setSelectIdGroup(item.idGroup)
-                                        );
-                                        fetchSchedule(
-                                          item.idGroup,
-                                          item.groupName
-                                        );
-                                      }
-                                    }}
-                                  >
-                                    <TextNameGroup>
-                                      {item.groupName &&
-                                        "Группа: " + item.groupName}
-                                    </TextNameGroup>
-                                  </TouchableOpacity>
-
-                                  <TextRoomNumber>
-                                    {item.roomNumber &&
-                                      "Кабинет №" + item.roomNumber}
-                                  </TextRoomNumber>
-                                </ContainerLeft>
-                                <ContainerRight>
-                                  <TextNumberPair>
-                                    {item.numberPair && item.numberPair}
-                                  </TextNumberPair>
-                                  <TextTypePair>
-                                    {item.typePair &&
-                                      "Тип пары: " + item.typePair}
-                                  </TextTypePair>
-                                  {weekday === currentDayForResident &&
-                                    timeArray === start && (
-                                      <TimeToLesson>
-                                        До начала пары: {timeDifferences}
-                                      </TimeToLesson>
-                                    )}
-
-                                  {isCurrent && (
-                                    <TimeToLesson>
-                                      До окончания пары:{" "}
-                                      {formattedTimeDifference}
-                                    </TimeToLesson>
-                                  )}
-                                </ContainerRight>
-                              </View>
-                              <Text style={{ textAlign: "center" }}>
-                                {item.nameDepartments}
-                              </Text>
-                              {item.comments && (
-                                <CommentsText style={{ textAlign: "center" }}>
-                                  {item.comments}
-                                </CommentsText>
-                              )}
-                            </View>
-                          </ContainerPair>
-                        </View>
-                      );
+                  <ContainerPair
+                    isColorPair={
+                      theme === lightTheme ? "#d9d9d999" : "#46464699"
+                    }
+                    style={{
+                      height: 60,
+                      justifyContent: "center",
                     }}
-                  />
+                  >
+                    <TextSelfStudy>День самостоятельной работы</TextSelfStudy>
+                  </ContainerPair>
                 </View>
               );
-            }}
-          />
-        </View>
-      ) : (
+            }
+
+            return (
+              <View key={weekday}>
+                <TextWeekday>{weekday}</TextWeekday>
+                <FlatList
+                  data={timeFilteredSchedule}
+                  keyExtractor={(item) => item.idPair.toString()}
+                  initialNumToRender={5}
+                  maxToRenderPerBatch={10}
+                  windowSize={10}
+                  renderItem={({ item }) => {
+                    const [start, end] = item.numberPair.split("-");
+                    const startTime = moment(start, "HH:mm");
+                    const endTime = moment(end, "HH:mm");
+                    const isCurrent =
+                      currentDayForResident ===
+                        (hasWeekday ? item.weekday : item.date) &&
+                      moment(currentTime, "HH:mm").isSameOrAfter(startTime) &&
+                      moment(currentTime, "HH:mm").isSameOrBefore(endTime);
+                    const isColorPair = isCurrent;
+                    const timeDifference = moment.utc(
+                      moment(endTime, "HH:mm:ss").diff(
+                        moment(currentTime, "HH:mm:ss")
+                      )
+                    );
+                    const formattedTimeDifference = timeDifference
+                      .format("HH:mm:ss")
+                      .padStart(8, "0");
+
+                    return (
+                      <View key={item.idPair}>
+                        <ContainerPair
+                          isColorPair={
+                            theme === lightTheme
+                              ? isColorPair
+                                ? "#C3C9DE"
+                                : "#d9d9d999"
+                              : isColorPair
+                              ? "#4B61B0"
+                              : "#46464699"
+                          }
+                        >
+                          <View>
+                            <TextNamePair ellipsizeMode="tail">
+                              {item.namePair}
+                            </TextNamePair>
+                            <View style={{ flexDirection: "row" }}>
+                              <ContainerLeft>
+                                <TouchableOpacity
+                                  onPress={() => {
+                                    if (!isConnected) {
+                                      {
+                                        ToastAndroid.show(
+                                          "Нет соединения с интернетом",
+                                          ToastAndroid.SHORT
+                                        );
+                                      }
+                                    } else {
+                                      dispatch(setSelectIdGroup(item.idGroup));
+                                      fetchSchedule(
+                                        item.idGroup,
+                                        item.groupName
+                                      );
+                                    }
+                                  }}
+                                >
+                                  <TextNameGroup>
+                                    {item.groupName &&
+                                      "Группа: " + item.groupName}
+                                  </TextNameGroup>
+                                </TouchableOpacity>
+
+                                <TextRoomNumber>
+                                  {item.roomNumber &&
+                                    "Кабинет №" + item.roomNumber}
+                                </TextRoomNumber>
+                              </ContainerLeft>
+                              <ContainerRight>
+                                <TextNumberPair>
+                                  {item.numberPair && item.numberPair}
+                                </TextNumberPair>
+                                <TextTypePair>
+                                  {item.typePair &&
+                                    "Тип пары: " + item.typePair}
+                                </TextTypePair>
+                                {weekday === currentDayForResident &&
+                                  timeArray === start && (
+                                    <TimeToLesson>
+                                      До начала пары: {timeDifferences}
+                                    </TimeToLesson>
+                                  )}
+
+                                {isCurrent && (
+                                  <TimeToLesson>
+                                    До окончания пары: {formattedTimeDifference}
+                                  </TimeToLesson>
+                                )}
+                              </ContainerRight>
+                            </View>
+                            <Text style={{ textAlign: "center" }}>
+                              {item.nameDepartments}
+                            </Text>
+                            {item.comments && (
+                              <CommentsText style={{ textAlign: "center" }}>
+                                {item.comments}
+                              </CommentsText>
+                            )}
+                          </View>
+                        </ContainerPair>
+                      </View>
+                    );
+                  }}
+                />
+              </View>
+            );
+          }}
+        />
+      )}
+      {groupType === "extramural" &&  (
         <View>
           {isFullSchedule ? (
             <View style={{ paddingHorizontal: screenWidth * 0.05 }}>
@@ -819,6 +834,117 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
               </View>
             )}
           />
+        </View>
+      )}
+
+      {groupType === "session" &&
+      dataScheduleEducator.scheduleResident.session.length !== 0 ? (
+        <FlatList
+          data={dataScheduleEducator.scheduleResident.session}
+          keyExtractor={(item, index) => index.toString()}
+          initialNumToRender={3}
+          maxToRenderPerBatch={10}
+          windowSize={10}
+          renderItem={({ item, index }) => (
+            <View key={index}>
+              <DateText>{item.date && item.date}</DateText>
+              <FlatList
+                data={item.schedule}
+                keyExtractor={(item) => item.idPair.toString()}
+                initialNumToRender={5}
+                maxToRenderPerBatch={10}
+                windowSize={10}
+                renderItem={({ item, index }) => {
+                  const [start, end] = item.numberPair.split("-");
+                  const startTime = moment(start, "HH:mm");
+                  const endTime = moment(end, "HH:mm");
+
+                  const isCurrent =
+                    currentDayForExtramuralist === item.date &&
+                    moment(currentTime, "HH:mm").isBetween(startTime, endTime);
+                  const isColorPair = isCurrent;
+
+                  return (
+                    <ContainerPair
+                      key={item.idPair}
+                      isColorPair={
+                        theme === lightTheme
+                          ? isColorPair
+                            ? "#C3C9DE"
+                            : "#d9d9d999"
+                          : isColorPair
+                          ? "#4B61B0"
+                          : "#46464699"
+                      }
+                    >
+                      <TextNamePair>{item.namePair}</TextNamePair>
+                      <View style={{ flexDirection: "row" }}>
+                        <ContainerLeft>
+                          <TouchableOpacity
+                            onPress={() => {
+                              if (!isConnected) {
+                                {
+                                  ToastAndroid.show(
+                                    "Нет соединения с интернетом",
+                                    ToastAndroid.SHORT
+                                  );
+                                }
+                              } else {
+                                fetchSchedule(item.idGroup, item.groupName);
+                              }
+                            }}
+                          >
+                            <TextNameGroup>
+                              {item.groupName && "Группа " + item.groupName}
+                            </TextNameGroup>
+                          </TouchableOpacity>
+                          <TextRoomNumber>
+                            {item.roomNumber && "Кабинет № " + item.roomNumber}
+                          </TextRoomNumber>
+                          <TextRoomNumber>
+                            {item.roomName && item.roomName}
+                          </TextRoomNumber>
+                        </ContainerLeft>
+                        <ContainerRight>
+                          <TextNumberPair>
+                            {item.numberPair && item.numberPair}
+                          </TextNumberPair>
+                          <TextTypePair>
+                            {item.typePairRetake
+                              ? "Тип пары " + item.typePairRetake
+                              : "Тип пары " + item.typePair}
+                          </TextTypePair>
+                        </ContainerRight>
+                      </View>
+                      {item.comments && (
+                        <CommentsText style={{ textAlign: "center" }}>
+                          {/^(https?:\/\/|www\.|https?:\/\/www\.)[\w\-.]+\.[a-zA-Z]{2,}(\/\S*)?$/.test(
+                            item.comments
+                          ) ? (
+                            <Text
+                              onPress={() => Linking.openURL(item.comments)}
+                            >
+                              {item.comments}
+                            </Text>
+                          ) : (
+                            item.comments
+                          )}
+                        </CommentsText>
+                      )}
+                    </ContainerPair>
+                  );
+                }}
+              />
+            </View>
+          )}
+        />
+      ) : (
+        <View>
+          {groupType === "session" && (
+            <CenteredContainer>
+              <IsSession>Сессии пока нет</IsSession>
+            </CenteredContainer>
+          )}
         </View>
       )}
     </Container>

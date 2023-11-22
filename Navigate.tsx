@@ -34,6 +34,7 @@ import { getDepartments } from "./api/apiDepartments";
 import { getEducator } from "./api/apiEducator";
 import { getNews } from "./api/apiNews";
 import { getGroups } from "./api/apiGroups";
+import Authorization from "./components/Authorization/Authorization";
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 export type RootStackParamList = {
@@ -46,6 +47,7 @@ export type RootStackParamList = {
   ScheduleEducator: undefined;
   News: undefined;
   Settings: undefined;
+  Authorization: undefined;
 };
 
 interface TabIconProps {
@@ -149,6 +151,8 @@ const Navigate = ({ navigation }: GroupsProps) => {
       return "Новости";
     } else if (route.name === "Settings") {
       return "Настройки";
+    } else if (route.name === "Authorization") {
+      return "Авторизация";
     }
   };
   const getInitialData = async () => {
@@ -178,12 +182,12 @@ const Navigate = ({ navigation }: GroupsProps) => {
       Connection();
     };
   }, [netInfo.isConnected, isConnected]);
-  
 
   return (
     <ThemeProvider theme={theme}>
       <NavigationContainer>
         <Tab.Navigator
+          initialRouteName="SelectedMyGroups"
           backBehavior="history"
           screenOptions={({ route, navigation }) => ({
             tabBarIcon: ({ focused, size, color }) =>
@@ -225,6 +229,26 @@ const Navigate = ({ navigation }: GroupsProps) => {
             },
           })}
         >
+          {/* <Tab.Screen
+            name="Authorization"
+            component={Authorization}
+            options={({ navigation }) => ({
+              tabBarLabel: "Авторизация",
+              tabBarLabelStyle: {
+                fontSize: screenWidth * 0.025,
+                fontFamily: "Montserrat-Bold",
+                color: theme.navigateColor,
+              },
+              tabBarButton: (props) => (
+                <TouchableOpacity
+                  {...props}
+                  onPress={() => {
+                    navigation.navigate("Authorization");
+                  }}
+                />
+              ),
+            })}
+          /> */}
           <Tab.Screen
             name="SelectedMyGroups"
             component={SelectedMyGroups}

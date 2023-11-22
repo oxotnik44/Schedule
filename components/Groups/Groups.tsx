@@ -20,7 +20,7 @@ import {
   getGroupsResidents,
   getGroupsExtramuralists,
 } from "../../api/apiGroups";
-import { getSchedule } from "../../api/apiSchedule";
+import { getIsActive, getSchedule } from "../../api/apiSchedule";
 import AddFavoriteGroups from "../Hoc/AddFavorite/AddFavorite";
 import {
   ArrowIcon,
@@ -51,18 +51,21 @@ interface GroupsState {
       {
         idGroup: number;
         nameGroup: string;
+        isResidentAspirant: number;
       }
     ];
     dataGroupsExtramuralists: [
       {
         idGroup: number;
         nameGroup: string;
+        isResidentAspirant: number;
       }
     ];
     loadedResidents: boolean;
     loadedExtramuralists: boolean;
     isResidentGroupOpen: boolean;
     isExtramuralGroupOpen: boolean;
+    idDepartments: number;
   };
 }
 interface DepartmentNumberState {
@@ -89,6 +92,7 @@ const Groups = ({ navigation }: GroupsProps) => {
   const isConnected = useSelector(
     (state: Settings) => state.settingsReducer.isConnected
   );
+
   const dispatch = useDispatch();
   useEffect(() => {
     const fetchGroupResidents = async () => {
@@ -112,20 +116,21 @@ const Groups = ({ navigation }: GroupsProps) => {
     fetchGroupResidents();
     fetchGroupExtramuralists();
   }, [numberDepartment, dispatch]);
-
   const fetchSchedule = async (idGroup: number, nameGroup: string) => {
     try {
       await getSchedule(idGroup, dispatch, nameGroup);
+      await getIsActive(dispatch, idGroup);
     } catch (error) {
       alert("Произошла ошибка");
     }
   };
-
   const handleGroupToggle = (isResidentGroup: boolean) => {
     if (isResidentGroup) {
       dispatch(setResidentGroupOpen(!dataGroups.isResidentGroupOpen));
+      dispatch(setExtramuralGroupOpen(false));
     } else {
       dispatch(setExtramuralGroupOpen(!dataGroups.isExtramuralGroupOpen));
+      dispatch(setResidentGroupOpen(false));
     }
   };
   let hasData = false; // Объявляем переменную hasData за пределами функции
@@ -155,58 +160,56 @@ const Groups = ({ navigation }: GroupsProps) => {
           isRotate={dataGroups.isResidentGroupOpen}
         />
       </ContainerChoiceGroup>
-
       {dataGroups.isResidentGroupOpen && (
-        <View>
-          <FlatList
-            data={dataGroups.dataGroupsResidents}
-            keyExtractor={(group) => group.idGroup.toString()}
-            initialNumToRender={6}
-            maxToRenderPerBatch={10}
-            windowSize={10}
-            contentContainerStyle={{
-              paddingBottom: screenHeight * 0.16,
-            }}
-            renderItem={({ item: group }) => (
-              <ContainerGroups
-                onPress={() => {
-                  if (!isConnected) {
-                    fetchNoConnected(group.idGroup, hasData).then((hasData) => {
-                      if (!hasData) {
-                        ToastAndroid.show(
-                          "Нет сохранённого расписания",
-                          ToastAndroid.SHORT
-                        );
-                      } else {
-                        dispatch(setNameGroup(group.nameGroup));
-                        dispatch(
-                          setIsExtramuralScheduleUntilTodayStudent(false)
-                        );
-                        navigation.navigate("Schedule");
-                      }
-                    });
-                  } else {
-                    fetchSchedule(group.idGroup, group.nameGroup).then(() => {
+        <FlatList
+          data={
+            dataGroups.idDepartments === 15 || dataGroups.idDepartments === 16
+              ? dataGroups.dataGroupsExtramuralists.filter(
+                  (group) => group.isResidentAspirant === 0
+                )
+              : dataGroups.dataGroupsResidents
+          }
+          keyExtractor={(group) => group.idGroup.toString()}
+          initialNumToRender={6}
+          maxToRenderPerBatch={10}
+          windowSize={10}
+          renderItem={({ item: group }) => (
+            <ContainerGroups
+              onPress={() => {
+                if (!isConnected) {
+                  fetchNoConnected(group.idGroup, hasData).then((hasData) => {
+                    if (!hasData) {
+                      ToastAndroid.show(
+                        "Нет сохранённого расписания",
+                        ToastAndroid.SHORT
+                      );
+                    } else {
                       dispatch(setNameGroup(group.nameGroup));
                       dispatch(setIsExtramuralScheduleUntilTodayStudent(false));
-                      dispatch(setSelectIdGroup(group.idGroup));
-                      dispatch(setTypeGroupStudent("resident"));
                       navigation.navigate("Schedule");
-                    });
-                  }
-                }}
-              >
-                <NameGroup numberOfLines={2}>{group.nameGroup}</NameGroup>
-                <AddFavoriteGroups
-                  idGroup={group.idGroup}
-                  nameGroup={group.nameGroup}
-                  idEducator={null}
-                  nameEducator={null}
-                />
-              </ContainerGroups>
-            )}
-          />
-        </View>
+                    }
+                  });
+                } else {
+                  fetchSchedule(group.idGroup, group.nameGroup).then(() => {
+                    dispatch(setNameGroup(group.nameGroup));
+                    dispatch(setIsExtramuralScheduleUntilTodayStudent(false));
+                    dispatch(setSelectIdGroup(group.idGroup));
+                    dispatch(setTypeGroupStudent("resident"));
+                    navigation.navigate("Schedule");
+                  });
+                }
+              }}
+            >
+              <NameGroup numberOfLines={2}>{group.nameGroup}</NameGroup>
+              <AddFavoriteGroups
+                idGroup={group.idGroup}
+                nameGroup={group.nameGroup}
+                idEducator={null}
+                nameEducator={null}
+              />
+            </ContainerGroups>
+          )}
+        />
       )}
 
       <ContainerChoiceGroup onPress={() => handleGroupToggle(false)}>
@@ -220,7 +223,13 @@ const Groups = ({ navigation }: GroupsProps) => {
       {dataGroups.isExtramuralGroupOpen && (
         <View>
           <FlatList
-            data={dataGroups.dataGroupsExtramuralists}
+            data={
+              dataGroups.idDepartments === 15 || dataGroups.idDepartments === 16
+                ? dataGroups.dataGroupsExtramuralists.filter(
+                    (group) => group.isResidentAspirant === 1
+                  )
+                : dataGroups.dataGroupsExtramuralists
+            }
             keyExtractor={(group) => group.idGroup.toString()}
             initialNumToRender={6}
             maxToRenderPerBatch={10}

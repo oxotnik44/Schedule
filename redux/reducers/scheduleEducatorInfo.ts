@@ -34,12 +34,14 @@ interface IScheduleExtramuralInfo {
   numberPair: string;
   typePair: string;
   namePair: string;
+  roomName: string;
   idEducator: number;
   nameDepartments: string;
   nameEducator: string;
   fullNameEducator: string;
   groupName: string;
   date: string | null;
+  typePairRetake: string;
 }
 
 interface IState {
@@ -49,8 +51,10 @@ interface IState {
       currentTimeCache: string;
     };
     groupType: string;
+    extramuralIsActive: boolean;
+
     scheduleResident: {
-      weekCorrection:number;
+      weekCorrection: number;
       numerator: IScheduleInfo[];
       denominator: IScheduleInfo[];
     };
@@ -69,8 +73,9 @@ export const initialScheduleState: IState = {
       currentTimeCache: "",
     },
     groupType: "resident",
+    extramuralIsActive: false,
     scheduleResident: {
-      weekCorrection:0,
+      weekCorrection: 0,
       numerator: [],
       denominator: [],
     },
@@ -100,6 +105,7 @@ const scheduleInfoEducatorReducer: Reducer<IState> = (
           scheduleResident: {
             numerator: [],
             denominator: [],
+            session: [],
           },
           scheduleExtramural: [],
         },
@@ -123,10 +129,7 @@ const scheduleInfoEducatorReducer: Reducer<IState> = (
       return {
         ...state,
         dataSchedule: {
-          scheduleResident: {
-            numerator: state.dataSchedule.scheduleResident.numerator,
-            denominator: state.dataSchedule.scheduleResident.denominator,
-          },
+          ...state.dataSchedule,
           scheduleExtramural: action.dataScheduleExtramural,
         },
       };

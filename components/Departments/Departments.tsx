@@ -9,10 +9,13 @@ import {
 } from "../../redux/reducers/departmentsInfoReducer";
 import {
   setExtramuralGroupOpen,
+  setIdDepartments,
+  setLoadedExtramuralists,
+  setLoadedResidents,
   setNameGroup,
   setResidentGroupOpen,
 } from "../../redux/reducers/groupsInfoReducer";
-import { getSchedule } from "../../api/apiSchedule";
+import { getIsActive, getSchedule } from "../../api/apiSchedule";
 import { RootStackParamList } from "../../Navigate";
 import AddFavoriteGroups from "../Hoc/AddFavorite/AddFavorite";
 import ImageDepartmens from "../Hoc/ImageDepartmens/ImageDepartmens";
@@ -31,6 +34,10 @@ import {
   setIsExtramuralScheduleUntilTodayStudent,
   setSelectIdGroup,
 } from "../../redux/reducers/scheduleStudentInfo";
+import {
+  getGroupsExtramuralists,
+  getGroupsResidents,
+} from "../../api/apiGroups";
 
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
@@ -96,13 +103,39 @@ const Departments: React.FC<DepartmentsProps> = ({ navigation }) => {
     async (idGroup: number, nameGroup: string) => {
       try {
         await getSchedule(idGroup, dispatch, nameGroup);
+        await getIsActive(dispatch, idGroup);
       } catch (error) {
         console.log(error);
       }
     },
     [dispatch]
   );
+  const fetchGroupResidents = async (numberDepartment: number) => {
+    try {
+      await getGroupsResidents(numberDepartment, dispatch);
+      dispatch(setLoadedResidents(true));
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
+  const fetchGroupExtramuralists = async (numberDepartment: number) => {
+    try {
+      await getGroupsExtramuralists(numberDepartment, dispatch);
+      dispatch(setLoadedExtramuralists(true));
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const fetchGroups = (idDepartment: number) => {
+    dispatch(setIdDepartments(idDepartment));
+    if (idDepartment === 15 || idDepartment === 16) {
+      fetchGroupExtramuralists(idDepartment);
+    } else {
+      fetchGroupResidents(idDepartment);
+      fetchGroupExtramuralists(idDepartment);
+    }
+  };
   const isSearchInputEmpty = textSearchGroup.trim() === "";
 
   const renderItemDepartment = ({ item }: { item: any }) => {
@@ -113,12 +146,14 @@ const Departments: React.FC<DepartmentsProps> = ({ navigation }) => {
         onPress={async () => {
           if (idDepartment === 18) {
             await getSchedule(3430, dispatch, item.nameGroup);
+            await getIsActive(dispatch, 3430);
             dispatch(setSelectIdGroup(3430));
             dispatch(setNameGroup("Технопарк"));
             dispatch(setIsExtramuralScheduleUntilTodayStudent(false));
 
             navigation.navigate("Schedule");
           } else {
+            fetchGroups(item.idDepartment);
             dispatch(setNumberDepartment(idDepartment));
             dispatch(setSelectNameDepartments(fullnameDepartment));
             navigation.navigate("Groups");

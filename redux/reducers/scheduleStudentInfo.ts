@@ -10,6 +10,7 @@ const RESET_DATA_SCHEDULE_STUDENT_EXTRAMURAL =
 const SET_SELECT_ID_GROUP = "SET_SELECT_ID_GROUP";
 const SET_IS_FULL_SCHEDULE_STUDENT = "SET_IS_FULL_SCHEDULE_STUDENT";
 const SET_LAST_CACHE_ENTRY_STUDENT = "SET_LAST_CACHE_ENTRY_STUDENT";
+const SET_EXTRAMURAL_IS_ACTIVE = "SET_EXTRAMURAL_IS_ACTIVE";
 interface IScheduleInfo {
   idPair: number;
   roomNumber: string | null;
@@ -50,6 +51,7 @@ interface IState {
       currentTimeCache: string;
     };
     groupType: string;
+    extramuralIsActive: boolean;
     scheduleResident: {
       weekCorrection: number;
       numerator: IScheduleInfo[];
@@ -73,6 +75,7 @@ export const initialScheduleState: IState = {
       currentTimeCache: "",
     },
     groupType: "",
+    extramuralIsActive: false,
     scheduleResident: {
       weekCorrection: 1,
       numerator: [],
@@ -124,10 +127,7 @@ const scheduleInfoStudentReducer: Reducer<IState> = (
       return {
         ...state,
         dataSchedule: {
-          scheduleResident: {
-            numerator: state.dataSchedule.scheduleResident.numerator,
-            denominator: state.dataSchedule.scheduleResident.denominator,
-          },
+          ...state.dataSchedule,
           scheduleExtramural: action.dataScheduleExtramural,
         },
       };
@@ -153,7 +153,14 @@ const scheduleInfoStudentReducer: Reducer<IState> = (
           lastCacheEntry: action.lastCacheEntryStudent,
         },
       };
-
+    case SET_EXTRAMURAL_IS_ACTIVE:
+      return {
+        ...state,
+        dataSchedule: {
+          ...state.dataSchedule,
+          extramuralIsActive: action.extramuralIsActive,
+        },
+      };
     default:
       return state;
   }
@@ -193,5 +200,8 @@ export const setLastCacheEntryStudent = (lastCacheEntryStudent: any) => ({
   type: SET_LAST_CACHE_ENTRY_STUDENT,
   lastCacheEntryStudent,
 });
-
+export const setExtramuralIsActive = (extramuralIsActive: boolean) => ({
+  type: SET_EXTRAMURAL_IS_ACTIVE,
+  extramuralIsActive,
+})
 export default scheduleInfoStudentReducer;

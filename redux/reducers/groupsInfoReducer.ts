@@ -11,10 +11,11 @@ const RESET_DATA_GROUPS = "RESET_DATA_GROUPS";
 const SET_SELECTED_GROUP_INFO = "SET_SELECTED_GROUP_NUMBER";
 const SET_RESIDENT_GROUP_OPEN = "SET_RESIDENT_GROUP_OPEN";
 const SET_EXTRAMURAL_GROUP_OPEN = "SET_EXTRAMURAL_GROUP_OPEN";
-
+const SET_ID_DEPARTMENTS = "SET_ID_DEPARTMENTS";
 interface iGroupsInfo {
   idGroup: number;
   nameGroup: string;
+  isResidentAspirant: number;
 }
 
 interface IState {
@@ -26,6 +27,7 @@ interface IState {
   selectedGroupName: string;
   isResidentGroupOpen: boolean;
   isExtramuralGroupOpen: boolean;
+  idDepartments: number;
 }
 
 export const initialGroupsResidentsState: IState = {
@@ -37,6 +39,7 @@ export const initialGroupsResidentsState: IState = {
   selectedGroupName: "",
   isResidentGroupOpen: false,
   isExtramuralGroupOpen: false,
+  idDepartments: 0,
 };
 
 const groupsInfoReducer: Reducer<IState> = (
@@ -115,7 +118,11 @@ const groupsInfoReducer: Reducer<IState> = (
         ...state,
         isExtramuralGroupOpen: action.isExtramuralGroupOpen,
       };
-
+    case SET_ID_DEPARTMENTS:
+      return {
+        ...state,
+        idDepartments: action.idDepartments,
+      };
     default:
       return state;
   }
@@ -158,7 +165,7 @@ export const setLoadedExtramuralists = (load: boolean) => ({
   loadedExtramuralists: load,
 });
 
-export const setNameGroup = ( nameNumber: string) => ({
+export const setNameGroup = (nameNumber: string) => ({
   type: SET_SELECTED_GROUP_INFO,
   selectedGroupName: nameNumber,
 });
@@ -172,5 +179,8 @@ export const setExtramuralGroupOpen = (isOpen: boolean) => ({
   type: SET_EXTRAMURAL_GROUP_OPEN,
   isExtramuralGroupOpen: isOpen,
 });
-
+export const setIdDepartments = (idDepartments: number) => ({
+  type: SET_ID_DEPARTMENTS,
+  idDepartments,
+});
 export default groupsInfoReducer;
