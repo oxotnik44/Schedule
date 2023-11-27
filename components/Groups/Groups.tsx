@@ -20,7 +20,7 @@ import {
   getGroupsResidents,
   getGroupsExtramuralists,
 } from "../../api/apiGroups";
-import { getIsActive, getSchedule } from "../../api/apiSchedule";
+import {  getSchedule } from "../../api/apiSchedule";
 import AddFavoriteGroups from "../Hoc/AddFavorite/AddFavorite";
 import {
   ArrowIcon,
@@ -119,7 +119,6 @@ const Groups = ({ navigation }: GroupsProps) => {
   const fetchSchedule = async (idGroup: number, nameGroup: string) => {
     try {
       await getSchedule(idGroup, dispatch, nameGroup);
-      await getIsActive(dispatch, idGroup);
     } catch (error) {
       alert("Произошла ошибка");
     }

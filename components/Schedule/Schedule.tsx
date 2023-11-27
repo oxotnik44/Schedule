@@ -42,7 +42,6 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../Navigate";
 import {
   getFullScheduleStudentExtramuralist,
-  getIsActive,
   getSchedule,
   getScheduleEducator,
 } from "../../api/apiSchedule";
@@ -676,7 +675,7 @@ const Schedule = ({ navigation }: ScheduleProps) => {
               <View
                 style={{
                   paddingHorizontal: screenWidth * 0.04,
-                  width: screenWidth * 0.9,
+                  alignItems: "center",
                 }}
               >
                 <Text
@@ -721,7 +720,12 @@ const Schedule = ({ navigation }: ScheduleProps) => {
                 </BtnGetScheduleExtramural>
               </View>
             ) : (
-              <View style={{ paddingHorizontal: screenWidth * 0.05 }}>
+              <View
+                style={{
+                  paddingHorizontal: screenWidth * 0.05,
+                  alignItems: "center",
+                }}
+              >
                 <Text
                   style={{
                     fontFamily: "Montserrat-Bold",

@@ -15,7 +15,7 @@ import {
   setNameGroup,
   setResidentGroupOpen,
 } from "../../redux/reducers/groupsInfoReducer";
-import { getIsActive, getSchedule } from "../../api/apiSchedule";
+import { getSchedule } from "../../api/apiSchedule";
 import { RootStackParamList } from "../../Navigate";
 import AddFavoriteGroups from "../Hoc/AddFavorite/AddFavorite";
 import ImageDepartmens from "../Hoc/ImageDepartmens/ImageDepartmens";
@@ -103,7 +103,6 @@ const Departments: React.FC<DepartmentsProps> = ({ navigation }) => {
     async (idGroup: number, nameGroup: string) => {
       try {
         await getSchedule(idGroup, dispatch, nameGroup);
-        await getIsActive(dispatch, idGroup);
       } catch (error) {
         console.log(error);
       }
@@ -146,7 +145,6 @@ const Departments: React.FC<DepartmentsProps> = ({ navigation }) => {
         onPress={async () => {
           if (idDepartment === 18) {
             await getSchedule(3430, dispatch, item.nameGroup);
-            await getIsActive(dispatch, 3430);
             dispatch(setSelectIdGroup(3430));
             dispatch(setNameGroup("Технопарк"));
             dispatch(setIsExtramuralScheduleUntilTodayStudent(false));

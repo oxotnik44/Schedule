@@ -661,10 +661,12 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
           }}
         />
       )}
-      {groupType === "extramural" &&  (
+      {groupType === "extramural" && (
         <View>
           {isFullSchedule ? (
-            <View style={{ paddingHorizontal: screenWidth * 0.05 }}>
+            <View style={{ paddingHorizontal: screenWidth * 0.05,
+              alignItems: "center",
+            }}>
               <Text
                 style={{
                   fontFamily: "Montserrat-Bold",
@@ -703,7 +705,12 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
               </BtnGetScheduleExtramural>
             </View>
           ) : (
-            <View style={{ paddingHorizontal: screenWidth * 0.05 }}>
+            <View
+              style={{
+                paddingHorizontal: screenWidth * 0.05,
+                alignItems: "center",
+              }}
+            >
               <Text
                 style={{
                   fontFamily: "Montserrat-Bold",
