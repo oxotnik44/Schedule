@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   View,
-  ScrollView,
   Text,
   TouchableOpacity,
   ToastAndroid,
@@ -24,7 +23,6 @@ import {
   DateText,
   IsSession,
   NoConnected,
-  ScheduleCloseView,
   TextNameGroup,
   TextNamePair,
   TextNumberPair,
@@ -201,13 +199,9 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
     }
   };
   const formatTime = (timeDiff: number) => {
-    const hours = Math.floor(timeDiff / 3600)
-      .toString()
-      .padStart(2, "0");
-    const minutes = Math.floor((timeDiff % 3600) / 60)
-      .toString()
-      .padStart(2, "0");
-    const seconds = (timeDiff % 60).toString().padStart(2, "0");
+    const hours = String(Math.floor(timeDiff / 3600)).padStart(2, "0");
+    const minutes = String(Math.floor((timeDiff % 3600) / 60)).padStart(2, "0");
+    const seconds = String(timeDiff % 60).padStart(2, "0");
 
     return `${hours}:${minutes}:${seconds}`;
   };
@@ -223,16 +217,18 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
       )
     );
   };
-  weekdays.map((item, index) => {
-    const timeFilteredSchedule = getFilteredSchedule()[index];
-    timeFilteredSchedule.map((item) => {
-      const [start] = item.numberPair.split("-");
+  const filteredSchedules = getFilteredSchedule();
 
-      if (item.weekday === currentDayForResident) {
+  filteredSchedules.forEach((timeFilteredSchedule, index) => {
+    timeFilteredSchedule.forEach((scheduleItem) => {
+      const [start] = scheduleItem.numberPair.split("-");
+
+      if (scheduleItem.weekday === currentDayForResident) {
         resultArray.push(start);
       }
     });
   });
+
   hasWeekday =
     typeWeekToSwitch === "numerator"
       ? dataScheduleEducator.scheduleResident.numerator.some(
@@ -282,20 +278,25 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
       currentTimeParts[1] * 60 +
       currentTimeParts[2];
 
-    for (let i = 0; i < resultArray.length; i++) {
-      const scheduleParts = resultArray[i].split("-");
+    const nextSchedule = resultArray.find((schedule) => {
+      const scheduleParts = schedule.split("-");
+      const startParts = scheduleParts[0].split(":").map(Number);
+      const scheduleTimeInSeconds = startParts[0] * 3600 + startParts[1] * 60;
+      return currentTimeInSeconds < scheduleTimeInSeconds;
+    });
+
+    if (nextSchedule) {
+      const scheduleParts = nextSchedule.split("-");
       const startParts = scheduleParts[0].split(":").map(Number);
       const scheduleTimeInSeconds = startParts[0] * 3600 + startParts[1] * 60;
 
-      if (currentTimeInSeconds < scheduleTimeInSeconds) {
-        const timeDiff = scheduleTimeInSeconds - currentTimeInSeconds;
-        const formattedTimeDiff = formatTime(timeDiff);
-        setTimeDifference(formattedTimeDiff);
-        setTimeArray(scheduleParts[0]);
-        break;
-      }
+      const timeDiff = scheduleTimeInSeconds - currentTimeInSeconds;
+      const formattedTimeDiff = formatTime(timeDiff);
+      setTimeDifference(formattedTimeDiff);
+      setTimeArray(scheduleParts[0]);
     }
   }, [currentTime, resultArray]);
+
   let updateFavoriteEducator;
   const STORAGE_KEY_SCHEDULE = "favoriteSchedule";
 
@@ -334,17 +335,14 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
                 Object.keys(educator)[0] === idEducator.toString()
             );
             if (educatorIndex !== -1) {
-              console.log("Обновление");
               scheduleEducator.educators[educatorIndex][idEducator] =
                 newDataSchedule;
-              console.log(scheduleEducator);
               await AsyncStorage.setItem(
                 STORAGE_KEY_SCHEDULE,
                 JSON.stringify(scheduleEducator)
               );
             }
           } else if (!isFavoriteScheduleEducator && isFavoriteEducator) {
-            console.log("Создание");
             setFavoriteSchedule(
               dataScheduleEducator,
               idEducator,
@@ -438,7 +436,7 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
             <Text
               style={{
                 color: theme === lightTheme ? "#004C6F" : "#FFFFFF",
-                fontSize: screenWidth * 0.05,
+                fontSize: 18,
                 textAlign: "center",
                 fontFamily: "Montserrat-SemiBold",
               }}
@@ -468,7 +466,7 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
             <Text
               style={{
                 color: theme === lightTheme ? "#004C6F" : "#FFFFFF",
-                fontSize: screenWidth * 0.05,
+                fontSize: 18,
                 textAlign: "center",
                 fontFamily: "Montserrat-SemiBold",
               }}
@@ -628,17 +626,17 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
                                   {item.typePair &&
                                     "Тип пары: " + item.typePair}
                                 </TextTypePair>
-                                {weekday === currentDayForResident &&
+                                {isCurrent ? (
+                                  <TimeToLesson>
+                                    До окончания пары: {formattedTimeDifference}
+                                  </TimeToLesson>
+                                ) : (
+                                  item.weekday === currentDayForResident &&
                                   timeArray === start && (
                                     <TimeToLesson>
                                       До начала пары: {timeDifferences}
                                     </TimeToLesson>
-                                  )}
-
-                                {isCurrent && (
-                                  <TimeToLesson>
-                                    До окончания пары: {formattedTimeDifference}
-                                  </TimeToLesson>
+                                  )
                                 )}
                               </ContainerRight>
                             </View>
@@ -664,9 +662,12 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
       {groupType === "extramural" && (
         <View>
           {isFullSchedule ? (
-            <View style={{ paddingHorizontal: screenWidth * 0.05,
-              alignItems: "center",
-            }}>
+            <View
+              style={{
+                paddingHorizontal: screenWidth * 0.05,
+                alignItems: "center",
+              }}
+            >
               <Text
                 style={{
                   fontFamily: "Montserrat-Bold",
@@ -853,7 +854,7 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
           maxToRenderPerBatch={10}
           windowSize={10}
           renderItem={({ item, index }) => (
-            <View key={index}>
+            <View key={index} style={{ marginTop: screenHeight * 0.02 }}>
               <DateText>{item.date && item.date}</DateText>
               <FlatList
                 data={item.schedule}
@@ -949,7 +950,7 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
         <View>
           {groupType === "session" && (
             <CenteredContainer>
-              <IsSession>Сессии пока нет</IsSession>
+              <IsSession>Сессия ещё не началась</IsSession>
             </CenteredContainer>
           )}
         </View>

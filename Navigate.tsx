@@ -1,23 +1,17 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect} from "react";
 import {
   Image,
-  Pressable,
   TouchableOpacity,
-  Text,
   Dimensions,
   ToastAndroid,
-  Alert,
-  Linking,
 } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
+import { NavigationContainer} from "@react-navigation/native";
 import Departments from "./components/Departments/Departments";
 import Educator from "./components/Educator/Educator";
 import Schedule from "./components/Schedule/Schedule";
 import { useDispatch, useSelector } from "react-redux";
 import SelectedMyGroups from "./components/SelectedMyGroups/SelectedMyGroups";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getSchedule } from "./api/apiSchedule";
 import Groups from "./components/Groups/Groups";
 import News from "./components/News/News";
 import { resetTextSearchGroup } from "./redux/reducers/departmentsInfoReducer";
@@ -26,7 +20,6 @@ import { ThemeProvider } from "styled-components/native";
 import Settings from "./components/Settings/Settings";
 import {
   StackNavigationProp,
-  createStackNavigator,
 } from "@react-navigation/stack";
 import NetInfo, { useNetInfo } from "@react-native-community/netinfo";
 import { setConnectionStatus } from "./redux/reducers/settingsReducer";
@@ -34,7 +27,6 @@ import { getDepartments } from "./api/apiDepartments";
 import { getEducator } from "./api/apiEducator";
 import { getNews } from "./api/apiNews";
 import { getGroups } from "./api/apiGroups";
-import Authorization from "./components/Authorization/Authorization";
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 export type RootStackParamList = {
@@ -73,7 +65,6 @@ interface DepartmentsState {
   };
 }
 const Tab = createBottomTabNavigator();
-const Stack = createStackNavigator();
 type ITheme = {
   settingsReducer: {
     theme: any;
@@ -229,26 +220,6 @@ const Navigate = ({ navigation }: GroupsProps) => {
             },
           })}
         >
-          {/* <Tab.Screen
-            name="Authorization"
-            component={Authorization}
-            options={({ navigation }) => ({
-              tabBarLabel: "Авторизация",
-              tabBarLabelStyle: {
-                fontSize: screenWidth * 0.025,
-                fontFamily: "Montserrat-Bold",
-                color: theme.navigateColor,
-              },
-              tabBarButton: (props) => (
-                <TouchableOpacity
-                  {...props}
-                  onPress={() => {
-                    navigation.navigate("Authorization");
-                  }}
-                />
-              ),
-            })}
-          /> */}
           <Tab.Screen
             name="SelectedMyGroups"
             component={SelectedMyGroups}

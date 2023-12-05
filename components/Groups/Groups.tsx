@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import {
   View,
-  ScrollView,
   Dimensions,
   ToastAndroid,
   FlatList,
@@ -134,21 +133,23 @@ const Groups = ({ navigation }: GroupsProps) => {
   };
   let hasData = false; // Объявляем переменную hasData за пределами функции
 
-  const fetchNoConnected = async (idGroup: number, hasData: boolean) => {
+  const fetchNoConnected = async (idGroup: number) => {
     const storedSchedule = await AsyncStorage.getItem("favoriteSchedule");
-    const scheduleStudent = storedSchedule
-      ? JSON.parse(storedSchedule)
-      : { groups: [], educators: [] };
-
-    scheduleStudent.groups.forEach((item: any) => {
+    const scheduleStudent = storedSchedule ? JSON.parse(storedSchedule) : { groups: [], educators: [] };
+  
+    const foundGroup = scheduleStudent.groups.find((item: any) => {
       const keys = Object.keys(item);
-      if (keys.includes(idGroup.toString())) {
-        hasData = true;
-        dispatch(setDataScheduleStudent(item[idGroup.toString()]));
-      }
+      return keys.includes(idGroup.toString());
     });
-    return hasData; // Возвращаем hasData
+  
+    if (foundGroup) {
+      dispatch(setDataScheduleStudent(foundGroup[idGroup.toString()]));
+      return true;
+    }
+  
+    return false;
   };
+  
 
   return (
     <Container>
@@ -176,7 +177,7 @@ const Groups = ({ navigation }: GroupsProps) => {
             <ContainerGroups
               onPress={() => {
                 if (!isConnected) {
-                  fetchNoConnected(group.idGroup, hasData).then((hasData) => {
+                  fetchNoConnected(group.idGroup).then((hasData) => {
                     if (!hasData) {
                       ToastAndroid.show(
                         "Нет сохранённого расписания",

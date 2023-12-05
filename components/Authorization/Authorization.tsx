@@ -1,13 +1,8 @@
-import React, { useCallback, useState } from "react";
+import React, {  useState } from "react";
 import {
-  FlatList,
   Dimensions,
-  Text,
   View,
   Image,
-  TextInput,
-  KeyboardAvoidingView,
-  Platform,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 

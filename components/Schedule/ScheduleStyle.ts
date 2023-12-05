@@ -32,7 +32,7 @@ export const ToggleButton = styled.TouchableOpacity`
 
 export const ToggleButtonText = styled.Text<groupTypeProps>`
   color: ${(props) => props.groupType};
-  font-size: ${screenWidth * 0.04}px;
+  font-size: ${screenWidth * 0.039}px;
   font-family: Montserrat-Bold;
 `;
 
@@ -166,12 +166,11 @@ export const TextDate = styled.Text`
 
 export const TypeWeekContainer = styled.View`
   flex-direction: row;
-  margin-bottom: ${screenHeight * 0.01}px;
 `;
 
 export const TypeWeekText = styled.Text<ContainerProps>`
   color: ${(props) => props.typeWeek};
-  font-size: ${screenWidth * 0.043}px;
+  font-size: ${screenWidth * 0.037}px;
   padding: 4px;
   text-align: center;
   font-family: Montserrat-SemiBold;

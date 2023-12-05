@@ -1,7 +1,7 @@
 import moment from "moment";
 import "moment/locale/ru";
 import "moment-timezone";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   View,
@@ -199,19 +199,20 @@ const Schedule = ({ navigation }: ScheduleProps) => {
     "Пятница",
     "Суббота",
   ];
+  // Эффект для определения типа недели
   useEffect(() => {
-    setTypeWeekToSwitch(() => {
-      const currentDate = moment();
-      const weekNumber = currentDate.isoWeek();
-      const isNumeratorWeek =
-        (weekNumber + dataSchedule.scheduleResident.weekCorrection) % 2 === 1; // Если номер недели нечетный, то это "numerator"
-      setCurrentTypeWeek(isNumeratorWeek ? "numerator" : "denominator");
-      return isNumeratorWeek ? "numerator" : "denominator";
-    });
-  }, [dataSchedule]);
+    const currentDate = moment();
+    const weekNumber = currentDate.isoWeek();
+    const isNumeratorWeek =
+      (weekNumber + dataSchedule.scheduleResident.weekCorrection) % 2 === 1; // Если номер недели нечетный, то это "numerator"
+    const typeToSwitch = isNumeratorWeek ? "numerator" : "denominator";
 
+    setCurrentTypeWeek(typeToSwitch);
+    setTypeWeekToSwitch(typeToSwitch);
+  }, [dataSchedule]);
+  // Эффект для обновления времени каждую секунду
   useEffect(() => {
-    const updateCurrentTime = () => {
+    const interval = setInterval(() => {
       const date = moment().tz("Asia/Novosibirsk").locale("ru");
       const day = weekdays[date.day() === 0 ? 6 : date.day() - 1];
       const time = date.format("HH:mm:ss");
@@ -219,13 +220,13 @@ const Schedule = ({ navigation }: ScheduleProps) => {
       setCurrentDayForExtramuralist(dayExtramuralist);
       setСurrentDayForResident(day);
       setCurrentTime(time);
-    };
-    const interval = setInterval(updateCurrentTime, 1000);
+    }, 1000);
+
     return () => {
       clearInterval(interval);
     };
   }, []);
-
+  // Эффект для поиска следующей пары по времени
   useEffect(() => {
     const currentTimeParts = currentTime.split(":").map(Number);
     const currentTimeInSeconds =
@@ -233,24 +234,30 @@ const Schedule = ({ navigation }: ScheduleProps) => {
       currentTimeParts[1] * 60 +
       currentTimeParts[2];
 
-    for (let i = 0; i < arrayStartsPairs.length; i++) {
-      const scheduleParts = arrayStartsPairs[i].split("-");
+    const nextSchedule = arrayStartsPairs.find((schedule) => {
+      const scheduleParts = schedule.split("-");
+      const startParts = scheduleParts[0].split(":").map(Number);
+      const scheduleTimeInSeconds = startParts[0] * 3600 + startParts[1] * 60;
+      return currentTimeInSeconds < scheduleTimeInSeconds;
+    });
+
+    if (nextSchedule) {
+      const scheduleParts = nextSchedule.split("-");
       const startParts = scheduleParts[0].split(":").map(Number);
       const scheduleTimeInSeconds = startParts[0] * 3600 + startParts[1] * 60;
 
-      if (currentTimeInSeconds < scheduleTimeInSeconds) {
-        const timeDiff = scheduleTimeInSeconds - currentTimeInSeconds;
-        const formattedTimeDiff = formatTime(timeDiff);
-        setTimeDifference(formattedTimeDiff);
-        setTimeArray(scheduleParts[0]);
-
-        break;
-      }
+      const timeDiff = scheduleTimeInSeconds - currentTimeInSeconds;
+      const formattedTimeDiff = formatTime(timeDiff);
+      setTimeDifference(formattedTimeDiff);
+      setTimeArray(scheduleParts[0]);
     }
   }, [currentTime, arrayStartsPairs]);
+
   let updateFavoriteGroup;
   const STORAGE_KEY_SCHEDULE = "favoriteSchedule";
+  // Эффект обновления избранных групп
   useEffect(() => {
+    // Обновление избранных групп, если установлено соединение
     if (isConnected) {
       updateFavoriteGroup = async (idGroup: number) => {
         try {
@@ -260,73 +267,73 @@ const Schedule = ({ navigation }: ScheduleProps) => {
           let scheduleStudent = storedSchedule
             ? JSON.parse(storedSchedule)
             : { groups: [], educators: [] };
+
+          // Проверка, является ли группа избранной
           const isFavoriteGroup = favoriteGroups.some(
             (groupFavorite) => groupFavorite.idGroup === idGroup
           );
-
           const isFavoriteScheduleGroup = scheduleStudent.groups.some(
             (group: any) => group.hasOwnProperty(idGroup)
           );
-          const NovosibirskTime = moment.tz("Asia/Novosibirsk");
 
+          // Получение времени Новосибирска
+          const NovosibirskTime = moment.tz("Asia/Novosibirsk");
           const currentTimeCache = NovosibirskTime.format("HH:mm:ss");
           const currentDateCache = NovosibirskTime.format("D MMMM YYYY");
-          const lastCacheEntry = {
-            currentTimeCache,
-            currentDateCache,
-          };
+          const lastCacheEntry = { currentTimeCache, currentDateCache };
+
           if (isFavoriteGroup && isFavoriteScheduleGroup) {
-            const newDataSchedule = {
-              ...dataSchedule,
-              lastCacheEntry,
-            };
+            const newDataSchedule = { ...dataSchedule, lastCacheEntry };
             const groupIndex = scheduleStudent.groups.findIndex(
               (group: any) => Object.keys(group)[0] === idGroup.toString()
             );
 
             if (groupIndex !== -1) {
-              console.log("Обновление");
               scheduleStudent.groups[groupIndex][idGroup] = newDataSchedule;
-              console.log(scheduleStudent);
               await AsyncStorage.setItem(
                 STORAGE_KEY_SCHEDULE,
                 JSON.stringify(scheduleStudent)
               );
             }
           } else if (!isFavoriteScheduleGroup && isFavoriteGroup) {
-            console.log("Создание");
-
-            setFavoriteSchedule(dataSchedule, idGroup, lastCacheEntry); // Добавление новой записи
+            setFavoriteSchedule(dataSchedule, idGroup, lastCacheEntry); // Добавление новой записи в расписание
           }
         } catch (error) {
           console.error("Ошибка при обновлении расписания", error);
         }
       };
 
+      // Вызов обновления избранных групп при изменении selectIdGroup
       updateFavoriteGroup(selectIdGroup);
     }
-  }, [selectIdGroup, dataSchedule]);
+  }, [selectIdGroup, dataSchedule, isConnected, favoriteGroups]);
+
+  // Эффект получения данных
   useEffect(() => {
     const fetchData = async () => {
+      // Получение данных, если соединение не установлено
       if (!isConnected) {
         const storedSchedule = await AsyncStorage.getItem("favoriteSchedule");
+
         if (storedSchedule) {
           const scheduleStudent = JSON.parse(storedSchedule);
+
           if (scheduleStudent && scheduleStudent.groups) {
             const foundGroup = scheduleStudent.groups.find(
               (item: any) => Object.keys(item)[0] === selectIdGroup.toString()
             );
+
             if (foundGroup) {
               const lastCacheEntry =
                 foundGroup[selectIdGroup.toString()].lastCacheEntry;
               dispatch(setLastCacheEntryStudent(lastCacheEntry));
-              // Здесь вы можете использовать lastCacheEntry по вашему усмотрению
             }
           }
         }
       }
     };
 
+    // Выполнение запроса данных
     fetchData();
   }, [isConnected, selectIdGroup]);
 
@@ -343,36 +350,38 @@ const Schedule = ({ navigation }: ScheduleProps) => {
       console.log(error);
     }
   };
-  let currentWeekSchedule =
+  // Определяем расписание на текущую неделю в зависимости от выбранного типа недели (numerator или denominator)
+  const currentWeekSchedule =
     typeWeekToSwitch === "numerator"
       ? dataSchedule.scheduleResident.numerator
       : dataSchedule.scheduleResident.denominator;
+
+  // Фильтруем расписание по каждому дню недели и сохраняем в массиве initialFilteredSchedule
   const initialFilteredSchedule = weekdays.map((weekday) =>
     currentWeekSchedule.filter(
       (item) => item.weekday === weekday || item.date === weekday
     )
   );
-  weekdays.forEach((weekday, index) => {
-    const timeFilteredSchedule = initialFilteredSchedule[index];
-    timeFilteredSchedule.forEach((scheduleItem) => {
-      const [start] = scheduleItem.numberPair.split("-");
+
+  // Проходим по отфильтрованному расписанию и извлекаем начальное время занятий для текущего дня
+  initialFilteredSchedule.forEach((schedule) => {
+    schedule.forEach((scheduleItem) => {
+      const [start] = scheduleItem.numberPair.split("-"); // Извлекаем начальное время
       if (scheduleItem.weekday === currentDayForResident) {
-        arrayStartsPairs.push(start);
+        arrayStartsPairs.push(start); // Добавляем начальное время в массив для текущего дня
       }
     });
   });
 
+  // Функция для форматирования времени в формат HH:mm:ss
   const formatTime = (timeDiff: number) => {
-    const hours = Math.floor(timeDiff / 3600)
-      .toString()
-      .padStart(2, "0");
-    const minutes = Math.floor((timeDiff % 3600) / 60)
-      .toString()
-      .padStart(2, "0");
-    const seconds = (timeDiff % 60).toString().padStart(2, "0");
+    const hours = String(Math.floor(timeDiff / 3600)).padStart(2, "0");
+    const minutes = String(Math.floor((timeDiff % 3600) / 60)).padStart(2, "0");
+    const seconds = String(timeDiff % 60).padStart(2, "0");
 
     return `${hours}:${minutes}:${seconds}`;
   };
+
   return (
     <ThemeProvider theme={theme}>
       <Container>
@@ -382,7 +391,7 @@ const Schedule = ({ navigation }: ScheduleProps) => {
               <Text
                 style={{
                   color: theme.textColor,
-                  fontSize: screenWidth * 0.05,
+                  fontSize: 18,
                   textAlign: "center",
                   fontFamily: "Montserrat-SemiBold",
                 }}
@@ -414,7 +423,7 @@ const Schedule = ({ navigation }: ScheduleProps) => {
               <Text
                 style={{
                   color: theme.textColor,
-                  fontSize: screenWidth * 0.05,
+                  fontSize: 18,
                   textAlign: "center",
                   fontFamily: "Montserrat-SemiBold",
                 }}
@@ -446,7 +455,7 @@ const Schedule = ({ navigation }: ScheduleProps) => {
               <Text
                 style={{
                   color: theme.textColor,
-                  fontSize: screenWidth * 0.05,
+                  fontSize: 18,
                   textAlign: "center",
                   fontFamily: "Montserrat-SemiBold",
                 }}
@@ -480,7 +489,7 @@ const Schedule = ({ navigation }: ScheduleProps) => {
               {dataSchedule.lastCacheEntry &&
                 "Расписание актуально на " +
                   dataSchedule.lastCacheEntry.currentDateCache +
-                  " в " +
+                  " " +
                   dataSchedule.lastCacheEntry.currentTimeCache}
             </NoConnected>
           </View>
@@ -625,17 +634,17 @@ const Schedule = ({ navigation }: ScheduleProps) => {
                                   {item.typePair &&
                                     "Тип пары: " + item.typePair}
                                 </TextTypePair>
-                                {item.weekday === currentDayForResident &&
+                                {isCurrent ? (
+                                  <TimeToLesson>
+                                    До окончания пары: {formattedTimeDifference}
+                                  </TimeToLesson>
+                                ) : (
+                                  item.weekday === currentDayForResident &&
                                   timeArray === start && (
                                     <TimeToLesson>
                                       До начала пары: {timeDifferences}
                                     </TimeToLesson>
-                                  )}
-
-                                {isCurrent && (
-                                  <TimeToLesson>
-                                    До окончания пары: {formattedTimeDifference}
-                                  </TimeToLesson>
+                                  )
                                 )}
                               </ContainerRight>
                             </View>
@@ -1026,7 +1035,7 @@ const Schedule = ({ navigation }: ScheduleProps) => {
           <View>
             {typeWeekToSwitch === "session" && (
               <CenteredContainer>
-                <IsSession>Сессии пока нет</IsSession>
+                <IsSession>Сессия ещё не началась</IsSession>
               </CenteredContainer>
             )}
           </View>

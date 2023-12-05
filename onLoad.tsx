@@ -1,12 +1,10 @@
-import { Provider, useDispatch, useSelector } from "react-redux";
-import store from "./redux/store";
+import { useDispatch, useSelector } from "react-redux";
 import React, { useEffect, useState } from "react";
 import Navigate, { RootStackParamList } from "./Navigate";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import NetInfo from "@react-native-community/netinfo";
 
 import { getDepartments } from "./api/apiDepartments";
-import { getSchedule } from "./api/apiSchedule";
 import { getEducator } from "./api/apiEducator";
 import { getNews } from "./api/apiNews";
 import { getGroups } from "./api/apiGroups";
@@ -95,23 +93,6 @@ const Load = ({ navigation }: GroupsProps) => {
         alert("Произошла ошибка: ");
       }
     };
-    // const fetchScheduleIfNeeded = async (): Promise<void> => {
-    //   const storedGroups = await AsyncStorage.getItem("favoriteGroups");
-    //   if (storedGroups) {
-    //     const parsedGroups: { idGroup: number; nameGroup: string }[] =
-    //       JSON.parse(storedGroups);
-    //     const idGroup = parsedGroups[0]?.idGroup;
-    //     if (idGroup) {
-    //       try {
-    //         await getSchedule(idGroup, dispatch);
-    //       } catch (error) {
-    //         // Обработка ошибки
-    //         alert("Произошла ошибка: ");
-    //         // Дополнительные действия по обработке ошибки
-    //       }
-    //     }
-    //   }
-    // };
 
     const onLoad = async (): Promise<void> => {
       if (loading) {
@@ -121,9 +102,7 @@ const Load = ({ navigation }: GroupsProps) => {
         // await fetchScheduleIfNeeded();
         NetInfo.fetch().then(async (state) => {
           dispatch(setConnectionStatus(state.isConnected));
-
           if (state.isConnected) {
-            console.log(state.isConnected);
             await fetchEducator();
             await fetchDepartments();
             await News();

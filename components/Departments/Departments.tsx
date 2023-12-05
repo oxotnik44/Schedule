@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { FlatList, Dimensions, Text, View } from "react-native";
+import { FlatList, Dimensions, View } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -123,7 +123,7 @@ const Departments: React.FC<DepartmentsProps> = ({ navigation }) => {
       await getGroupsExtramuralists(numberDepartment, dispatch);
       dispatch(setLoadedExtramuralists(true));
     } catch (error) {
-      console.log(error);
+      console.error("Ошибка при загрузке групп:", error);
     }
   };
   const fetchGroups = (idDepartment: number) => {
@@ -148,7 +148,6 @@ const Departments: React.FC<DepartmentsProps> = ({ navigation }) => {
             dispatch(setSelectIdGroup(3430));
             dispatch(setNameGroup("Технопарк"));
             dispatch(setIsExtramuralScheduleUntilTodayStudent(false));
-
             navigation.navigate("Schedule");
           } else {
             fetchGroups(item.idDepartment);

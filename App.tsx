@@ -1,6 +1,6 @@
 import { Provider } from "react-redux";
 import store from "./redux/store";
-import React, { useEffect } from "react";
+import React from "react";
 import Load from "./onLoad";
 import { StatusBar } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
