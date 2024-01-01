@@ -436,7 +436,7 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
             <Text
               style={{
                 color: theme === lightTheme ? "#004C6F" : "#FFFFFF",
-                fontSize: 18,
+                fontSize: screenWidth * 0.043,
                 textAlign: "center",
                 fontFamily: "Montserrat-SemiBold",
               }}
@@ -466,7 +466,7 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
             <Text
               style={{
                 color: theme === lightTheme ? "#004C6F" : "#FFFFFF",
-                fontSize: 18,
+                fontSize: screenWidth * 0.043,
                 textAlign: "center",
                 fontFamily: "Montserrat-SemiBold",
               }}

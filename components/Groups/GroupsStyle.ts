@@ -48,7 +48,7 @@ export const ArrowIcon = styled.Image<ArrowIconProps>`
 
 export const NameGroup = styled.Text`
   color: ${(props) => props.theme.textColor};
-  font-size: ${screenWidth * 0.045}px;
+  font-size: ${screenWidth * 0.04}px;
   font-family: "Montserrat-SemiBold";
   width: ${screenWidth * 0.6}px;
 `;

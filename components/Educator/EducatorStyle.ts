@@ -24,7 +24,7 @@ export const ContainerEducators = styled.TouchableOpacity`
 `;
 
 export const NameEducators = styled.Text`
-  font-size: ${screenWidth * 0.04}px;
+  font-size: ${screenWidth * 0.037}px;
   color: ${(props) => props.theme.textColor};
   text-align: center;
   font-family: "Montserrat-SemiBold";

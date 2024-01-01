@@ -391,7 +391,7 @@ const Schedule = ({ navigation }: ScheduleProps) => {
               <Text
                 style={{
                   color: theme.textColor,
-                  fontSize: 18,
+                  fontSize: screenWidth * 0.043,
                   textAlign: "center",
                   fontFamily: "Montserrat-SemiBold",
                 }}
@@ -423,7 +423,7 @@ const Schedule = ({ navigation }: ScheduleProps) => {
               <Text
                 style={{
                   color: theme.textColor,
-                  fontSize: 18,
+                  fontSize: screenWidth * 0.043,
                   textAlign: "center",
                   fontFamily: "Montserrat-SemiBold",
                 }}
@@ -455,7 +455,7 @@ const Schedule = ({ navigation }: ScheduleProps) => {
               <Text
                 style={{
                   color: theme.textColor,
-                  fontSize: 18,
+                  fontSize: screenWidth * 0.043,
                   textAlign: "center",
                   fontFamily: "Montserrat-SemiBold",
                 }}

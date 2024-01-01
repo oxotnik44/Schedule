@@ -46,7 +46,7 @@ export const IconDelete = styled.Image`
 `;
 
 export const GroupText = styled.Text`
-  font-size: ${screenWidth * 0.043}px;
+  font-size: ${screenWidth * 0.039}px;
   color: ${(props) => props.theme.textColor};
   flex: 1;
   margin-left: ${screenWidth * 0.05}px;

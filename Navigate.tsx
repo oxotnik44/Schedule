@@ -197,7 +197,7 @@ const Navigate = ({ navigation }: GroupsProps) => {
             headerTitleAlign: "center",
             headerTintColor: theme.navigateColor, // Цвет текста в header
             headerTitleStyle: {
-              fontSize: screenWidth * 0.06,
+              fontSize: screenWidth * 0.05,
               fontFamily: "Montserrat-SemiBold",
             },
             headerLeft: () => (
