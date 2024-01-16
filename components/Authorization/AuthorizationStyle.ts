@@ -4,12 +4,14 @@ import styled from "styled-components/native";
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 
-export const Container = styled.View`
+export const Container = styled.View<{ px: number }>`
   justify-content: center;
   align-items: center;
   flex: 1;
   background-color: ${(props) => props.theme.backgroundColor};
+  bottom: ${(props) => props.px}px; /* Обратите внимание на добавление "px" для значения */
 `;
+
 
 export const NoConnected = styled.Text`
   font-size: ${screenWidth * 0.055}px;

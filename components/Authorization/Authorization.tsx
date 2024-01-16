@@ -1,8 +1,12 @@
-import React, {  useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Dimensions,
   View,
   Image,
+  TextInput,
+  Keyboard,
+  KeyboardEvent,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 
@@ -17,7 +21,7 @@ import {
   ContainerAuthorization,
   NoConnected,
 } from "./AuthorizationStyle";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { authorization } from "../../api/apiAuthorization";
 
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
@@ -39,17 +43,37 @@ const Authorization: React.FC<AuthorizationProps> = ({ navigation }) => {
   );
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
-  const handleAuthorization = () => {
+  const [keyboardStatus, setKeyboardStatus] = useState(0);
+  useEffect(() => {
+    const showSubscription = Keyboard.addListener('keyboardDidShow', () => {
+      setKeyboardStatus(screenHeight * 0.1);
+    });
+    const hideSubscription = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardStatus(0);
+    });
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, []);
+
+  const handleAuthorization = async () => {
     if (login === "") {
       alert("Введите логин");
     } else if (password === "") {
       alert("Введите пароль");
+    } else {
+      await authorization(dispatch, login, password);
     }
+  };
+  const dismissKeyboard = () => {
+    Keyboard.dismiss();
   };
   return (
     <ThemeProvider theme={theme}>
-      <Container>
-        <KeyboardAwareScrollView>
+      <TouchableWithoutFeedback onPress={dismissKeyboard}>
+        <Container px={keyboardStatus}>
           {!isConnected ? (
             <NoConnected>Нет соединения с интернетом</NoConnected>
           ) : (
@@ -67,7 +91,7 @@ const Authorization: React.FC<AuthorizationProps> = ({ navigation }) => {
               <ContainerAuthorization>
                 <AuthInput
                   value={login}
-                  placeholder="Введите имя пользователя"
+                  placeholder="Введите логин"
                   style={{ marginBottom: 10 }}
                   onChangeText={(value) => {
                     setLogin(value);
@@ -81,6 +105,7 @@ const Authorization: React.FC<AuthorizationProps> = ({ navigation }) => {
                   placeholder="Введите пароль"
                   secureTextEntry={true}
                   style={{ marginBottom: 20 }}
+                  onSubmitEditing={handleAuthorization}
                 />
                 <AuthButton onPress={handleAuthorization}>
                   <AuthButtonText>Авторизация</AuthButtonText>
@@ -88,8 +113,9 @@ const Authorization: React.FC<AuthorizationProps> = ({ navigation }) => {
               </ContainerAuthorization>
             </View>
           )}
-        </KeyboardAwareScrollView>
-      </Container>
+        </Container>
+      </TouchableWithoutFeedback>
+
     </ThemeProvider>
   );
 };
