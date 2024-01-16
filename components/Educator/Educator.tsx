@@ -74,6 +74,7 @@ const Educator: React.FC<EducatorProps> = ({ navigation }) => {
   const renderItemEducator = ({ item }: { item: any }) => {
     const { idEducator, nameEducator, regaliaEducator } = item;
     return (
+      
       <ContainerEducators
         key={idEducator}
         onPress={async () => {

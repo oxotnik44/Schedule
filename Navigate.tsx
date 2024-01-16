@@ -27,7 +27,6 @@ import { getDepartments } from "./api/apiDepartments";
 import { getEducator } from "./api/apiEducator";
 import { getNews } from "./api/apiNews";
 import { getGroups } from "./api/apiGroups";
-import Authorization from "./components/Authorization/Authorization";
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 export type RootStackParamList = {
@@ -41,6 +40,7 @@ export type RootStackParamList = {
   News: undefined;
   Settings: undefined;
   Authorization: undefined;
+  AC:undefined
 };
 
 interface TabIconProps {
@@ -221,6 +221,26 @@ const Navigate = ({ navigation }: GroupsProps) => {
             },
           })}
         >
+           <Tab.Screen
+            name="Account"
+            component={Account}
+            options={({ navigation }) => ({
+              tabBarLabel: "Аккаунт",
+              tabBarLabelStyle: {
+                fontSize: screenWidth * 0.025,
+                fontFamily: "Montserrat-Bold",
+                color: theme.navigateColor,
+              },
+              tabBarButton: (props) => (
+                <TouchableOpacity
+                  {...props}
+                  onPress={() => {
+                    navigation.navigate("Account");
+                  }}
+                />
+              ),
+            })}
+          />
           <Tab.Screen
             name="SelectedMyGroups"
             component={SelectedMyGroups}
