@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { FlatList, Dimensions, View } from "react-native";
+import { FlatList, Dimensions, View, ToastAndroid } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -102,6 +102,7 @@ const Departments: React.FC<DepartmentsProps> = ({ navigation }) => {
   const fetchSchedule = useCallback(
     async (idGroup: number, nameGroup: string) => {
       try {
+        console.log(idGroup, nameGroup)
         await getSchedule(idGroup, dispatch, nameGroup);
       } catch (error) {
         console.log(error);
@@ -143,20 +144,29 @@ const Departments: React.FC<DepartmentsProps> = ({ navigation }) => {
       <ContainerDepartments
         key={idDepartment}
         onPress={async () => {
-          if (idDepartment === 18) {
-            await getSchedule(3430, dispatch, item.nameGroup);
-            dispatch(setSelectIdGroup(3430));
-            dispatch(setNameGroup("Технопарк"));
-            dispatch(setIsExtramuralScheduleUntilTodayStudent(false));
-            navigation.navigate("Schedule");
-          } else {
-            fetchGroups(item.idDepartment);
-            dispatch(setNumberDepartment(idDepartment));
-            dispatch(setSelectNameDepartments(fullnameDepartment));
-            navigation.navigate("Groups");
-            dispatch(setResidentGroupOpen(false));
-            dispatch(setExtramuralGroupOpen(false));
+          if (!isConnected) {
+            ToastAndroid.show(
+              "Нет соединения с интернетом",
+              ToastAndroid.SHORT
+            );
           }
+          else {
+            if (idDepartment === 18) {
+              await getSchedule(3430, dispatch, item.nameGroup);
+              dispatch(setSelectIdGroup(3430));
+              dispatch(setNameGroup("Технопарк"));
+              dispatch(setIsExtramuralScheduleUntilTodayStudent(false));
+              navigation.navigate("Schedule");
+            } else {
+              fetchGroups(item.idDepartment);
+              dispatch(setNumberDepartment(idDepartment));
+              dispatch(setSelectNameDepartments(fullnameDepartment));
+              navigation.navigate("Groups");
+              dispatch(setResidentGroupOpen(false));
+              dispatch(setExtramuralGroupOpen(false));
+            }
+          }
+
         }}
       >
         <NameDepartments>{fullnameDepartment}</NameDepartments>
@@ -172,12 +182,22 @@ const Departments: React.FC<DepartmentsProps> = ({ navigation }) => {
       <ContainerDepartments
         key={idGroup.toString()}
         onPress={() => {
-          fetchSchedule(idGroup, nameGroup).then(() => {
-            navigation.navigate("Schedule");
-            dispatch(setNameGroup(nameGroup));
-            dispatch(setIsExtramuralScheduleUntilTodayStudent(false));
-            dispatch(setSelectIdGroup(idGroup));
-          });
+          if (!isConnected) {
+            ToastAndroid.show(
+              "Нет соединения с интернетом",
+              ToastAndroid.SHORT
+            );
+          }
+          else {
+            fetchSchedule(idGroup, nameGroup).then(() => {
+              console.log(idGroup)
+              navigation.navigate("Schedule");
+              dispatch(setNameGroup(nameGroup));
+              dispatch(setIsExtramuralScheduleUntilTodayStudent(false));
+              dispatch(setSelectIdGroup(idGroup));
+            });
+          }
+
         }}
       >
         <NameDepartments>{nameGroup}</NameDepartments>
@@ -194,7 +214,7 @@ const Departments: React.FC<DepartmentsProps> = ({ navigation }) => {
   return (
     <ThemeProvider theme={theme}>
       <Container>
-        {!isConnected ? (
+        {!isConnected && !dataDepartment.length ? (
           <NoConnected>Нет соединения с интернетом</NoConnected>
         ) : (
           <View>

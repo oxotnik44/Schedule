@@ -381,7 +381,6 @@ const Schedule = ({ navigation }: ScheduleProps) => {
 
     return `${hours}:${minutes}:${seconds}`;
   };
-
   return (
     <ThemeProvider theme={theme}>
       <Container>

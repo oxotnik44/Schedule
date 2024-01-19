@@ -19,7 +19,7 @@ import {
   getGroupsResidents,
   getGroupsExtramuralists,
 } from "../../api/apiGroups";
-import {  getSchedule } from "../../api/apiSchedule";
+import { getSchedule } from "../../api/apiSchedule";
 import AddFavoriteGroups from "../Hoc/AddFavorite/AddFavorite";
 import {
   ArrowIcon,
@@ -117,6 +117,7 @@ const Groups = ({ navigation }: GroupsProps) => {
   }, [numberDepartment, dispatch]);
   const fetchSchedule = async (idGroup: number, nameGroup: string) => {
     try {
+
       await getSchedule(idGroup, dispatch, nameGroup);
     } catch (error) {
       alert("Произошла ошибка");
@@ -134,22 +135,23 @@ const Groups = ({ navigation }: GroupsProps) => {
   let hasData = false; // Объявляем переменную hasData за пределами функции
 
   const fetchNoConnected = async (idGroup: number) => {
+    console.log(idGroup)
     const storedSchedule = await AsyncStorage.getItem("favoriteSchedule");
     const scheduleStudent = storedSchedule ? JSON.parse(storedSchedule) : { groups: [], educators: [] };
-  
+
     const foundGroup = scheduleStudent.groups.find((item: any) => {
       const keys = Object.keys(item);
       return keys.includes(idGroup.toString());
     });
-  
+
     if (foundGroup) {
       dispatch(setDataScheduleStudent(foundGroup[idGroup.toString()]));
       return true;
     }
-  
+
     return false;
   };
-  
+
 
   return (
     <Container>
@@ -165,8 +167,8 @@ const Groups = ({ navigation }: GroupsProps) => {
           data={
             dataGroups.idDepartments === 15 || dataGroups.idDepartments === 16
               ? dataGroups.dataGroupsExtramuralists.filter(
-                  (group) => group.isResidentAspirant === 0
-                )
+                (group) => group.isResidentAspirant === 0
+              )
               : dataGroups.dataGroupsResidents
           }
           keyExtractor={(group) => group.idGroup.toString()}
@@ -226,8 +228,8 @@ const Groups = ({ navigation }: GroupsProps) => {
             data={
               dataGroups.idDepartments === 15 || dataGroups.idDepartments === 16
                 ? dataGroups.dataGroupsExtramuralists.filter(
-                    (group) => group.isResidentAspirant === 1
-                  )
+                  (group) => group.isResidentAspirant === 1
+                )
                 : dataGroups.dataGroupsExtramuralists
             }
             keyExtractor={(group) => group.idGroup.toString()}
@@ -246,6 +248,7 @@ const Groups = ({ navigation }: GroupsProps) => {
                       ToastAndroid.SHORT
                     );
                   } else {
+                    console.log(group.idGroup, group.nameGroup)
                     fetchSchedule(group.idGroup, group.nameGroup).then(() => {
                       dispatch(setNameGroup(group.nameGroup));
                       dispatch(setIsExtramuralScheduleUntilTodayStudent(false));
@@ -256,7 +259,7 @@ const Groups = ({ navigation }: GroupsProps) => {
                   }
                 }}
               >
-                <NameGroup>{group.nameGroup}</NameGroup>
+                <NameGroup numberOfLines={2}>{group.nameGroup}</NameGroup>
                 <View>
                   <AddFavoriteGroups
                     idGroup={group.idGroup}

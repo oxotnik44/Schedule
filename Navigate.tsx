@@ -27,6 +27,8 @@ import { getDepartments } from "./api/apiDepartments";
 import { getEducator } from "./api/apiEducator";
 import { getNews } from "./api/apiNews";
 import { getGroups } from "./api/apiGroups";
+import Authorization from "./components/Authorization/Authorization";
+import Account from "./components/PersonalAccountStudent/Account";
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 export type RootStackParamList = {
@@ -40,7 +42,7 @@ export type RootStackParamList = {
   News: undefined;
   Settings: undefined;
   Authorization: undefined;
-  AC:undefined
+  AC: undefined
 };
 
 interface TabIconProps {
@@ -221,7 +223,7 @@ const Navigate = ({ navigation }: GroupsProps) => {
             },
           })}
         >
-           <Tab.Screen
+          {/* <Tab.Screen
             name="Account"
             component={Account}
             options={({ navigation }) => ({
@@ -240,7 +242,7 @@ const Navigate = ({ navigation }: GroupsProps) => {
                 />
               ),
             })}
-          />
+          /> */}
           <Tab.Screen
             name="SelectedMyGroups"
             component={SelectedMyGroups}
@@ -261,26 +263,7 @@ const Navigate = ({ navigation }: GroupsProps) => {
               ),
             })}
           />
-          <Tab.Screen
-            name="Authorization"
-            component={Authorization}
-            options={({ navigation }) => ({
-              tabBarLabel: "Логин",
-              tabBarLabelStyle: {
-                fontSize: screenWidth * 0.025,
-                fontFamily: "Montserrat-Bold",
-                color: theme.navigateColor,
-              },
-              tabBarButton: (props) => (
-                <TouchableOpacity
-                  {...props}
-                  onPress={() => {
-                    navigation.navigate("Authorization");
-                  }}
-                />
-              ),
-            })}
-          />
+
           <Tab.Screen
             name="Departments"
             component={Departments}

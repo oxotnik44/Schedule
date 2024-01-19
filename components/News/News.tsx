@@ -1,5 +1,5 @@
 import React from "react";
-import { View, FlatList, Pressable, Linking } from "react-native";
+import { View, FlatList, Pressable, Linking, ToastAndroid } from "react-native";
 import { useSelector } from "react-redux";
 import {
   Container,
@@ -36,8 +36,20 @@ interface Settings {
   };
 }
 const NewsItem = ({ item }: { item: INewsItem }) => {
+  const isConnected = useSelector(
+    (state: Settings) => state.settingsReducer.isConnected
+  );
   const handlePress = () => {
-    Linking.openURL(item.link);
+    if (!isConnected) {
+      ToastAndroid.show(
+        "Нет соединения с интернетом",
+        ToastAndroid.SHORT
+      );
+    }
+    else {
+      Linking.openURL(item.link);
+
+    }
   };
 
   return (
@@ -63,7 +75,7 @@ const News = () => {
   return (
     <ThemeProvider theme={theme}>
       <Container>
-        {!isConnected ? (
+        {!isConnected && !dataNews.length ? (
           <NoConnected>Нет соединения с интернетом</NoConnected>
         ) : (
           <FlatList
@@ -73,7 +85,7 @@ const News = () => {
             initialNumToRender={5}
             windowSize={5}
             showsVerticalScrollIndicator={false}
-            // contentContainerStyle={{ paddingBottom: 16 }}
+          // contentContainerStyle={{ paddingBottom: 16 }}
           />
         )}
       </Container>
