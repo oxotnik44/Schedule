@@ -3,10 +3,10 @@ import { TouchableOpacity, Alert, FlatList, ToastAndroid } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { getSchedule, getScheduleEducator } from "../../api/apiSchedule";
-import { setNameGroup } from "../../redux/reducers/groupsInfoReducer";
+import { setNameGroup } from "../../redux/reducers/GroupsInfoSlice";
 import { removeFavoriteGroupAC } from "../../redux/reducers/favoritesReducer/favoriteGroupsReducer";
 import { removeFavoriteEducatorAC } from "../../redux/reducers/favoritesReducer/favoriteEducatorsReducer";
-import { setNameEducator } from "../../redux/reducers/educatorReducer";
+import { setNameEducator } from "../../redux/reducers/EducatorSlice";
 
 import { ThemeProvider } from "styled-components/native";
 import {
@@ -21,17 +21,17 @@ import {
   ToggleButtonText,
   ToggleContainer,
 } from "./SelectedMyGroupsStyle";
-import { lightTheme } from "../../redux/reducers/settingsReducer";
+import { lightTheme } from "../../redux/reducers/SettingsSlice";
 import {
   setDataScheduleStudent,
   setIsExtramuralScheduleUntilTodayStudent,
   setSelectIdGroup,
-} from "../../redux/reducers/scheduleStudentInfo";
+} from "../../redux/reducers/ScheduleStudentInfoSlice";
 import {
   setDataScheduleEducator,
   setIsFullScheduleEducator,
   setSelectIdEducator,
-} from "../../redux/reducers/scheduleEducatorInfo";
+} from "../../redux/reducers/ScheduleEducatorInfoSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { removeFavoriteStudentSchedule } from "../../redux/reducers/favoritesReducer/favoriteScheduleStudent";
 import { removeFavoriteEducatorSchedule } from "../../redux/reducers/favoritesReducer/favoriteScheduleEducator";

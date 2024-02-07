@@ -6,7 +6,7 @@ import {
   setSelectNameDepartments,
   setNumberDepartment,
   setTextSearchGroup,
-} from "../../redux/reducers/departmentsInfoReducer";
+} from "../../redux/reducers/DepartmentsInfoSlice";
 import {
   setExtramuralGroupOpen,
   setIdDepartments,
@@ -14,7 +14,7 @@ import {
   setLoadedResidents,
   setNameGroup,
   setResidentGroupOpen,
-} from "../../redux/reducers/groupsInfoReducer";
+} from "../../redux/reducers/GroupsInfoSlice";
 import { getSchedule } from "../../api/apiSchedule";
 import { RootStackParamList } from "../../Navigate";
 import AddFavoriteGroups from "../Hoc/AddFavorite/AddFavorite";
@@ -33,7 +33,7 @@ import { ThemeProvider } from "styled-components/native";
 import {
   setIsExtramuralScheduleUntilTodayStudent,
   setSelectIdGroup,
-} from "../../redux/reducers/scheduleStudentInfo";
+} from "../../redux/reducers/ScheduleStudentInfoSlice";
 import {
   getGroupsExtramuralists,
   getGroupsResidents,

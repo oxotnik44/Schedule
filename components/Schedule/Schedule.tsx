@@ -36,7 +36,7 @@ import {
   TypeWeekContainer,
   TypeWeekText,
 } from "./ScheduleStyle";
-import { setNameEducator } from "../../redux/reducers/educatorReducer";
+import { setNameEducator } from "../../redux/reducers/EducatorSlice";
 
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../Navigate";
@@ -45,13 +45,13 @@ import {
   getSchedule,
   getScheduleEducator,
 } from "../../api/apiSchedule";
-import { lightTheme } from "../../redux/reducers/settingsReducer";
+import { lightTheme } from "../../redux/reducers/SettingsSlice";
 import { ThemeProvider } from "styled-components/native";
-import { setSelectIdEducator } from "../../redux/reducers/scheduleEducatorInfo";
+import { setSelectIdEducator } from "../../redux/reducers/ScheduleEducatorInfoSlice";
 import {
   setIsExtramuralScheduleUntilTodayStudent,
   setLastCacheEntryStudent,
-} from "../../redux/reducers/scheduleStudentInfo";
+} from "../../redux/reducers/ScheduleStudentInfoSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { setFavoriteSchedule } from "../../redux/reducers/favoritesReducer/favoriteScheduleStudent";
 const screenWidth = Dimensions.get("window").width;

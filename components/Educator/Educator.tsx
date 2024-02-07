@@ -4,7 +4,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { useDispatch, useSelector } from "react-redux";
 
 import { RootStackParamList } from "../../Navigate";
-import { setNameEducator } from "../../redux/reducers/educatorReducer";
+import { setNameEducator } from "../../redux/reducers/EducatorSlice";
 
 import {
   Container,
@@ -25,7 +25,7 @@ import {
   setDataScheduleEducator,
   setIsFullScheduleEducator,
   setSelectIdEducator,
-} from "../../redux/reducers/scheduleEducatorInfo";
+} from "../../redux/reducers/ScheduleEducatorInfoSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 const screenWidth = Dimensions.get("window").width;
 

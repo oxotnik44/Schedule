@@ -38,7 +38,7 @@ import {
   TypeWeekContainer,
   TypeWeekText,
 } from "./ScheduleStyle";
-import { setNameGroup } from "../../redux/reducers/groupsInfoReducer";
+import { setNameGroup } from "../../redux/reducers/GroupsInfoSlice";
 import {
   getFullScheduleEducatorExtramural,
   getSchedule,
@@ -46,12 +46,12 @@ import {
 } from "../../api/apiSchedule";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../Navigate";
-import { lightTheme } from "../../redux/reducers/settingsReducer";
+import { lightTheme } from "../../redux/reducers/SettingsSlice";
 import {
   setIsFullScheduleEducator,
   setLastCacheEntryEducator,
-} from "../../redux/reducers/scheduleEducatorInfo";
-import { setSelectIdGroup } from "../../redux/reducers/scheduleStudentInfo";
+} from "../../redux/reducers/ScheduleEducatorInfoSlice";
+import { setSelectIdGroup } from "../../redux/reducers/ScheduleStudentInfoSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { setFavoriteSchedule } from "../../redux/reducers/favoritesReducer/favoriteScheduleEducator";
 

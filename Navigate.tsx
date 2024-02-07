@@ -14,21 +14,20 @@ import { useDispatch, useSelector } from "react-redux";
 import SelectedMyGroups from "./components/SelectedMyGroups/SelectedMyGroups";
 import Groups from "./components/Groups/Groups";
 import News from "./components/News/News";
-import { resetTextSearchGroup } from "./redux/reducers/departmentsInfoReducer";
 import ScheduleEducator from "./components/Schedule/ScheduleEducator";
 import { ThemeProvider } from "styled-components/native";
 import Settings from "./components/Settings/Settings";
-import {
-  StackNavigationProp,
-} from "@react-navigation/stack";
+import { StackNavigationProp } from "@react-navigation/stack";
 import NetInfo, { useNetInfo } from "@react-native-community/netinfo";
-import { setConnectionStatus } from "./redux/reducers/settingsReducer";
+import { setConnectionStatus } from "./redux/reducers/SettingsSlice";
 import { getDepartments } from "./api/apiDepartments";
 import { getEducator } from "./api/apiEducator";
 import { getNews } from "./api/apiNews";
 import { getGroups } from "./api/apiGroups";
 import Authorization from "./components/Authorization/Authorization";
 import Account from "./components/PersonalAccountStudent/Account";
+import { resetTextSearchGroup } from "./redux/reducers/DepartmentsInfoSlice";
+import { useAppDispatch, useAppSelector } from "./redux/store";
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 export type RootStackParamList = {
@@ -42,7 +41,7 @@ export type RootStackParamList = {
   News: undefined;
   Settings: undefined;
   Authorization: undefined;
-  AC: undefined
+  AC: undefined;
 };
 
 interface TabIconProps {
@@ -109,20 +108,19 @@ const Navigate = ({ navigation }: GroupsProps) => {
       />
     );
   };
-  const dispatch = useDispatch();
-  const theme = useSelector((state: ITheme) => state.settingsReducer.theme);
-  const selectGroup = useSelector(
-    (state: GroupsState) => state.groupsInfoReducer.selectedGroupName
+  const dispatch = useAppDispatch();
+  const theme = useAppSelector((state) => state.SettingsSlice.theme);
+  const selectGroup = useAppSelector(
+    (state) => state.GroupsInfoSlice.selectedGroupName
   );
-  const selectEducator = useSelector(
-    (state: EducatorsState) => state.educatorInfoReducer.selectNameEducator
+  const selectEducator = useAppSelector(
+    (state) => state.EducatorInfoSlice.selectNameEducator
   );
-  const selectDepartments = useSelector(
-    (state: DepartmentsState) =>
-      state.departmentInfoReducer.selectNameDepartments
+  const selectDepartments = useAppSelector(
+    (state) => state.DepartmentInfoSlice.selectNameDepartments
   );
-  const isConnected = useSelector(
-    (state: Settings) => state.settingsReducer.isConnected
+  const isConnected = useAppSelector(
+    (state) => state.SettingsSlice.isConnected
   );
   const getHeaderTitle = (route: { name: string }) => {
     if (route.name === "ScheduleMyGroups") {

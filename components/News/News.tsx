@@ -21,34 +21,29 @@ interface INewsItem {
 }
 
 interface IState {
-  newsReducer: {
+  NewsSlice: {
     newsData: INewsItem[];
   };
 }
 type ITheme = {
-  settingsReducer: {
+  SettingsSlice: {
     theme: any;
   };
 };
 interface Settings {
-  settingsReducer: {
+  SettingsSlice: {
     isConnected: boolean;
   };
 }
 const NewsItem = ({ item }: { item: INewsItem }) => {
   const isConnected = useSelector(
-    (state: Settings) => state.settingsReducer.isConnected
+    (state: Settings) => state.SettingsSlice.isConnected
   );
   const handlePress = () => {
     if (!isConnected) {
-      ToastAndroid.show(
-        "Нет соединения с интернетом",
-        ToastAndroid.SHORT
-      );
-    }
-    else {
+      ToastAndroid.show("Нет соединения с интернетом", ToastAndroid.SHORT);
+    } else {
       Linking.openURL(item.link);
-
     }
   };
 
@@ -68,10 +63,10 @@ const NewsItem = ({ item }: { item: INewsItem }) => {
 
 const News = () => {
   const isConnected = useSelector(
-    (state: Settings) => state.settingsReducer.isConnected
+    (state: Settings) => state.SettingsSlice.isConnected
   );
-  const dataNews = useSelector((state: IState) => state.newsReducer.newsData);
-  const theme = useSelector((state: ITheme) => state.settingsReducer.theme);
+  const dataNews = useSelector((state: IState) => state.NewsSlice.newsData);
+  const theme = useSelector((state: ITheme) => state.SettingsSlice.theme);
   return (
     <ThemeProvider theme={theme}>
       <Container>
@@ -85,7 +80,7 @@ const News = () => {
             initialNumToRender={5}
             windowSize={5}
             showsVerticalScrollIndicator={false}
-          // contentContainerStyle={{ paddingBottom: 16 }}
+            // contentContainerStyle={{ paddingBottom: 16 }}
           />
         )}
       </Container>

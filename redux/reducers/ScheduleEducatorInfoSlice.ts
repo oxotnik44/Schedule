@@ -1,0 +1,129 @@
+import { createSlice } from "@reduxjs/toolkit";
+
+interface IScheduleInfo {
+  idPair: number;
+  roomNumber: string | null;
+  weekday: string;
+  numberPair: string;
+  typePair: string;
+  namePair: string;
+  nameDepartments: string;
+  groupName: string;
+  idEducator: number;
+  nameEducator: string;
+  fullNameEducator: string;
+  regaliaEducator: string;
+  date: string | null;
+}
+
+interface IScheduleExtramuralInfo {
+  idPair: number;
+  roomNumber: string | null;
+  weekday: string;
+  numberPair: string;
+  typePair: string;
+  namePair: string;
+  roomName: string;
+  idEducator: number;
+  nameDepartments: string;
+  nameEducator: string;
+  fullNameEducator: string;
+  groupName: string;
+  date: string | null;
+  typePairRetake: string;
+}
+
+interface IState {
+  dataSchedule: {
+    lastCacheEntry: {
+      currentDateCache: string;
+      currentTimeCache: string;
+    };
+    groupType: string;
+    extramuralIsActive: boolean;
+
+    scheduleResident: {
+      weekCorrection: number;
+      numerator: IScheduleInfo[];
+      denominator: IScheduleInfo[];
+      session: {
+        date: string;
+        schedule: IScheduleExtramuralInfo[];
+      }[];
+    };
+    scheduleExtramural: { date: string; schedule: IScheduleExtramuralInfo[] }[];
+  };
+  typeGroupEducator: string;
+  selectIdEducator: number;
+  selectIdGroup: number;
+  isFullSchedule: boolean;
+}
+
+export const initialScheduleState: IState = {
+  dataSchedule: {
+    lastCacheEntry: {
+      currentDateCache: "",
+      currentTimeCache: "",
+    },
+    groupType: "resident",
+    extramuralIsActive: false,
+    scheduleResident: {
+      weekCorrection: 0,
+      numerator: [],
+      denominator: [],
+      session: [],
+    },
+    scheduleExtramural: [],
+  },
+  typeGroupEducator: "",
+  selectIdEducator: 0,
+  selectIdGroup: 0,
+  isFullSchedule: false,
+};
+export const ScheduleInfoEducatorSlice = createSlice({
+  name: "ScheduleInfoEducator",
+  initialState: initialScheduleState,
+  reducers: {
+    setDataScheduleEducator: (state, action) => {
+      state.dataSchedule = action.payload;
+    },
+    resetScheduleEducator: (state, action) => {
+      state.dataSchedule.scheduleResident = {
+        weekCorrection: 0,
+        numerator: [],
+        denominator: [],
+        session: [],
+      };
+      state.dataSchedule.scheduleExtramural = [];
+    },
+    setSelectIdEducator: (state, action) => {
+      state.selectIdEducator = action.payload;
+    },
+    setSelectIdGroupEducator: (state, action) => {
+      state.selectIdGroup = action.payload;
+    },
+    resetDataScheduleEducatorExtramural: (state, action) => {
+      state.dataSchedule.scheduleExtramural = [];
+    },
+    setDataEducatorExtramural: (state, action) => {
+      state.dataSchedule.scheduleExtramural = action.payload;
+    },
+    setIsFullScheduleEducator: (state, action) => {
+      state.isFullSchedule = action.payload;
+    },
+    setLastCacheEntryEducator: (state, action) => {
+      state.dataSchedule.lastCacheEntry = action.payload;
+    },
+  },
+});
+export const {
+  setDataScheduleEducator,
+  resetScheduleEducator,
+  setSelectIdEducator,
+  setSelectIdGroupEducator,
+  resetDataScheduleEducatorExtramural,
+  setDataEducatorExtramural,
+  setIsFullScheduleEducator,
+  setLastCacheEntryEducator,
+} = ScheduleInfoEducatorSlice.actions;
+export default ScheduleInfoEducatorSlice.reducer;

@@ -5,7 +5,7 @@ import {
   lightTheme,
   setTheme,
   darkTheme,
-} from "../../redux/reducers/settingsReducer";
+} from "../../redux/reducers/SettingsSlice";
 import {
   BtnPrivacyPolicy,
   TextIncorporateTheme,

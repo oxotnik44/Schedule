@@ -7,7 +7,7 @@ import {
   setDataGroups,
   setDataGroupsExtramuralists,
   setDataGroupsResidents,
-} from "../redux/reducers/groupsInfoReducer";
+} from "../redux/reducers/GroupsInfoSlice";
 import { api } from "./baseUrl";
 
 

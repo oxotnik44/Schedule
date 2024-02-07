@@ -11,24 +11,15 @@ import { getGroups } from "./api/apiGroups";
 import { setFavoriteGroupsAC } from "./redux/reducers/favoritesReducer/favoriteGroupsReducer";
 import { setFavoriteEducatorAC } from "./redux/reducers/favoritesReducer/favoriteEducatorsReducer";
 import { useFonts } from "expo-font";
-import {
-  setConnectionStatus,
-  setTheme,
-} from "./redux/reducers/settingsReducer";
+import { setConnectionStatus, setTheme } from "./redux/reducers/SettingsSlice";
 import { StackNavigationProp } from "@react-navigation/stack";
+import { useAppDispatch } from "./redux/store";
 type GroupsProps = {
   navigation: StackNavigationProp<RootStackParamList, "Settings">;
 };
-interface Settings {
-  settingsReducer: {
-    isConnected: boolean;
-  };
-}
+
 const Load = ({ navigation }: GroupsProps) => {
-  const isConnected = useSelector(
-    (state: Settings) => state.settingsReducer.isConnected
-  );
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const [loading, setLoading] = useState(true);
   const [fontsLoaded] = useFonts({
     "Montserrat-SemiBold": require("./assets/fonts/Montserrat-SemiBold.ttf"),

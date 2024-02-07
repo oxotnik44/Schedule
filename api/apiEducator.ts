@@ -2,7 +2,7 @@ import axios from "axios";
 import {
   resetEducator,
   setDataEducator,
-} from "../redux/reducers/educatorReducer";
+} from "../redux/reducers/EducatorSlice";
 import { api } from "./baseUrl";
 
 
