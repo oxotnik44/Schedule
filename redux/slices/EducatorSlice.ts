@@ -28,7 +28,7 @@ export const EducatorInfoSlice = createSlice({
     setDataEducator: (state, action) => {
       state.dataEducator = action.payload;
     },
-    resetEducator: (state, action) => {
+    resetEducator: (state) => {
       state.dataEducator = [];
     },
     setNameEducator: (state, action) => {

@@ -8,14 +8,13 @@ import {
   setResidentGroupOpen,
   setExtramuralGroupOpen,
   setNameGroup,
-} from "../../redux/reducers/GroupsInfoSlice";
+} from "../../redux/slices/GroupsInfoSlice";
 import { RootStackParamList } from "../../Navigate";
 import {
   getGroupsResidents,
   getGroupsExtramuralists,
 } from "../../api/apiGroups";
 import { getSchedule } from "../../api/apiSchedule";
-import AddFavoriteGroups from "../Hoc/AddFavorite/AddFavorite";
 import {
   ArrowIcon,
   Container,
@@ -29,10 +28,10 @@ import {
   setIsExtramuralScheduleUntilTodayStudent,
   setSelectIdGroup,
   setTypeGroupStudent,
-} from "../../redux/reducers/ScheduleStudentInfoSlice";
+} from "../../redux/slices/ScheduleStudentInfoSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { setFavoriteSchedule } from "../../redux/reducers/favoritesReducer/favoriteScheduleStudent";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
+import AddFavorite from "../../helper/AddFavorite/AddFavorite";
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 
@@ -40,7 +39,7 @@ type GroupsProps = {
   navigation: StackNavigationProp<RootStackParamList, "Groups">;
 };
 interface GroupsState {
-  groupsInfoReducer: {
+  GroupsInfoSlice: {
     selectedGroupNumber: number;
     dataGroupsResidents: [
       {
@@ -64,13 +63,13 @@ interface GroupsState {
   };
 }
 interface DepartmentNumberState {
-  departmentInfoReducer: {
+  DepartmentInfoSlice: {
     numberDepartment: number;
   };
 }
 
 interface Settings {
-  settingsReducer: {
+  SettingsSlice: {
     isConnected: boolean;
   };
 }
@@ -196,7 +195,7 @@ const Groups = ({ navigation }: GroupsProps) => {
               }}
             >
               <NameGroup numberOfLines={2}>{group.nameGroup}</NameGroup>
-              <AddFavoriteGroups
+              <AddFavorite
                 idGroup={group.idGroup}
                 nameGroup={group.nameGroup}
                 idEducator={null}
@@ -254,7 +253,7 @@ const Groups = ({ navigation }: GroupsProps) => {
               >
                 <NameGroup numberOfLines={2}>{group.nameGroup}</NameGroup>
                 <View>
-                  <AddFavoriteGroups
+                  <AddFavorite
                     idGroup={group.idGroup}
                     nameGroup={group.nameGroup}
                     idEducator={null}

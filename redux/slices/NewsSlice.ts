@@ -21,7 +21,7 @@ export const NewsInfoSlice = createSlice({
     setNewsData: (state, action) => {
       state.newsData = action.payload;
     },
-    resetNews: (state, action) => {
+    resetNews: (state) => {
       state.newsData = [];
     },
   },

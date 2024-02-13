@@ -19,15 +19,15 @@ import { ThemeProvider } from "styled-components/native";
 import Settings from "./components/Settings/Settings";
 import { StackNavigationProp } from "@react-navigation/stack";
 import NetInfo, { useNetInfo } from "@react-native-community/netinfo";
-import { setConnectionStatus } from "./redux/reducers/SettingsSlice";
 import { getDepartments } from "./api/apiDepartments";
 import { getEducator } from "./api/apiEducator";
 import { getNews } from "./api/apiNews";
 import { getGroups } from "./api/apiGroups";
 import Authorization from "./components/Authorization/Authorization";
 import Account from "./components/PersonalAccountStudent/Account";
-import { resetTextSearchGroup } from "./redux/reducers/DepartmentsInfoSlice";
 import { useAppDispatch, useAppSelector } from "./redux/store";
+import { setConnectionStatus } from "./redux/slices/SettingsSlice";
+import { resetTextSearchGroup } from "./redux/slices/DepartmentsInfoSlice";
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 export type RootStackParamList = {

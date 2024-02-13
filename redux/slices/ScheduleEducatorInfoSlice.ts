@@ -87,7 +87,7 @@ export const ScheduleInfoEducatorSlice = createSlice({
     setDataScheduleEducator: (state, action) => {
       state.dataSchedule = action.payload;
     },
-    resetScheduleEducator: (state, action) => {
+    resetScheduleEducator: (state) => {
       state.dataSchedule.scheduleResident = {
         weekCorrection: 0,
         numerator: [],
@@ -102,7 +102,7 @@ export const ScheduleInfoEducatorSlice = createSlice({
     setSelectIdGroupEducator: (state, action) => {
       state.selectIdGroup = action.payload;
     },
-    resetDataScheduleEducatorExtramural: (state, action) => {
+    resetDataScheduleEducatorExtramural: (state) => {
       state.dataSchedule.scheduleExtramural = [];
     },
     setDataEducatorExtramural: (state, action) => {

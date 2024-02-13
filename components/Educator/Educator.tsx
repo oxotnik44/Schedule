@@ -4,7 +4,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { useDispatch, useSelector } from "react-redux";
 
 import { RootStackParamList } from "../../Navigate";
-import { setNameEducator } from "../../redux/reducers/EducatorSlice";
+import { setNameEducator } from "../../redux/slices/EducatorSlice";
 
 import {
   Container,
@@ -20,13 +20,13 @@ import {
 import { getScheduleEducator } from "../../api/apiSchedule";
 import { ThemeProvider } from "styled-components/native";
 
-import AddFavoriteGroups from "../Hoc/AddFavorite/AddFavorite";
 import {
   setDataScheduleEducator,
   setIsFullScheduleEducator,
   setSelectIdEducator,
-} from "../../redux/reducers/ScheduleEducatorInfoSlice";
+} from "../../redux/slices/ScheduleEducatorInfoSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import AddFavorite from "../../helper/AddFavorite/AddFavorite";
 const screenWidth = Dimensions.get("window").width;
 
 type EducatorProps = {
@@ -34,7 +34,7 @@ type EducatorProps = {
 };
 
 interface EducatorState {
-  educatorInfoReducer: {
+  EducatorInfoSlice: {
     dataEducator: [
       {
         idEducator: number;
@@ -48,25 +48,25 @@ interface EducatorState {
 }
 
 type ITheme = {
-  settingsReducer: {
+  SettingsSlice: {
     theme: any;
   };
 };
 interface Settings {
-  settingsReducer: {
+  SettingsSlice: {
     isConnected: boolean;
   };
 }
 const Educator: React.FC<EducatorProps> = ({ navigation }) => {
   const { dataEducator } = useSelector(
-    (state: EducatorState) => state.educatorInfoReducer
+    (state: EducatorState) => state.EducatorInfoSlice
   );
   const isConnected = useSelector(
-    (state: Settings) => state.settingsReducer.isConnected
+    (state: Settings) => state.SettingsSlice.isConnected
   );
   const [searchEducator, setSearchEducator] = useState("");
   const dispatch = useDispatch();
-  const theme = useSelector((state: ITheme) => state.settingsReducer.theme);
+  const theme = useSelector((state: ITheme) => state.SettingsSlice.theme);
   const filteredData = dataEducator.filter((item) => {
     const educatorName = item.nameEducator.toLocaleLowerCase();
     const educatorValue = searchEducator.toLocaleLowerCase();
@@ -126,7 +126,7 @@ const Educator: React.FC<EducatorProps> = ({ navigation }) => {
           <RegaliaEducators>Учёное звание: {regaliaEducator}</RegaliaEducators>
         </View>
         <View>
-          <AddFavoriteGroups
+          <AddFavorite
             idGroup={null}
             nameGroup={null}
             idEducator={idEducator}

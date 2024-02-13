@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 
 interface ITheme {
   theme: any;
@@ -28,32 +28,26 @@ export const darkTheme = {
   navigateColor: "#004C6F",
 };
 
+const STORAGE_KEY_THEME = "selectedTheme";
+
 const initialSettingsState: ITheme = {
   theme: lightTheme,
   isConnected: false,
 };
 
-export const setThemeAsync = createAsyncThunk('settings/setThemeAsync', async (theme: string) => {
-  await AsyncStorage.setItem("selectedTheme", theme);
-  return theme;
-});
-
 export const SettingsSlice = createSlice({
   name: "Settings",
   initialState: initialSettingsState,
   reducers: {
-    setConnectionStatus: (state, action: PayloadAction<boolean | null>) => {
+    setConnectionStatus: (state, action) => {
       state.isConnected = action.payload;
     },
-  },
-  extraReducers: (builder) => {
-    builder
-      .addCase(setThemeAsync.fulfilled, (state, action) => {
-        state.theme = action.payload === "lightTheme" ? lightTheme : darkTheme;
-      });
+    setTheme: (state, action) => {
+      AsyncStorage.setItem("selectedTheme", action.payload);
+      state.theme = action.payload === "lightTheme" ? lightTheme : darkTheme;
+    },
   },
 });
 
-export const { setConnectionStatus } = SettingsSlice.actions;
-export { setThemeAsync as setTheme };
+export const { setConnectionStatus, setTheme } = SettingsSlice.actions;
 export default SettingsSlice.reducer;

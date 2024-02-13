@@ -29,7 +29,7 @@ export const DepartmentInfoSlice = createSlice({
     setDataDepartment: (state, action) => {
       state.dataDepartment = action.payload;
     },
-    resetDepartment: (state, action) => {
+    resetDepartment: (state) => {
       state.dataDepartment = [];
     },
     setNumberDepartment: (state, action) => {

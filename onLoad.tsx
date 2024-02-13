@@ -1,4 +1,3 @@
-import { useDispatch, useSelector } from "react-redux";
 import React, { useEffect, useState } from "react";
 import Navigate, { RootStackParamList } from "./Navigate";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -8,12 +7,12 @@ import { getDepartments } from "./api/apiDepartments";
 import { getEducator } from "./api/apiEducator";
 import { getNews } from "./api/apiNews";
 import { getGroups } from "./api/apiGroups";
-import { setFavoriteGroupsAC } from "./redux/reducers/favoritesReducer/favoriteGroupsReducer";
-import { setFavoriteEducatorAC } from "./redux/reducers/favoritesReducer/favoriteEducatorsReducer";
 import { useFonts } from "expo-font";
-import { setConnectionStatus, setTheme } from "./redux/reducers/SettingsSlice";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useAppDispatch } from "./redux/store";
+import { setConnectionStatus, setTheme } from "./redux/slices/SettingsSlice";
+import { setFavoriteGroups } from "./redux/slices/FavoritesSlice/FavoriteGroupsSlice";
+import { setFavoriteEducator } from "./redux/slices/FavoritesSlice/FavoriteEducatorsSlice";
 type GroupsProps = {
   navigation: StackNavigationProp<RootStackParamList, "Settings">;
 };
@@ -32,14 +31,14 @@ const Load = ({ navigation }: GroupsProps) => {
       const groups: { idGroup: number; nameGroup: string }[] = storedGroups
         ? JSON.parse(storedGroups)
         : [];
-      dispatch(setFavoriteGroupsAC(groups));
+      dispatch(setFavoriteGroups(groups));
     };
 
     const getFavoritesEducators = async (): Promise<void> => {
       const storedEducator = await AsyncStorage.getItem("favoriteEducators");
       const educator: { idEducator: number; nameEducator: string }[] =
         storedEducator ? JSON.parse(storedEducator) : [];
-      dispatch(setFavoriteEducatorAC(educator));
+      dispatch(setFavoriteEducator(educator));
     };
 
     const getTheme = async (): Promise<void> => {

@@ -38,7 +38,7 @@ import {
   TypeWeekContainer,
   TypeWeekText,
 } from "./ScheduleStyle";
-import { setNameGroup } from "../../redux/reducers/GroupsInfoSlice";
+import { setNameGroup } from "../../redux/slices/GroupsInfoSlice";
 import {
   getFullScheduleEducatorExtramural,
   getSchedule,
@@ -46,14 +46,14 @@ import {
 } from "../../api/apiSchedule";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../Navigate";
-import { lightTheme } from "../../redux/reducers/SettingsSlice";
+import { lightTheme } from "../../redux/slices/SettingsSlice";
 import {
   setIsFullScheduleEducator,
   setLastCacheEntryEducator,
-} from "../../redux/reducers/ScheduleEducatorInfoSlice";
-import { setSelectIdGroup } from "../../redux/reducers/ScheduleStudentInfoSlice";
+} from "../../redux/slices/ScheduleEducatorInfoSlice";
+import { setSelectIdGroup } from "../../redux/slices/ScheduleStudentInfoSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { setFavoriteSchedule } from "../../redux/reducers/favoritesReducer/favoriteScheduleEducator";
+import { setFavoriteSchedule } from "../../redux/slices/FavoritesSlice/FavoriteScheduleEducator";
 
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
@@ -94,7 +94,7 @@ interface IScheduleExtramuralInfo {
   typePairRetake: string | null;
 }
 interface ScheduleState {
-  scheduleInfoEducatorReducer: {
+  ScheduleInfoEducatorSlice: {
     dataSchedule: {
       lastCacheEntry: {
         currentDateCache: string;
@@ -130,35 +130,35 @@ type ScheduleEducatorProps = {
   navigation: StackNavigationProp<RootStackParamList, "ScheduleEducator">;
 };
 type ITheme = {
-  settingsReducer: {
+  SettingsSlice: {
     theme: any;
   };
 };
 interface Settings {
-  settingsReducer: {
+  SettingsSlice: {
     isConnected: boolean;
   };
 }
 interface FavoriteEducatorsState {
-  favoriteEducatorReducer: {
+  FavoriteEducatorsSlice: {
     favoriteEducators: { idEducator: number; nameEducator: string }[];
   };
 }
 const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
-  const theme = useSelector((state: ITheme) => state.settingsReducer.theme);
+  const theme = useSelector((state: ITheme) => state.SettingsSlice.theme);
   const dispatch = useDispatch();
   const isConnected = useSelector(
-    (state: Settings) => state.settingsReducer.isConnected
+    (state: Settings) => state.SettingsSlice.isConnected
   );
   moment.tz.setDefault("Asia/Novosibirsk");
   const dataScheduleEducator = useSelector(
-    (state: ScheduleState) => state.scheduleInfoEducatorReducer.dataSchedule
+    (state: ScheduleState) => state.ScheduleInfoEducatorSlice.dataSchedule
   );
   const selectIdEducator = useSelector(
-    (state: ScheduleState) => state.scheduleInfoEducatorReducer.selectIdEducator
+    (state: ScheduleState) => state.ScheduleInfoEducatorSlice.selectIdEducator
   );
   const isFullSchedule = useSelector(
-    (state: ScheduleState) => state.scheduleInfoEducatorReducer.isFullSchedule
+    (state: ScheduleState) => state.ScheduleInfoEducatorSlice.isFullSchedule
   );
   const [groupType, setGroupType] = useState<
     "resident" | "extramural" | "session"
@@ -187,7 +187,7 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
   ];
   const favoriteEducators = useSelector(
     (state: FavoriteEducatorsState) =>
-      state.favoriteEducatorReducer.favoriteEducators
+      state.FavoriteEducatorsSlice.favoriteEducators
   );
   const fetchSchedule = async (idGroup: number, groupName: string) => {
     try {
@@ -500,8 +500,9 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
           <NoConnected>Отсутствует соединение.</NoConnected>
           <NoConnected>
             {dataScheduleEducator.lastCacheEntry &&
+             "Расписание актуально на " +
               dataScheduleEducator.lastCacheEntry.currentDateCache +
-                " в " +
+                " " +
                 dataScheduleEducator.lastCacheEntry.currentTimeCache}
           </NoConnected>
         </View>
@@ -510,7 +511,7 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
         <FlatList
           data={weekdays}
           keyExtractor={(weekday) => weekday}
-          initialNumToRender={2}
+          initialNumToRender={3}
           maxToRenderPerBatch={10}
           windowSize={10}
           renderItem={({ item: weekday }) => {

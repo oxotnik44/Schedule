@@ -5,7 +5,8 @@ import {
   lightTheme,
   setTheme,
   darkTheme,
-} from "../../redux/reducers/SettingsSlice";
+  setConnectionStatus,
+} from "../../redux/slices/SettingsSlice";
 import {
   BtnPrivacyPolicy,
   TextIncorporateTheme,
@@ -16,13 +17,13 @@ import {
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 type ITheme = {
-  settingsReducer: {
+  SettingsSlice: {
     theme: any;
   };
 };
 const Settings = () => {
   const [isDarkMode, setIsDarkMode] = useState(false); // Состояние для темной темы
-  const theme = useSelector((state: ITheme) => state.settingsReducer.theme);
+  const theme = useSelector((state: ITheme) => state.SettingsSlice.theme);
 
   useEffect(() => {
     setIsDarkMode(theme === darkTheme);

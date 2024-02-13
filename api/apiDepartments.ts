@@ -1,7 +1,5 @@
-import {
-  resetDepartment,
-  setDataDepartment,
-} from "../redux/reducers/DepartmentsInfoSlice";
+
+import { resetDepartment, setDataDepartment } from "../redux/slices/DepartmentsInfoSlice";
 import { api } from "./baseUrl";
 
 export const getDepartments = async (dispatch: Function) => {

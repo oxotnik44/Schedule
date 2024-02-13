@@ -6,7 +6,7 @@ import {
   setSelectNameDepartments,
   setNumberDepartment,
   setTextSearchGroup,
-} from "../../redux/reducers/DepartmentsInfoSlice";
+} from "../../redux/slices/DepartmentsInfoSlice";
 import {
   setExtramuralGroupOpen,
   setIdDepartments,
@@ -14,11 +14,9 @@ import {
   setLoadedResidents,
   setNameGroup,
   setResidentGroupOpen,
-} from "../../redux/reducers/GroupsInfoSlice";
+} from "../../redux/slices/GroupsInfoSlice";
 import { getSchedule } from "../../api/apiSchedule";
 import { RootStackParamList } from "../../Navigate";
-import AddFavoriteGroups from "../Hoc/AddFavorite/AddFavorite";
-import ImageDepartmens from "../Hoc/ImageDepartmens/ImageDepartmens";
 import {
   Container,
   ContainerDepartments,
@@ -33,11 +31,13 @@ import { ThemeProvider } from "styled-components/native";
 import {
   setIsExtramuralScheduleUntilTodayStudent,
   setSelectIdGroup,
-} from "../../redux/reducers/ScheduleStudentInfoSlice";
+} from "../../redux/slices/ScheduleStudentInfoSlice";
 import {
   getGroupsExtramuralists,
   getGroupsResidents,
 } from "../../api/apiGroups";
+import ImageDepartmens from "../../helper/ImageDepartmens/ImageDepartmens";
+import AddFavorite from "../../helper/AddFavorite/AddFavorite";
 
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
@@ -45,7 +45,7 @@ type DepartmentsProps = {
   navigation: StackNavigationProp<RootStackParamList, "Departments">;
 };
 interface DepartmentsState {
-  departmentInfoReducer: {
+  DepartmentInfoSlice: {
     dataDepartment: [
       {
         idDepartment: number;
@@ -61,7 +61,7 @@ interface DepartmentsState {
 }
 
 interface GroupsState {
-  groupsInfoReducer: {
+  GroupsInfoSlice: {
     dataGroups: [
       {
         idGroup: number;
@@ -72,26 +72,26 @@ interface GroupsState {
   };
 }
 type ITheme = {
-  settingsReducer: {
+  SettingsSlice: {
     theme: any;
   };
 };
 interface Settings {
-  settingsReducer: {
+  SettingsSlice: {
     isConnected: boolean;
   };
 }
 const Departments: React.FC<DepartmentsProps> = ({ navigation }) => {
   const { dataDepartment, textSearchGroup } = useSelector(
-    (state: DepartmentsState) => state.departmentInfoReducer
+    (state: DepartmentsState) => state.DepartmentInfoSlice
   );
   const dataGroups = useSelector(
-    (state: GroupsState) => state.groupsInfoReducer
+    (state: GroupsState) => state.GroupsInfoSlice
   );
   const isConnected = useSelector(
-    (state: Settings) => state.settingsReducer.isConnected
+    (state: Settings) => state.SettingsSlice.isConnected
   );
-  const theme = useSelector((state: ITheme) => state.settingsReducer.theme);
+  const theme = useSelector((state: ITheme) => state.SettingsSlice.theme);
 
   const dispatch = useDispatch();
   const filteredData = dataGroups.dataGroups.filter((item: any) => {
@@ -201,7 +201,7 @@ const Departments: React.FC<DepartmentsProps> = ({ navigation }) => {
         }}
       >
         <NameDepartments>{nameGroup}</NameDepartments>
-        <AddFavoriteGroups
+        <AddFavorite
           idGroup={idGroup}
           nameGroup={nameGroup}
           idEducator={null}

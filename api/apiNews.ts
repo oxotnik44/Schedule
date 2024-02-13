@@ -1,5 +1,5 @@
 import axios from "axios";
-import { setNewsData } from "../redux/reducers/NewsSlice";
+import { setNewsData } from "../redux/slices/NewsSlice";
 import he from "he";
 import moment from "moment";
 import "moment/locale/ru";

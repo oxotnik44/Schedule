@@ -5,13 +5,13 @@ import {
   setDataScheduleStudent,
   setDataStudentExtramural,
   setExtramuralIsActive,
-} from "../redux/reducers/ScheduleStudentInfoSlice";
+} from "../redux/slices/ScheduleStudentInfoSlice";
 import {
   resetDataScheduleEducatorExtramural,
   resetScheduleEducator,
   setDataEducatorExtramural,
   setDataScheduleEducator,
-} from "../redux/reducers/ScheduleEducatorInfoSlice";
+} from "../redux/slices/ScheduleEducatorInfoSlice";
 import { api } from "./baseUrl";
 
 export const getSchedule = async (

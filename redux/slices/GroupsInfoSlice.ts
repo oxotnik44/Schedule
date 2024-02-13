@@ -39,16 +39,16 @@ export const GroupsInfoSlice = createSlice({
     setDataGroupsExtramuralists: (state, action) => {
       state.dataGroupsExtramuralists = action.payload;
     },
-    resetGroupsResidents: (state, action) => {
+    resetGroupsResidents: (state) => {
       state.dataGroupsResidents = [];
     },
-    resetGroupsExtramuralists: (state, action) => {
+    resetGroupsExtramuralists: (state) => {
       state.dataGroupsExtramuralists = [];
     },
     setDataGroups: (state, action) => {
       state.dataGroups = action.payload;
     },
-    resetDataGroups: (state, action) => {
+    resetDataGroups: (state) => {
       state.dataGroups = [];
     },
     setLoadedResidents: (state, action) => {
