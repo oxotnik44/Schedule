@@ -38,7 +38,7 @@ import {
 } from "../../api/apiGroups";
 import ImageDepartmens from "../../helper/ImageDepartmens/ImageDepartmens";
 import AddFavorite from "../../helper/AddFavorite/AddFavorite";
-
+import { FlashList } from "@shopify/flash-list";
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 type DepartmentsProps = {
@@ -142,7 +142,6 @@ const Departments: React.FC<DepartmentsProps> = ({ navigation }) => {
     const { idDepartment, fullnameDepartment, imgDepartment } = item;
     return (
       <ContainerDepartments
-        key={idDepartment}
         onPress={async () => {
           if (!isConnected) {
             ToastAndroid.show(
@@ -180,7 +179,6 @@ const Departments: React.FC<DepartmentsProps> = ({ navigation }) => {
 
     return (
       <ContainerDepartments
-        key={idGroup.toString()}
         onPress={() => {
           if (!isConnected) {
             ToastAndroid.show(
@@ -239,29 +237,20 @@ const Departments: React.FC<DepartmentsProps> = ({ navigation }) => {
             </ContainerSearchGroups>
 
             {isSearchInputEmpty ? (
-              <FlatList
+              <FlashList
                 data={dataDepartment}
-                keyExtractor={(item) => item.idDepartment.toString()}
                 renderItem={renderItemDepartment}
-                showsHorizontalScrollIndicator={false}
-                initialNumToRender={10}
-                maxToRenderPerBatch={10}
-                windowSize={15}
                 contentContainerStyle={{
                   paddingBottom: screenHeight * 0.02,
                 }}
+                estimatedItemSize={20}
               />
             ) : (
-              <FlatList
+              <FlashList
                 data={filteredData}
-                keyExtractor={(item, index) =>
-                  `${item.idGroup}-${index.toString()}`
-                }
-                initialNumToRender={10}
-                maxToRenderPerBatch={10}
-                windowSize={15}
                 renderItem={renderItemGroup}
-                showsHorizontalScrollIndicator={false} // Удаление полоски прокрутки
+                showsHorizontalScrollIndicator={false}
+                estimatedItemSize={200} 
               />
             )}
           </View>

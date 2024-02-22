@@ -1,122 +1,75 @@
-import React, { useState, useRef, useEffect } from "react";
-import {
-  Dimensions,
-  View,
-  Image,
-  TextInput,
-  Keyboard,
-  KeyboardEvent,
-  TouchableWithoutFeedback,
-} from "react-native";
-import { StackNavigationProp } from "@react-navigation/stack";
+import React, { useState, useEffect } from "react";
+import { View, Image, Dimensions } from "react-native";
+import { WebView, WebViewMessageEvent } from "react-native-webview";
+import axios from "axios";
 
-import { RootStackParamList } from "../../Navigate";
-import { useDispatch, useSelector } from "react-redux";
-import { ThemeProvider } from "styled-components/native";
 import {
   AuthButton,
   AuthButtonText,
-  AuthInput,
   Container,
-  ContainerAuthorization,
   NoConnected,
 } from "./AuthorizationStyle";
 import { authorization } from "../../api/apiAuthorization";
+import { useSelector } from "react-redux";
+import Account from "../PersonalAccountStudent/Account";
 
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
-type AuthorizationProps = {
-  navigation: StackNavigationProp<RootStackParamList, "Departments">;
-};
-interface Settings {
-  settingsReducer: {
-    isConnected: boolean;
-    theme: any;
+interface AuthUserTokenState {
+  AuthTokenSlice: {
+    token: string | null;
   };
 }
-const Authorization: React.FC<AuthorizationProps> = ({ navigation }) => {
-  const theme = useSelector((state: Settings) => state.settingsReducer.theme);
-
-  const dispatch = useDispatch();
-  const isConnected = useSelector(
-    (state: Settings) => state.settingsReducer.isConnected
+const Authorization = () => {
+  const [isWebsiteOpened, setIsWebsiteOpened] = useState(false);
+  const authTokenUser = useSelector(
+    (stata: AuthUserTokenState) => stata.AuthTokenSlice.token
   );
-  const [login, setLogin] = useState("");
-  const [password, setPassword] = useState("");
-  const [keyboardStatus, setKeyboardStatus] = useState(0);
-  useEffect(() => {
-    const showSubscription = Keyboard.addListener('keyboardDidShow', () => {
-      setKeyboardStatus(screenHeight * 0.1);
-    });
-    const hideSubscription = Keyboard.addListener('keyboardDidHide', () => {
-      setKeyboardStatus(0);
-    });
+  const handleMessage = (event: WebViewMessageEvent) => {
+    const { data } = event.nativeEvent;
+    if (data.startsWith("authToken:")) {
+      const authToken = data.replace("authToken:", "").trim();
+      console.log("Received Auth Token:", authToken);
+      // Дополнительные действия с authToken, например, сохранение в состоянии приложения
 
-    return () => {
-      showSubscription.remove();
-      hideSubscription.remove();
-    };
-  }, []);
-
-  const handleAuthorization = async () => {
-    if (login === "") {
-      alert("Введите логин");
-    } else if (password === "") {
-      alert("Введите пароль");
-    } else {
-      await authorization(dispatch, login, password);
+      // Закрываем WebView после успешной авторизации
+      setIsWebsiteOpened(false);
+      console.log("WebView closed after successful authorization");
     }
   };
-  const dismissKeyboard = () => {
-    Keyboard.dismiss();
-  };
-  return (
-    <ThemeProvider theme={theme}>
-      <TouchableWithoutFeedback onPress={dismissKeyboard}>
-        <Container px={keyboardStatus}>
-          {!isConnected ? (
-            <NoConnected>Нет соединения с интернетом</NoConnected>
-          ) : (
-            <View style={{ flex: 1 }}>
-              <Image
-                source={require("../../assets/NGPYImg.png")}
-                style={{
-                  width: screenWidth * 0.6,
-                  height: screenHeight * 0.6,
-                  resizeMode: "contain",
-                  alignSelf: "center",
-                  marginTop: -screenHeight * 0.15,
-                }}
-              />
-              <ContainerAuthorization>
-                <AuthInput
-                  value={login}
-                  placeholder="Введите логин"
-                  style={{ marginBottom: 10 }}
-                  onChangeText={(value) => {
-                    setLogin(value);
-                  }}
-                />
-                <AuthInput
-                  value={password}
-                  onChangeText={(value) => {
-                    setPassword(value);
-                  }}
-                  placeholder="Введите пароль"
-                  secureTextEntry={true}
-                  style={{ marginBottom: 20 }}
-                  onSubmitEditing={handleAuthorization}
-                />
-                <AuthButton onPress={handleAuthorization}>
-                  <AuthButtonText>Авторизация</AuthButtonText>
-                </AuthButton>
-              </ContainerAuthorization>
-            </View>
-          )}
-        </Container>
-      </TouchableWithoutFeedback>
 
-    </ThemeProvider>
+  return (
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      {!isWebsiteOpened ? (
+        <View>
+          <Image
+            source={require("../../assets/NGPYImg.png")}
+            style={{
+              width: screenWidth * 0.6,
+              height: screenHeight * 0.6,
+              resizeMode: "contain",
+              alignSelf: "center",
+              marginTop: -screenHeight * 0.15,
+            }}
+          />
+          <AuthButton onPress={authorization}>
+            <AuthButtonText>Авторизация</AuthButtonText>
+          </AuthButton>
+        </View>
+      ) : (
+        <WebView
+          source={{
+            uri: "https://sso.nspu.ru/module.php/core/loginuserpass.php?AuthState=_3856661352b79d0c687d5faeeeb40af4760ad7ae36%3Ahttps%3A%2F%2Fsso.nspu.ru%2Fsaml2%2Fidp%2FSSOService.php%3Fspentityid%3Dhttps%253A%252F%252Flk.nspu.ru%252Fsaml2%252Fpassport%252Fmetadata%26cookieTime%3D1708526768%26RelayState%3D%252Fhome",
+          }}
+          onMessage={handleMessage}
+          originWhitelist={["*"]}
+          style={{
+            width: screenWidth,
+            height: screenHeight,
+          }}
+        />
+      )}
+    </View>
   );
 };
 

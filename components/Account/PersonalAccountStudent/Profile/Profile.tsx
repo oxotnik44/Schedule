@@ -8,22 +8,17 @@ import {
 } from "./ProfileStyle";
 import { ThemeProvider } from "styled-components/native";
 
-type ITheme = {
-  settingsReducer: {
+interface Settings {
+  SettingsSlice: {
+    isConnected: boolean;
     theme: any;
   };
-};
-interface Settings {
-  settingsReducer: {
-    isConnected: boolean;
-  };
 }
-
 const ProfileStudent = () => {
   const isConnected = useSelector(
-    (state: Settings) => state.settingsReducer.isConnected
+    (state: Settings) => state.SettingsSlice.isConnected
   );
-  const theme = useSelector((state: ITheme) => state.settingsReducer.theme);
+  const theme = useSelector((state: Settings) => state.SettingsSlice.theme);
   return (
     <ThemeProvider theme={theme}>
       <Container>

@@ -27,6 +27,7 @@ import {
 } from "../../redux/slices/ScheduleEducatorInfoSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import AddFavorite from "../../helper/AddFavorite/AddFavorite";
+import { FlashList } from "@shopify/flash-list";
 const screenWidth = Dimensions.get("window").width;
 
 type EducatorProps = {
@@ -74,9 +75,11 @@ const Educator: React.FC<EducatorProps> = ({ navigation }) => {
     return educatorName.includes(educatorValue);
   });
   const fetchNoConnected = async (idEducator: number) => {
-    console.log(idEducator)
+    console.log(idEducator);
     const storedSchedule = await AsyncStorage.getItem("favoriteSchedule");
-    const scheduleEducator = storedSchedule ? JSON.parse(storedSchedule) : { groups: [], educators: [] };
+    const scheduleEducator = storedSchedule
+      ? JSON.parse(storedSchedule)
+      : { groups: [], educators: [] };
 
     const foundEducator = scheduleEducator.educators.find((item: any) => {
       const keys = Object.keys(item);
@@ -93,9 +96,7 @@ const Educator: React.FC<EducatorProps> = ({ navigation }) => {
   const renderItemEducator = ({ item }: { item: any }) => {
     const { idEducator, nameEducator, regaliaEducator } = item;
     return (
-
       <ContainerEducators
-        key={idEducator}
         onPress={async () => {
           if (!isConnected) {
             fetchNoConnected(idEducator).then((hasData) => {
@@ -110,18 +111,16 @@ const Educator: React.FC<EducatorProps> = ({ navigation }) => {
                 navigation.navigate("ScheduleEducator");
               }
             });
-          }
-          else {
+          } else {
             dispatch(setNameEducator(nameEducator));
             dispatch(setIsFullScheduleEducator(false));
             dispatch(setSelectIdEducator(idEducator));
             await getScheduleEducator(dispatch, idEducator);
             navigation.navigate("ScheduleEducator");
           }
-
         }}
       >
-        <View style={{ width: screenWidth * 0.7 }}>
+        <View style={{ width: screenWidth * 0.63 }}>
           <NameEducators numberOfLines={2}>{nameEducator}</NameEducators>
           <RegaliaEducators>Учёное звание: {regaliaEducator}</RegaliaEducators>
         </View>
@@ -164,11 +163,11 @@ const Educator: React.FC<EducatorProps> = ({ navigation }) => {
               </SearchContainer>
             </ContainerSearchGroups>
 
-            <FlatList
+            <FlashList
               data={filteredData}
-              keyExtractor={(item) => item.idEducator.toString()}
               renderItem={renderItemEducator}
-              showsHorizontalScrollIndicator={false} // Удаление полоски прокрутки
+              showsHorizontalScrollIndicator={false}
+              estimatedItemSize={100}
             />
           </View>
         )}

@@ -12,7 +12,7 @@ export const Container = styled.View`
 `;
 
 export const ContainerEducators = styled.TouchableOpacity`
-  width: ${screenWidth * 0.95}px;
+  width: ${screenWidth * 0.9}px;
   height: ${screenHeight * 0.1}px;
   background-color: ${(props) => props.theme.containerColor};
   border-radius: 15px;

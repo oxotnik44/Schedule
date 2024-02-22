@@ -13,6 +13,7 @@ import { useAppDispatch } from "./redux/store";
 import { setConnectionStatus, setTheme } from "./redux/slices/SettingsSlice";
 import { setFavoriteGroups } from "./redux/slices/FavoritesSlice/FavoriteGroupsSlice";
 import { setFavoriteEducator } from "./redux/slices/FavoritesSlice/FavoriteEducatorsSlice";
+import { setTokenUser } from "./redux/slices/AuthTokenSlice";
 type GroupsProps = {
   navigation: StackNavigationProp<RootStackParamList, "Settings">;
 };
@@ -40,7 +41,16 @@ const Load = ({ navigation }: GroupsProps) => {
         storedEducator ? JSON.parse(storedEducator) : [];
       dispatch(setFavoriteEducator(educator));
     };
-
+    const getAuthUserToken = async () => {
+      const authTokenStorage = await AsyncStorage.getItem("authTokenStorage");
+      const token = authTokenStorage ? JSON.parse(authTokenStorage) : null;
+      console.log(authTokenStorage)
+      if (token === null) {
+        dispatch(setTokenUser(null));
+      } else {
+        dispatch(setTokenUser(token));
+      }
+    };
     const getTheme = async (): Promise<void> => {
       try {
         const storedTheme = await AsyncStorage.getItem("selectedTheme");
@@ -97,6 +107,7 @@ const Load = ({ navigation }: GroupsProps) => {
             await fetchDepartments();
             await News();
             await Groups();
+            await getAuthUserToken();
           }
           setLoading(false);
         });

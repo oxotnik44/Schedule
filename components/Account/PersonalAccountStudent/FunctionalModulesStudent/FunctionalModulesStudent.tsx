@@ -9,14 +9,10 @@ import {
 } from "./FunctionalModulesStudentStyle";
 import { Pressable, ScrollView } from "react-native";
 
-type ITheme = {
-  settingsReducer: {
-    theme: any;
-  };
-};
 interface Settings {
-  settingsReducer: {
+  SettingsSlice: {
     isConnected: boolean;
+    theme: any;
   };
 }
 const mass = [
@@ -30,9 +26,9 @@ const mass = [
 ];
 const FunctionalModulesStudent = () => {
   const isConnected = useSelector(
-    (state: Settings) => state.settingsReducer.isConnected
+    (state: Settings) => state.SettingsSlice.isConnected
   );
-  const theme = useSelector((state: ITheme) => state.settingsReducer.theme);
+  const theme = useSelector((state: Settings) => state.SettingsSlice.theme);
   return (
     <ThemeProvider theme={theme}>
       <ScrollView>

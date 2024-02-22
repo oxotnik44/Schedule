@@ -221,7 +221,7 @@ const Navigate = ({ navigation }: GroupsProps) => {
             },
           })}
         >
-          {/* <Tab.Screen
+          <Tab.Screen
             name="Account"
             component={Account}
             options={({ navigation }) => ({
@@ -240,7 +240,7 @@ const Navigate = ({ navigation }: GroupsProps) => {
                 />
               ),
             })}
-          /> */}
+          />
           <Tab.Screen
             name="SelectedMyGroups"
             component={SelectedMyGroups}
