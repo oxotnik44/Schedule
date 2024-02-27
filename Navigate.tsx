@@ -24,10 +24,10 @@ import { getEducator } from "./api/apiEducator";
 import { getNews } from "./api/apiNews";
 import { getGroups } from "./api/apiGroups";
 import Authorization from "./components/Authorization/Authorization";
-import Account from "./components/PersonalAccountStudent/Account";
 import { useAppDispatch, useAppSelector } from "./redux/store";
 import { setConnectionStatus } from "./redux/slices/SettingsSlice";
 import { resetTextSearchGroup } from "./redux/slices/DepartmentsInfoSlice";
+import Account from "./components/Account/Account";
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 export type RootStackParamList = {

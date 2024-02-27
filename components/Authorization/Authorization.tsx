@@ -11,7 +11,6 @@ import {
 } from "./AuthorizationStyle";
 import { authorization } from "../../api/apiAuthorization";
 import { useSelector } from "react-redux";
-import Account from "../PersonalAccountStudent/Account";
 
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
@@ -52,7 +51,10 @@ const Authorization = () => {
               marginTop: -screenHeight * 0.15,
             }}
           />
-          <AuthButton onPress={authorization}>
+          <AuthButton  onPress={() => {
+            // Открываем сайт при нажатии на кнопку
+            setIsWebsiteOpened(true);
+          }}>
             <AuthButtonText>Авторизация</AuthButtonText>
           </AuthButton>
         </View>

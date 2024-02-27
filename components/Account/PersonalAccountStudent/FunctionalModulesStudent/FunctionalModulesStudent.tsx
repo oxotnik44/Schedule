@@ -44,7 +44,7 @@ const FunctionalModulesStudent = () => {
               >
                 <ModuleImage
                   resizeMode="contain"
-                  source={require("../../../assets/Departments.png")}
+                  source={require("../../../../assets/Departments.png")}
                 />
                 <ModuleName>{item.name}</ModuleName>
               </ContainerFunctionalModule>

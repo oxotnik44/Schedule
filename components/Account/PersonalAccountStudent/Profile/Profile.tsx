@@ -24,7 +24,7 @@ const ProfileStudent = () => {
       <Container>
         <ProfileImage
           resizeMode="contain"
-          source={require("../../../assets/Educator.png")}
+          source={require("../../../../assets/Educator.png")}
         />
         <ProfileInfoContainer>
           <ProfileInfoText>ФИО:Новиков Артём Витальевич</ProfileInfoText>
