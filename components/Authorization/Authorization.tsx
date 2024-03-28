@@ -16,15 +16,17 @@ type ScheduleProps = {
 const Authorization = ({ navigation }: ScheduleProps) => {
   const dispatch = useDispatch();
   const _handlePressButtonAsync = async () => {
-    const baseUrl = "https://schedulemobilebackend.nspu.ru:3000/auth";
+    const baseUrl = "https://schedulemobilebackend.nspu.ru:3000/login";
     const callbackUrl = Linking.createURL("App", { scheme: "myapp" });
     const result = await WebBrowser.openAuthSessionAsync(baseUrl, callbackUrl);
     if (result?.type === "success" && result.url) {
       const queryParams = queryString.parse(result.url.split("?")[1]);
       const accessToken = queryParams.accessToken;
-      if (accessToken) {
-        Authentication(accessToken, navigation, dispatch);
-      }
+      console.log(queryParams.user);
+
+      // if (accessToken) {
+      //   Authentication(accessToken, navigation, dispatch);
+      // }
     }
   };
 
