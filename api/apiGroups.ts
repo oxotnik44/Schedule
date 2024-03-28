@@ -10,8 +10,6 @@ import {
 } from "../redux/slices/GroupsInfoSlice";
 import { api } from "./baseUrl";
 
-
-
 export const getGroupsResidents = async (
   idDepartment: number,
   dispatch: Function

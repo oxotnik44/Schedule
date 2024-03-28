@@ -120,7 +120,7 @@ const Load = ({ navigation }: GroupsProps) => {
   if (!fontsLoaded) {
     return null;
   }
-
+console.log(loading)
   if (loading) {
     return <></>; // Или можно отображать индикатор загрузки
   } else {
