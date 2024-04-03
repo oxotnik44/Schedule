@@ -1,12 +1,16 @@
-import React from "react";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import {
   Container,
+  InfoCard,
+  InfoItem,
+  InfoTitle,
   ProfileImage,
   ProfileInfoContainer,
-  ProfileInfoText,
+  ProfileNameText,
 } from "./ProfileStyle";
 import { ThemeProvider } from "styled-components/native";
+import { TouchableOpacity } from "react-native";
 
 interface Settings {
   SettingsSlice: {
@@ -18,22 +22,36 @@ const ProfileStudent = () => {
   const isConnected = useSelector(
     (state: Settings) => state.SettingsSlice.isConnected
   );
+  // const studentData = useSelector(
+  //   (state: IState) => state.ProfileSlice.studentsData[0]
+  // );
   const theme = useSelector((state: Settings) => state.SettingsSlice.theme);
+  const [isInfoVisible, setIsInfoVisible] = useState(false);
   return (
     <ThemeProvider theme={theme}>
-      <Container>
+      <Container style={{ marginBottom: isInfoVisible ? 300 : 0 }}>
         <ProfileImage
           resizeMode="contain"
-          source={require("../../../../assets/Educator.png")}
+          source={require("../../../../assets/Account.png")}
         />
+        <ProfileNameText>Новиков Артём Витальевич</ProfileNameText>
         <ProfileInfoContainer>
-          <ProfileInfoText>ФИО:Новиков Артём Витальевич</ProfileInfoText>
-          <ProfileInfoText>Телефон:+79133726299</ProfileInfoText>
-          <ProfileInfoText>Email:artemnovikov1969@gmail.com</ProfileInfoText>
+          <TouchableOpacity onPress={() => setIsInfoVisible(!isInfoVisible)}>
+            <InfoTitle>Полная информация</InfoTitle>
+          </TouchableOpacity>
+          {isInfoVisible && (
+            <InfoCard>
+              <InfoItem>Телефон: +1234567890</InfoItem> 
+              <InfoItem>Дата рождения: 01.01.1990</InfoItem>
+              <InfoItem>Учебный план: 0000000000000</InfoItem>
+            </InfoCard>
+          )}
         </ProfileInfoContainer>
       </Container>
     </ThemeProvider>
   );
 };
+
+//<InfoItem>Дата рождения: {studentData? studentData.birthDate || "Не указана"}</InfoItem>
 
 export default ProfileStudent;

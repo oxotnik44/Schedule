@@ -28,6 +28,7 @@ import { useAppDispatch, useAppSelector } from "./redux/store";
 import { setConnectionStatus } from "./redux/slices/SettingsSlice";
 import { resetTextSearchGroup } from "./redux/slices/DepartmentsInfoSlice";
 import Account from "./components/Account/Account";
+import СurrentGradesModulesStudent from "./components/Account/PersonalAccountStudent/FunctionalModulesStudent/СurrentGradesModulesStudents/СurrentGradesModulesStudent";
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 export type RootStackParamList = {
@@ -42,6 +43,7 @@ export type RootStackParamList = {
   Settings: undefined;
   Authorization: undefined;
   AC: undefined;
+  СurrentGrades: undefined;
 };
 
 interface TabIconProps {
@@ -95,6 +97,8 @@ const Navigate = ({ navigation }: GroupsProps) => {
       iconSource = require("./assets/Educator.png");
     } else if (route.name === "News") {
       iconSource = require("./assets/News.png");
+    } else if (route.name === "Account") {
+      iconSource = require("./assets/Account.png");
     }
     return (
       <Image
@@ -145,7 +149,10 @@ const Navigate = ({ navigation }: GroupsProps) => {
       return "Настройки";
     } else if (route.name === "Authorization") {
       return "Авторизация";
+    } else if (route.name === "Account") {
+      return "Аккаунт";
     }
+    
   };
   const getInitialData = async () => {
     await getDepartments(dispatch);
@@ -221,26 +228,7 @@ const Navigate = ({ navigation }: GroupsProps) => {
             },
           })}
         >
-          <Tab.Screen
-            name="Account"
-            component={Account}
-            options={({ navigation }) => ({
-              tabBarLabel: "Аккаунт",
-              tabBarLabelStyle: {
-                fontSize: screenWidth * 0.025,
-                fontFamily: "Montserrat-Bold",
-                color: theme.navigateColor,
-              },
-              tabBarButton: (props) => (
-                <TouchableOpacity
-                  {...props}
-                  onPress={() => {
-                    navigation.navigate("Account");
-                  }}
-                />
-              ),
-            })}
-          />
+          
           <Tab.Screen
             name="SelectedMyGroups"
             component={SelectedMyGroups}
@@ -283,6 +271,26 @@ const Navigate = ({ navigation }: GroupsProps) => {
               ),
             })}
           />
+          <Tab.Screen
+            name="Account"
+            component={Account}
+            options={({ navigation }) => ({
+              tabBarLabel: "Аккаунт",
+              tabBarLabelStyle: {
+                fontSize: screenWidth * 0.025,
+                fontFamily: "Montserrat-Bold",
+                color: theme.navigateColor,
+              },
+              tabBarButton: (props) => (
+                <TouchableOpacity
+                  {...props}
+                  onPress={() => {
+                    navigation.navigate("Account");
+                  }}
+                />
+              ),
+            })}
+          />
 
           <Tab.Screen
             name="Educator"
@@ -303,6 +311,11 @@ const Navigate = ({ navigation }: GroupsProps) => {
                 />
               ),
             })}
+          />
+          <Tab.Screen
+            name="СurrentGrades"
+            component={СurrentGradesModulesStudent}
+            options={{ tabBarButton: () => null }}
           />
           <Tab.Screen
             name="Settings"

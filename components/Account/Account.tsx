@@ -7,6 +7,7 @@ import { useSelector } from "react-redux";
 import { View } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../Navigate";
+import СurrentGradesModulesStudent from "./PersonalAccountStudent/FunctionalModulesStudent/СurrentGradesModulesStudents/СurrentGradesModulesStudent";
 type ScheduleProps = {
   navigation: StackNavigationProp<RootStackParamList, "Schedule">;
 };
@@ -25,8 +26,7 @@ const Account = ({ navigation }: ScheduleProps) => {
         <Authorization navigation={navigation}/>
       ) : (
         <View>
-          <Profile />
-          <FunctionalModulesStudent />
+          <СurrentGradesModulesStudent/>
         </View>
       )}
     </Container>
