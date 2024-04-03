@@ -51,7 +51,7 @@ const СurrentGradesModulesStudent = () => {
       grades: [
         { grade: 5, date: "03.04.2024" },
         { grade: 4, date: "02.04.2024" },
-        { grade: 4, date: "02.04.2024" },
+        { grade: 2, date: "02.04.2024" },
         { grade: 4, date: "02.04.2024" },
         { grade: 4, date: "02.04.2024" },
         { grade: 4, date: "02.04.2024" },
