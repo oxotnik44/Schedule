@@ -8,6 +8,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../Navigate";
 import СurrentGradesModulesStudent from "./PersonalAccountStudent/FunctionalModulesStudent/СurrentGradesModulesStudents/СurrentGradesModulesStudent";
 import RecordBookModulesStudent from "./PersonalAccountStudent/FunctionalModulesStudent/RecordBookModulesStudents/RecordBookModulesStudent";
+import FunctionalModulesStudent from "./PersonalAccountStudent/FunctionalModulesStudent/FunctionalModulesStudent";
 type ScheduleProps = {
   navigation: StackNavigationProp<RootStackParamList, "Schedule">;
 };
@@ -26,7 +27,8 @@ const Account = ({ navigation }: ScheduleProps) => {
         <Authorization navigation={navigation}/>
       ) : (
         <View>
-          <RecordBookModulesStudent/>
+          {/* <Profile/> */}
+          {/* <FunctionalModulesStudent navigation={navigation}/> */}
         </View>
       )}
     </Container>

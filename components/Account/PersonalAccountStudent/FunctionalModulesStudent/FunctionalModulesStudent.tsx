@@ -12,9 +12,9 @@ import { Pressable, ScrollView } from "react-native";
 import { RootStackParamList } from "../../../../Navigate";
 import { StackNavigationProp } from "@react-navigation/stack";
 
-// type CurrentGradesProps = {
-//   navigation: StackNavigationProp<RootStackParamList, "СurrentGrades">;
-// };
+type CurrentGradesProps = {
+  navigation: StackNavigationProp<RootStackParamList, "СurrentGrades">;
+};
 
 interface Settings {
   SettingsSlice: {
@@ -23,7 +23,7 @@ interface Settings {
   };
 }
 const mass = [{ name : "Зачетная книжка"}, { name: "Оценки" }];
-const FunctionalModulesStudent = () => {
+const FunctionalModulesStudent:React.FC<CurrentGradesProps> = ({navigation}) => {
   const isConnected = useSelector(
     (state: Settings) => state.SettingsSlice.isConnected
   );
@@ -44,7 +44,7 @@ const FunctionalModulesStudent = () => {
       <ScrollView>
         <Container>
           {mass.map((item, index) => (
-            <Pressable key={index} onPress={() => {}}>
+            <Pressable key={index} onPress={() => {navigation.navigate("СurrentGrades")}}>
               <ContainerFunctionalModule
                 style={{
                   height: 140,

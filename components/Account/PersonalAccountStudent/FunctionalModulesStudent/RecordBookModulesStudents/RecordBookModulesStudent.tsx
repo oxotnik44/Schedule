@@ -39,13 +39,6 @@ const testData = [
               grade: "Зачтено",
               competenceCode: "ВМ1",
             },
-            {
-              component: "Практика",
-              control: "Экзамен",
-              name: "Физика",
-              grade: "4",
-              competenceCode: "ФЗ2",
-            },
           ],
         },
         {
