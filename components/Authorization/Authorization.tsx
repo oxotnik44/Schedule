@@ -5,9 +5,10 @@ import * as WebBrowser from "expo-web-browser";
 import * as Linking from "expo-linking";
 import queryString from "query-string";
 import { useDispatch, useSelector } from "react-redux";
-import { Authentication } from "../../api/apiAuthentication";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../Navigate";
+import axios from "axios";
+import { setAuthTokenStorage } from "../../Storage/AuthTokenStorage";
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 type ScheduleProps = {
@@ -18,15 +19,38 @@ const Authorization = ({ navigation }: ScheduleProps) => {
   const _handlePressButtonAsync = async () => {
     const baseUrl = "https://schedulemobilebackend.nspu.ru:3000/login";
     const callbackUrl = Linking.createURL("App", { scheme: "myapp" });
-    const result = await WebBrowser.openAuthSessionAsync(baseUrl, callbackUrl);
-    if (result?.type === "success" && result.url) {
-      const queryParams = queryString.parse(result.url.split("?")[1]);
-      const accessToken = queryParams.accessToken;
-      console.log(queryParams.user);
 
-      // if (accessToken) {
-      //   Authentication(accessToken, navigation, dispatch);
-      // }
+    try {
+      const response = await axios.post(
+        "https://schedulemobilebackend.nspu.ru:3000/setIpAddressMobileForAuth",
+        {
+          ipAddressMobileForAuth: callbackUrl,
+        }
+      );
+
+      // Проверка статуса ответа
+      if (response.status === 200) {
+        // Открытие браузера
+        const result = await WebBrowser.openAuthSessionAsync(
+          baseUrl,
+          callbackUrl
+        );
+        if (result?.type === "success" && result.url) {
+          const queryParams = queryString.parse(result.url.split("?")[1]);
+          const accessToken = queryParams.accessToken;
+          console.log(accessToken);
+          console.log(queryParams.userData);
+          setAuthTokenStorage(accessToken, dispatch);
+
+          // if (accessToken) {
+          //   Authentication(accessToken, navigation, dispatch);
+          // }
+        }
+      } else {
+        console.error("Failed to send callbackUrl to server");
+      }
+    } catch (error) {
+      console.error("Error sending callbackUrl to server:", error);
     }
   };
 

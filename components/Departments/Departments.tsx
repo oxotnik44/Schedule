@@ -42,7 +42,7 @@ import { FlashList } from "@shopify/flash-list";
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 type DepartmentsProps = {
-  navigation: StackNavigationProp<RootStackParamList, "Departments">;
+  navigation: StackNavigationProp<RootStackParamList>;
 };
 interface DepartmentsState {
   DepartmentInfoSlice: {

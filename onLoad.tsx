@@ -14,6 +14,7 @@ import { setConnectionStatus, setTheme } from "./redux/slices/SettingsSlice";
 import { setFavoriteGroups } from "./redux/slices/FavoritesSlice/FavoriteGroupsSlice";
 import { setFavoriteEducator } from "./redux/slices/FavoritesSlice/FavoriteEducatorsSlice";
 import { setTokenUser } from "./redux/slices/AuthTokenSlice";
+import { AuthOnLoad } from "./api/apiAuthentication";
 type GroupsProps = {
   navigation: StackNavigationProp<RootStackParamList, "Settings">;
 };
@@ -44,11 +45,12 @@ const Load = ({ navigation }: GroupsProps) => {
     const getAuthUserToken = async () => {
       const authTokenStorage = await AsyncStorage.getItem("authTokenStorage");
       const token = authTokenStorage ? JSON.parse(authTokenStorage) : null;
-      console.log(authTokenStorage)
       if (token === null) {
         dispatch(setTokenUser(null));
       } else {
         dispatch(setTokenUser(token));
+        console.log(token)
+        AuthOnLoad(token);
       }
     };
     const getTheme = async (): Promise<void> => {
@@ -120,7 +122,7 @@ const Load = ({ navigation }: GroupsProps) => {
   if (!fontsLoaded) {
     return null;
   }
-console.log(loading)
+  console.log(loading);
   if (loading) {
     return <></>; // Или можно отображать индикатор загрузки
   } else {

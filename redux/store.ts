@@ -12,6 +12,7 @@ import SettingsSlice from "./slices/SettingsSlice";
 import { ScheduleInfoStudentSlice } from "./slices/ScheduleStudentInfoSlice";
 import { ScheduleInfoEducatorSlice } from "./slices/ScheduleEducatorInfoSlice";
 import AuthTokenSlice from "./slices/AuthTokenSlice";
+import aSlice from "./slices/aSlice";
 export const store = configureStore({
   reducer: {
     DepartmentInfoSlice: DepartmentInfoSlice.reducer,
@@ -24,6 +25,7 @@ export const store = configureStore({
     ScheduleInfoStudentSlice: ScheduleInfoStudentSlice.reducer,
     ScheduleInfoEducatorSlice: ScheduleInfoEducatorSlice.reducer,
     AuthTokenSlice: AuthTokenSlice,
+    aSlice: aSlice,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

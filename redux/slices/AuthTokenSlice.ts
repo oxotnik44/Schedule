@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 interface iTokenUser {
-  token: string | null;
+  token: any;
 }
 export const initialAuthToken: iTokenUser = {
   token: "",
