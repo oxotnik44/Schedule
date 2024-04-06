@@ -1,12 +1,13 @@
 import React from "react";
 import { Container } from "./AccountStyle";
 import Profile from "./PersonalAccountStudent/Profile/Profile";
-import FunctionalModulesStudent from "./PersonalAccountStudent/FunctionalModulesStudent/FunctionalModulesStudent";
 import Authorization from "../Authorization/Authorization";
 import { useSelector } from "react-redux";
 import { View } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../Navigate";
+import СurrentGradesModulesStudent from "./PersonalAccountStudent/FunctionalModulesStudent/СurrentGradesModulesStudents/СurrentGradesModulesStudent";
+import RecordBookModulesStudent from "./PersonalAccountStudent/FunctionalModulesStudent/RecordBookModulesStudents/RecordBookModulesStudent";
 type ScheduleProps = {
   navigation: StackNavigationProp<RootStackParamList, "Schedule">;
 };
@@ -25,8 +26,8 @@ const Account = ({ navigation }: ScheduleProps) => {
         <Authorization navigation={navigation}/>
       ) : (
         <View>
-          <Profile />
-          <FunctionalModulesStudent />
+          {/* <Profile/> */}
+          {/* <FunctionalModulesStudent navigation={navigation}/> */}
         </View>
       )}
     </Container>

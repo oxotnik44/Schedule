@@ -1,5 +1,5 @@
 import axios from "axios";
-import { setCourses } from "../redux/slices/aSlice";
+import { setCourses } from "../redux/slices/GradesInfoSlice";
 
 export const getSemesterGrades = async (dispatch: Function) => {
   try {
