@@ -50,7 +50,7 @@ const Load = ({ navigation }: GroupsProps) => {
       } else {
         dispatch(setTokenUser(token));
         console.log(token)
-        AuthOnLoad(token);
+        AuthOnLoad(token,dispatch);
       }
     };
     const getTheme = async (): Promise<void> => {

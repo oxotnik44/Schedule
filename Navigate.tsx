@@ -29,6 +29,7 @@ import { setConnectionStatus } from "./redux/slices/SettingsSlice";
 import { resetTextSearchGroup } from "./redux/slices/DepartmentsInfoSlice";
 import Account from "./components/Account/Account";
 import СurrentGradesModulesStudent from "./components/Account/PersonalAccountStudent/FunctionalModulesStudent/СurrentGradesModulesStudents/СurrentGradesModulesStudent";
+import RecordBookModulesStudent from "./components/Account/PersonalAccountStudent/FunctionalModulesStudent/RecordBookModulesStudents/RecordBookModulesStudent";
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 export type RootStackParamList = {
@@ -43,7 +44,8 @@ export type RootStackParamList = {
   Settings: undefined;
   Authorization: undefined;
   AC: undefined;
-  СurrentGrades: undefined;
+  RecordBookModulesStudent: undefined;
+  СurrentGradesModulesStudent: undefined;
 };
 
 interface TabIconProps {
@@ -151,8 +153,11 @@ const Navigate = ({ navigation }: GroupsProps) => {
       return "Авторизация";
     } else if (route.name === "Account") {
       return "Аккаунт";
+    } else if (route.name === "RecordBookModulesStudent") {
+      return "Зачётная книжка";
+    } else if (route.name === "СurrentGradesModulesStudent") {
+      return "Текущие оценки";
     }
-    
   };
   const getInitialData = async () => {
     await getDepartments(dispatch);
@@ -228,7 +233,6 @@ const Navigate = ({ navigation }: GroupsProps) => {
             },
           })}
         >
-          
           <Tab.Screen
             name="SelectedMyGroups"
             component={SelectedMyGroups}
@@ -313,8 +317,13 @@ const Navigate = ({ navigation }: GroupsProps) => {
             })}
           />
           <Tab.Screen
-            name="СurrentGrades"
+            name="СurrentGradesModulesStudent"
             component={СurrentGradesModulesStudent}
+            options={{ tabBarButton: () => null }}
+          />
+          <Tab.Screen
+            name="RecordBookModulesStudent"
+            component={RecordBookModulesStudent}
             options={{ tabBarButton: () => null }}
           />
           <Tab.Screen

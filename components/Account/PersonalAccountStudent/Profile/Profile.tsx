@@ -18,13 +18,19 @@ interface Settings {
     theme: any;
   };
 }
+interface ProfileInfo {
+  ProfileInfoSlice: {
+    fullName: string;
+  };
+}
+
 const ProfileStudent = () => {
   const isConnected = useSelector(
     (state: Settings) => state.SettingsSlice.isConnected
   );
-  // const studentData = useSelector(
-  //   (state: IState) => state.ProfileSlice.studentsData[0]
-  // );
+  const fullNameStudent = useSelector(
+    (state: ProfileInfo) => state.ProfileInfoSlice.fullName
+  );
   const theme = useSelector((state: Settings) => state.SettingsSlice.theme);
   const [isInfoVisible, setIsInfoVisible] = useState(false);
   return (
@@ -34,14 +40,14 @@ const ProfileStudent = () => {
           resizeMode="contain"
           source={require("../../../../assets/Account.png")}
         />
-        <ProfileNameText>Новиков Артём Витальевич</ProfileNameText>
+        <ProfileNameText>{fullNameStudent}</ProfileNameText>
         <ProfileInfoContainer>
           <TouchableOpacity onPress={() => setIsInfoVisible(!isInfoVisible)}>
             <InfoTitle>Полная информация</InfoTitle>
           </TouchableOpacity>
           {isInfoVisible && (
             <InfoCard>
-              <InfoItem>Телефон: +1234567890</InfoItem> 
+              <InfoItem>Телефон: +1234567890</InfoItem>
               <InfoItem>Дата рождения: 01.01.1990</InfoItem>
               <InfoItem>Учебный план: 0000000000000</InfoItem>
             </InfoCard>

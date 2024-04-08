@@ -36,24 +36,24 @@ interface Course {
 }
 
 interface IState {
-  courseData: { [key: string]: Course };
+  semesterGradesData: { [key: string]: Course };
 }
 
 export const initialState: IState = {
-  courseData: {},
+  semesterGradesData: {},
 };
 
-const GradesInfoSlice = createSlice({
+const SemesterGradesInfoSlice = createSlice({
   name: "Grades",
   initialState,
   reducers: {
     // Редуктор для установки курсов
-    setCourses(state, action: PayloadAction<{ [key: string]: Course }>) {
-      state.courseData = action.payload;
+    setSessionGrades(state, action) {
+      state.semesterGradesData = action.payload;
     },
   },
 });
 
 // Экспорт экшенов (действий) и редуктора
-export const { setCourses } = GradesInfoSlice.actions;
-export default GradesInfoSlice.reducer;
+export const { setSessionGrades } = SemesterGradesInfoSlice.actions;
+export default SemesterGradesInfoSlice.reducer;

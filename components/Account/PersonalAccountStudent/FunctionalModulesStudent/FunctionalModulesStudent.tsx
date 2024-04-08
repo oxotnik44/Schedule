@@ -8,12 +8,16 @@ import {
   ModuleName,
   ServicesTitle,
 } from "./FunctionalModulesStudentStyle";
-import { Pressable, ScrollView } from "react-native";
+import { Pressable, ScrollView, Text, ToastAndroid } from "react-native";
 import { RootStackParamList } from "../../../../Navigate";
 import { StackNavigationProp } from "@react-navigation/stack";
+import { getSemesterGrades } from "../../../../api/apiUserStudent";
 
-type CurrentGradesProps = {
-  navigation: StackNavigationProp<RootStackParamList, "СurrentGrades">;
+type RecordBookModulesStudent = {
+  navigation: StackNavigationProp<
+    RootStackParamList,
+    "RecordBookModulesStudent"
+  >;
 };
 
 interface Settings {
@@ -22,19 +26,21 @@ interface Settings {
     theme: any;
   };
 }
-const mass = [{ name : "Зачетная книжка"}, { name: "Оценки" }];
-const FunctionalModulesStudent:React.FC<CurrentGradesProps> = ({navigation}) => {
+const mass = [{ name: "Зачётная книжка" }, { name: "Оценки" }];
+const FunctionalModulesStudent: React.FC<RecordBookModulesStudent> = ({
+  navigation,
+}) => {
   const isConnected = useSelector(
     (state: Settings) => state.SettingsSlice.isConnected
   );
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const theme = useSelector((state: Settings) => state.SettingsSlice.theme);
 
   const getImageSource = (name: any) => {
     switch (name) {
       case "Оценки":
         return require("../../../../assets/Grades.png");
-      case "Зачетная книжка":
+      case "Зачётная книжка":
         return require("../../../../assets/ReportCard.png");
     }
   }; //для смены картинки
@@ -44,11 +50,23 @@ const FunctionalModulesStudent:React.FC<CurrentGradesProps> = ({navigation}) => 
       <ServicesTitle>СЕРВИСЫ</ServicesTitle>
       <ScrollView>
         <Container>
-          <Pressable onPress={() => getSemesterGrades(dispatch)}>
-            <Text>qwe</Text>
-          </Pressable>
           {mass.map((item, index) => (
-            <Pressable key={index} onPress={() => {navigation.navigate("СurrentGrades")}}>
+            <Pressable
+              key={index}
+              onPress={() => {
+                if (!isConnected) {
+                  ToastAndroid.show(
+                    "Нет соединения с интернетом",
+                    ToastAndroid.SHORT
+                  );
+                } else {
+                  item.name === "Зачётная книжка"
+                    ? (getSemesterGrades(dispatch),
+                      navigation.navigate("RecordBookModulesStudent"))
+                    : navigation.navigate("СurrentGradesModulesStudent");
+                }
+              }}
+            >
               <ContainerFunctionalModule
                 style={{
                   height: 140,

@@ -9,12 +9,16 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../Navigate";
 import axios from "axios";
 import { setAuthTokenStorage } from "../../Storage/AuthTokenStorage";
+import { setProfileInfo } from "../../redux/slices/ProfileInfoSlice";
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 type ScheduleProps = {
   navigation: StackNavigationProp<RootStackParamList, "Schedule">;
 };
-const Authorization = ({ navigation }: ScheduleProps) => {
+interface ProfileInfo {
+  fullName: string;
+}
+const Authorization = () => {
   const dispatch = useDispatch();
   const _handlePressButtonAsync = async () => {
     const baseUrl = "https://schedulemobilebackend.nspu.ru:3000/login";
@@ -39,12 +43,28 @@ const Authorization = ({ navigation }: ScheduleProps) => {
           const queryParams = queryString.parse(result.url.split("?")[1]);
           const accessToken = queryParams.accessToken;
           console.log(accessToken);
-          console.log(queryParams.userData);
-          setAuthTokenStorage(accessToken, dispatch);
+          if (
+            queryParams.userData !== null &&
+            typeof queryParams.userData === "string"
+          ) {
+            const userData = JSON.parse(queryParams.userData);
+            console.log(userData.login);
+            const fullName =
+              userData.lastname +
+              " " +
+              userData.firstname +
+              " " +
+              userData.middlename;
+              const profileInfo: ProfileInfo = {
+                fullName: fullName,
+              };
+              
+              dispatch(setProfileInfo(profileInfo));
+          } else {
+            console.error("queryParams.userData is null or not a string");
+          }
 
-          // if (accessToken) {
-          //   Authentication(accessToken, navigation, dispatch);
-          // }
+          setAuthTokenStorage(accessToken, dispatch);
         }
       } else {
         console.error("Failed to send callbackUrl to server");

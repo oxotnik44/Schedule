@@ -1,5 +1,5 @@
 import axios from "axios";
-import { setCourses } from "../redux/slices/GradesInfoSlice";
+import { setSessionGrades } from "../redux/slices/SemesterGradesInfoSlice";
 
 export const getSemesterGrades = async (dispatch: Function) => {
   try {
@@ -36,9 +36,8 @@ export const getSemesterGrades = async (dispatch: Function) => {
         })),
       })),
     }));
-
     // Вызываем действие setCourses и передаем ему преобразованные данные
-    dispatch(setCourses(data));
+    dispatch(setSessionGrades(data));
   } catch (error) {
     console.error("Error while authenticating:", error);
   }

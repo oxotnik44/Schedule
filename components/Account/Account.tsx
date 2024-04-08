@@ -8,8 +8,9 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../Navigate";
 import СurrentGradesModulesStudent from "./PersonalAccountStudent/FunctionalModulesStudent/СurrentGradesModulesStudents/СurrentGradesModulesStudent";
 import RecordBookModulesStudent from "./PersonalAccountStudent/FunctionalModulesStudent/RecordBookModulesStudents/RecordBookModulesStudent";
+import FunctionalModulesStudent from "./PersonalAccountStudent/FunctionalModulesStudent/FunctionalModulesStudent";
 type ScheduleProps = {
-  navigation: StackNavigationProp<RootStackParamList, "Schedule">;
+  navigation: StackNavigationProp<RootStackParamList, "RecordBookModulesStudent">;
 };
 interface AuthUserTokenState {
   AuthTokenSlice: {
@@ -22,12 +23,12 @@ const Account = ({ navigation }: ScheduleProps) => {
   );
   return (
     <Container style={{ flexDirection: "column" }}>
-      {authTokenUser !== null ? (
-        <Authorization navigation={navigation}/>
+      {authTokenUser === null ? (
+        <Authorization />
       ) : (
         <View>
-          {/* <Profile/> */}
-          {/* <FunctionalModulesStudent navigation={navigation}/> */}
+          <Profile />
+          <FunctionalModulesStudent navigation={navigation} />
         </View>
       )}
     </Container>
