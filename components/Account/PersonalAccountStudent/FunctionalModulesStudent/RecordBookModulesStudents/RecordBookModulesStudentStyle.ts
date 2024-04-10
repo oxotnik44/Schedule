@@ -9,32 +9,27 @@ export const MainContainer = styled.ScrollView.attrs(() => ({
   background-color: ${(props) => props.theme.backgroundColor};
 `;
 
-export const TableHeadersContainer = styled.View`
-  flex-direction: row;
-  justify: space-between;
-  padding: 10px;
-  background-color: ${(props) => props.theme.backgroundColor};
+export const CourseContainer = styled.View`
+  margin-bottom: 20px;
 `;
 
-export const TableHeader = styled.Text`
-  font-size: 16px;
-  color: ${(props) => props.theme.textColor};
-  font-family: "Montserrat-Bold";
-`;
-
-export const CourseSemesterContainer = styled.View`
-  margin-top: 20px;
-`;
-
-export const CourseSemesterTitle = styled.Text`
+export const CourseTitle = styled.Text`
   font-size: 18px;
   color: ${(props) => props.theme.textColor};
   font-family: "Montserrat-SemiBold";
   padding: 10px;
+  margin-bottom: 10px;
 `;
 
-export const GradesTable = styled.View`
-  margin-top: 10px;
+export const SemesterContainer = styled.View`
+  margin-bottom: 20px;
+`;
+
+export const SemesterTitle = styled.Text`
+  font-size: 16px;
+  color: ${(props) => props.theme.textColor};
+  font-family: "Montserrat-Bold";
+  padding: 10px;
 `;
 
 export const TableRow = styled.View`
@@ -58,15 +53,5 @@ export const TableRowHeader = styled.Text`
   padding-right: 10px;
   background-color: #e0e0e0;
   border-radius: 5px;
-  margin-right: 5px; 
+  margin-right: 5px;
 `;
-
-export const DisciplineTitle = styled.Text`
-  font-size: 18px;
-  color: ${(props) => props.theme.textColor};
-  font-family: "Montserrat-SemiBold";
-  padding: 10px;
-  margin-top: 20px;
-  margin-bottom: 10px;
-`;
-
