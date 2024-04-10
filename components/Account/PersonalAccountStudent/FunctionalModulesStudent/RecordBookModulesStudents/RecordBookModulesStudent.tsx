@@ -66,7 +66,7 @@ const RecordBookModulesStudent = () => {
   const dispatch = useDispatch();
   
   useEffect(() => {
-    dispatch(getSemesterGrades());
+    getSemesterGrades(dispatch);
   }, [dispatch]);
   
   const [collapsed, setCollapsed] = useState<boolean[]>([]);
