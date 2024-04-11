@@ -1,7 +1,10 @@
 import axios from "axios";
 import { setSessionGrades } from "../redux/slices/SemesterGradesInfoSlice";
 
-export const getSemesterGrades = async (dispatch: Function) => {
+export const getSemesterGrades = async (
+  dispatch: Function,
+  navigation: any
+) => {
   try {
     const response = await axios.post(
       "https://schedulemobilebackend.nspu.ru:3000/getSemesterGrades",
@@ -24,11 +27,11 @@ export const getSemesterGrades = async (dispatch: Function) => {
             disciplines: typeControl["Дисциплины"].map((discipline: any) => ({
               nameDiscipline: discipline["Наименование"],
               codeDiscipline: discipline["УИД_Дисциплины"],
-              appraisal: discipline["Оценка"],
+              grade: discipline["Оценка"],
               listCompetencies: discipline["СписокКомпетенций"].map(
                 (competencies: any) => ({
-                  codeCompetencies: competencies["КодКомпетенции"],
-                  nameCompetencies: competencies["НаименованиеКомпетенции"],
+                  competencyCode: competencies["КодКомпетенции"],
+                  competencyName: competencies["НаименованиеКомпетенции"],
                 })
               ),
             })),
@@ -38,6 +41,7 @@ export const getSemesterGrades = async (dispatch: Function) => {
     }));
     // Вызываем действие setCourses и передаем ему преобразованные данные
     dispatch(setSessionGrades(data));
+    navigation.navigate("RecordBookModulesStudent");
   } catch (error) {
     console.error("Error while authenticating:", error);
   }

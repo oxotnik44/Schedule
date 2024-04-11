@@ -61,8 +61,7 @@ const FunctionalModulesStudent: React.FC<RecordBookModulesStudent> = ({
                   );
                 } else {
                   item.name === "Зачётная книжка"
-                    ? (getSemesterGrades(dispatch),
-                      navigation.navigate("RecordBookModulesStudent"))
+                    ? (getSemesterGrades(dispatch,navigation))
                     : navigation.navigate("СurrentGradesModulesStudent");
                 }
               }}

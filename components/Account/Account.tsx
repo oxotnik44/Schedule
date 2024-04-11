@@ -23,7 +23,7 @@ const Account = ({ navigation }: ScheduleProps) => {
   );
   return (
     <Container style={{ flexDirection: "column" }}>
-      {authTokenUser !== null ? (
+      {authTokenUser === null ? (
         <Authorization />
       ) : (
         <View>
