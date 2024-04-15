@@ -15,9 +15,7 @@ const screenHeight = Dimensions.get("window").height;
 type ScheduleProps = {
   navigation: StackNavigationProp<RootStackParamList, "Schedule">;
 };
-interface ProfileInfo {
-  fullName: string;
-}
+
 const Authorization = () => {
   const dispatch = useDispatch();
   const _handlePressButtonAsync = async () => {
@@ -55,11 +53,9 @@ const Authorization = () => {
               userData.firstname +
               " " +
               userData.middlename;
-              const profileInfo: ProfileInfo = {
-                fullName: fullName,
-              };
-              
-              dispatch(setProfileInfo(profileInfo));
+
+            console.log(typeof fullName);
+            dispatch(setProfileInfo(fullName));
           } else {
             console.error("queryParams.userData is null or not a string");
           }

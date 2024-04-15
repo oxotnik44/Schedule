@@ -40,7 +40,7 @@ const ProfileStudent = () => {
           resizeMode="contain"
           source={require("../../../../assets/Account.png")}
         />
-        <ProfileNameText>{fullNameStudent}</ProfileNameText>
+        <ProfileNameText>{fullNameStudent && fullNameStudent}</ProfileNameText>
         <ProfileInfoContainer>
           <TouchableOpacity onPress={() => setIsInfoVisible(!isInfoVisible)}>
             <InfoTitle>Полная информация</InfoTitle>
