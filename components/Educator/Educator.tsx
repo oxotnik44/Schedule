@@ -27,7 +27,6 @@ import {
 } from "../../redux/slices/ScheduleEducatorInfoSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import AddFavorite from "../../helper/AddFavorite/AddFavorite";
-import { FlashList } from "@shopify/flash-list";
 const screenWidth = Dimensions.get("window").width;
 
 type EducatorProps = {
@@ -163,11 +162,10 @@ const Educator: React.FC<EducatorProps> = ({ navigation }) => {
               </SearchContainer>
             </ContainerSearchGroups>
 
-            <FlashList
+            <FlatList
               data={filteredData}
               renderItem={renderItemEducator}
               showsHorizontalScrollIndicator={false}
-              estimatedItemSize={100}
             />
           </View>
         )}

@@ -20,7 +20,12 @@ interface Settings {
 }
 interface ProfileInfo {
   ProfileInfoSlice: {
-    fullName: string;
+    personalDataStudent: {
+      fullName: string;
+      numberGroup: string;
+      email: string;
+      creditBook: string;
+    };
   };
 }
 
@@ -28,8 +33,8 @@ const ProfileStudent = () => {
   const isConnected = useSelector(
     (state: Settings) => state.SettingsSlice.isConnected
   );
-  const fullNameStudent = useSelector(
-    (state: ProfileInfo) => state.ProfileInfoSlice.fullName
+  const dataStudent = useSelector(
+    (state: ProfileInfo) => state.ProfileInfoSlice.personalDataStudent
   );
   const theme = useSelector((state: Settings) => state.SettingsSlice.theme);
   const [isInfoVisible, setIsInfoVisible] = useState(false);
@@ -40,16 +45,15 @@ const ProfileStudent = () => {
           resizeMode="contain"
           source={require("../../../../assets/Account.png")}
         />
-        <ProfileNameText>{fullNameStudent && fullNameStudent}</ProfileNameText>
+        <ProfileNameText>{dataStudent.fullName}</ProfileNameText>
         <ProfileInfoContainer>
           <TouchableOpacity onPress={() => setIsInfoVisible(!isInfoVisible)}>
             <InfoTitle>Полная информация</InfoTitle>
           </TouchableOpacity>
           {isInfoVisible && (
             <InfoCard>
-              <InfoItem>Телефон: +1234567890</InfoItem>
-              <InfoItem>Дата рождения: 01.01.1990</InfoItem>
-              <InfoItem>Учебный план: 0000000000000</InfoItem>
+              <InfoItem>Номер группы: {dataStudent.numberGroup} </InfoItem>
+              <InfoItem>Email: {dataStudent.email}</InfoItem>
             </InfoCard>
           )}
         </ProfileInfoContainer>

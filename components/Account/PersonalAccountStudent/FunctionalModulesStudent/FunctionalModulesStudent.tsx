@@ -19,11 +19,26 @@ type RecordBookModulesStudent = {
     "RecordBookModulesStudent"
   >;
 };
-
+interface ProfileInfo {
+  ProfileInfoSlice: {
+    personalDataStudent: {
+      login: string;
+      fullName: string;
+      numberGroup: string;
+      email: string;
+      creditBook: string;
+    };
+  };
+}
 interface Settings {
   SettingsSlice: {
     isConnected: boolean;
     theme: any;
+  };
+}
+interface iTokenUser {
+  AuthTokenSlice: {
+    accessToken: any;
   };
 }
 const mass = [{ name: "Зачётная книжка" }, { name: "Оценки" }];
@@ -33,9 +48,14 @@ const FunctionalModulesStudent: React.FC<RecordBookModulesStudent> = ({
   const isConnected = useSelector(
     (state: Settings) => state.SettingsSlice.isConnected
   );
+  const dataStudent = useSelector(
+    (state: ProfileInfo) => state.ProfileInfoSlice.personalDataStudent
+  );
+  const accessToken = useSelector(
+    (state: iTokenUser) => state.AuthTokenSlice.accessToken
+  );
   const dispatch = useDispatch();
   const theme = useSelector((state: Settings) => state.SettingsSlice.theme);
-
   const getImageSource = (name: any) => {
     switch (name) {
       case "Оценки":
@@ -44,7 +64,7 @@ const FunctionalModulesStudent: React.FC<RecordBookModulesStudent> = ({
         return require("../../../../assets/ReportCard.png");
     }
   }; //для смены картинки
-
+  console.log(accessToken);
   return (
     <ThemeProvider theme={theme}>
       <ServicesTitle>СЕРВИСЫ</ServicesTitle>
@@ -61,7 +81,13 @@ const FunctionalModulesStudent: React.FC<RecordBookModulesStudent> = ({
                   );
                 } else {
                   item.name === "Зачётная книжка"
-                    ? (getSemesterGrades(dispatch,navigation))
+                    ? getSemesterGrades(
+                        dispatch,
+                        navigation,
+                        accessToken,
+                        dataStudent.login,
+                        dataStudent.creditBook
+                      )
                     : navigation.navigate("СurrentGradesModulesStudent");
                 }
               }}

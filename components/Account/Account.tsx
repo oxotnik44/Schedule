@@ -10,16 +10,19 @@ import СurrentGradesModulesStudent from "./PersonalAccountStudent/FunctionalMod
 import RecordBookModulesStudent from "./PersonalAccountStudent/FunctionalModulesStudent/RecordBookModulesStudents/RecordBookModulesStudent";
 import FunctionalModulesStudent from "./PersonalAccountStudent/FunctionalModulesStudent/FunctionalModulesStudent";
 type ScheduleProps = {
-  navigation: StackNavigationProp<RootStackParamList, "RecordBookModulesStudent">;
+  navigation: StackNavigationProp<
+    RootStackParamList,
+    "RecordBookModulesStudent"
+  >;
 };
 interface AuthUserTokenState {
   AuthTokenSlice: {
-    token: string | null;
+    accessToken: string | null;
   };
 }
 const Account = ({ navigation }: ScheduleProps) => {
   const authTokenUser = useSelector(
-    (stata: AuthUserTokenState) => stata.AuthTokenSlice.token
+    (stata: AuthUserTokenState) => stata.AuthTokenSlice.accessToken
   );
   return (
     <Container style={{ flexDirection: "column" }}>

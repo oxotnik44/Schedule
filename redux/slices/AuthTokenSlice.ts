@@ -1,17 +1,17 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 interface iTokenUser {
-  token: any;
+  accessToken: any;
 }
 export const initialAuthToken: iTokenUser = {
-  token: "",
+  accessToken: "",
 };
 const AuthTokenSlice = createSlice({
   name: "AuthTokenUser",
   initialState: initialAuthToken,
   reducers: {
     setTokenUser: (state, action) => {
-      state.token = action.payload;
+      state.accessToken = action.payload;
     },
   },
 });

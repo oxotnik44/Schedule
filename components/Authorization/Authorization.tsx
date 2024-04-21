@@ -9,13 +9,21 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../Navigate";
 import axios from "axios";
 import { setAuthTokenStorage } from "../../Storage/AuthTokenStorage";
-import { setProfileInfo } from "../../redux/slices/ProfileInfoSlice";
+import { setProfileStudentInfoStorage } from "../../Storage/ProfileInfoStorage";
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 type ScheduleProps = {
   navigation: StackNavigationProp<RootStackParamList, "Schedule">;
 };
-
+interface ProfileState {
+  fullName: string;
+  numberGroup: string;
+  email: string;
+  gradeBook: string;
+}
+interface IState {
+  personalDataStudent: ProfileState;
+}
 const Authorization = () => {
   const dispatch = useDispatch();
   const _handlePressButtonAsync = async () => {
@@ -32,35 +40,38 @@ const Authorization = () => {
 
       // Проверка статуса ответа
       if (response.status === 200) {
-        // Открытие браузера
         const result = await WebBrowser.openAuthSessionAsync(
           baseUrl,
           callbackUrl
         );
         if (result?.type === "success" && result.url) {
           const queryParams = queryString.parse(result.url.split("?")[1]);
-          const accessToken = queryParams.accessToken;
-          console.log(accessToken);
-          if (
-            queryParams.userData !== null &&
-            typeof queryParams.userData === "string"
-          ) {
-            const userData = JSON.parse(queryParams.userData);
-            console.log(userData.login);
-            const fullName =
-              userData.lastname +
-              " " +
-              userData.firstname +
-              " " +
-              userData.middlename;
-
-            console.log(typeof fullName);
-            dispatch(setProfileInfo(fullName));
+          const { accessToken, userData } = queryParams;
+          if (userData && typeof userData === "string") {
+            const {
+              lastname,
+              firstname,
+              middlename,
+              edu_groups,
+              mail,
+              gradebooks,
+              login,
+            } = JSON.parse(userData);
+            const fullName = `${lastname} ${firstname} ${middlename}`;
+            setAuthTokenStorage(accessToken, dispatch);
+            setProfileStudentInfoStorage(
+              {
+                login,
+                fullName,
+                numberGroup: edu_groups,
+                email: mail,
+                creditBook: gradebooks,
+              },
+              dispatch
+            );
           } else {
             console.error("queryParams.userData is null or not a string");
           }
-
-          setAuthTokenStorage(accessToken, dispatch);
         }
       } else {
         console.error("Failed to send callbackUrl to server");

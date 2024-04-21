@@ -38,7 +38,6 @@ import {
 } from "../../api/apiGroups";
 import ImageDepartmens from "../../helper/ImageDepartmens/ImageDepartmens";
 import AddFavorite from "../../helper/AddFavorite/AddFavorite";
-import { FlashList } from "@shopify/flash-list";
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 type DepartmentsProps = {
@@ -85,9 +84,7 @@ const Departments: React.FC<DepartmentsProps> = ({ navigation }) => {
   const { dataDepartment, textSearchGroup } = useSelector(
     (state: DepartmentsState) => state.DepartmentInfoSlice
   );
-  const dataGroups = useSelector(
-    (state: GroupsState) => state.GroupsInfoSlice
-  );
+  const dataGroups = useSelector((state: GroupsState) => state.GroupsInfoSlice);
   const isConnected = useSelector(
     (state: Settings) => state.SettingsSlice.isConnected
   );
@@ -102,7 +99,7 @@ const Departments: React.FC<DepartmentsProps> = ({ navigation }) => {
   const fetchSchedule = useCallback(
     async (idGroup: number, nameGroup: string) => {
       try {
-        console.log(idGroup, nameGroup)
+        console.log(idGroup, nameGroup);
         await getSchedule(idGroup, dispatch, nameGroup);
       } catch (error) {
         console.log(error);
@@ -148,8 +145,7 @@ const Departments: React.FC<DepartmentsProps> = ({ navigation }) => {
               "Нет соединения с интернетом",
               ToastAndroid.SHORT
             );
-          }
-          else {
+          } else {
             if (idDepartment === 18) {
               await getSchedule(3430, dispatch, item.nameGroup);
               dispatch(setSelectIdGroup(3430));
@@ -165,7 +161,6 @@ const Departments: React.FC<DepartmentsProps> = ({ navigation }) => {
               dispatch(setExtramuralGroupOpen(false));
             }
           }
-
         }}
       >
         <NameDepartments>{fullnameDepartment}</NameDepartments>
@@ -185,17 +180,15 @@ const Departments: React.FC<DepartmentsProps> = ({ navigation }) => {
               "Нет соединения с интернетом",
               ToastAndroid.SHORT
             );
-          }
-          else {
+          } else {
             fetchSchedule(idGroup, nameGroup).then(() => {
-              console.log(idGroup)
+              console.log(idGroup);
               navigation.navigate("Schedule");
               dispatch(setNameGroup(nameGroup));
               dispatch(setIsExtramuralScheduleUntilTodayStudent(false));
               dispatch(setSelectIdGroup(idGroup));
             });
           }
-
         }}
       >
         <NameDepartments>{nameGroup}</NameDepartments>
@@ -237,20 +230,18 @@ const Departments: React.FC<DepartmentsProps> = ({ navigation }) => {
             </ContainerSearchGroups>
 
             {isSearchInputEmpty ? (
-              <FlashList
+              <FlatList
                 data={dataDepartment}
                 renderItem={renderItemDepartment}
                 contentContainerStyle={{
                   paddingBottom: screenHeight * 0.02,
                 }}
-                estimatedItemSize={20}
               />
             ) : (
-              <FlashList
+              <FlatList
                 data={filteredData}
                 renderItem={renderItemGroup}
                 showsHorizontalScrollIndicator={false}
-                estimatedItemSize={200} 
               />
             )}
           </View>

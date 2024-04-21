@@ -15,7 +15,8 @@
     "preview2": {
       "android": {
         "buildType": "apk"
-      }
+      },
+      "channel": "preview2"
     },
     "production": {
       "channel": "production"

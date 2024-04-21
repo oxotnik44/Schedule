@@ -1,13 +1,23 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface ProfileState {
+  login: string;
   fullName: string;
-  loading: boolean;
+  numberGroup: string;
+  email: string;
+  creditBook: string | undefined;
 }
-
-const initialProfileState: ProfileState = {
-  fullName: "",
-  loading: false,
+interface IState {
+  personalDataStudent: ProfileState;
+}
+const initialProfileState: IState = {
+  personalDataStudent: {
+    login: "",
+    fullName: "",
+    numberGroup: "",
+    email: "",
+    creditBook: "",
+  },
 };
 
 const ProfileInfoSlice = createSlice({
@@ -15,14 +25,11 @@ const ProfileInfoSlice = createSlice({
   initialState: initialProfileState,
   reducers: {
     setProfileInfo: (state, action) => {
-      state.fullName = action.payload;
-    },
-    setLoading: (state, action) => {
-      state.loading = action.payload;
+      state.personalDataStudent = action.payload;
     },
   },
 });
 
-export const { setProfileInfo, setLoading } = ProfileInfoSlice.actions;
+export const { setProfileInfo } = ProfileInfoSlice.actions;
 
 export default ProfileInfoSlice.reducer;

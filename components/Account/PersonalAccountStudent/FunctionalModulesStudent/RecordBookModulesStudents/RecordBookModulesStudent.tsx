@@ -13,8 +13,9 @@ import {
   TableRowHeader,
   ContainerComponent,
   ContainerTypeControl,
+  NoCreditBook,
+  CenteredContainer,
 } from "./RecordBookModulesStudentStyle";
-import { getSemesterGrades } from "../../../../../api/apiUserStudent";
 
 interface Settings {
   SettingsSlice: {
@@ -22,6 +23,7 @@ interface Settings {
     theme: any;
   };
 }
+
 interface ISemesterGrades {
   SemesterGradesInfoSlice: {
     dataSemesterGrades: {
@@ -123,27 +125,33 @@ const RecordBookModulesStudent = () => {
   return (
     <ThemeProvider theme={theme}>
       <MainContainer>
-        <FlatList
-          data={semesterGradesData}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={({ item, index }) => (
-            <CourseContainer key={index}>
-              <CourseTitle onPress={() => toggleCollapsed(index)}>
-                {item.numberCourse} курс
-              </CourseTitle>
-              {collapsed[index] && (
-                <FlatList
-                  data={item.semesters}
-                  keyExtractor={(item, index) => index.toString()}
-                  renderItem={renderSemester}
-                  initialNumToRender={2}
-                  maxToRenderPerBatch={10}
-                  windowSize={10}
-                />
-              )}
-            </CourseContainer>
-          )}
-        />
+        {semesterGradesData === null ? (
+          <CenteredContainer>
+            <NoCreditBook>Нет зачетной книжки или оценок в ней</NoCreditBook>
+          </CenteredContainer>
+        ) : (
+          <FlatList
+            data={semesterGradesData}
+            keyExtractor={(item, index) => index.toString()}
+            renderItem={({ item, index }) => (
+              <CourseContainer key={index}>
+                <CourseTitle onPress={() => toggleCollapsed(index)}>
+                  {item.numberCourse} курс
+                </CourseTitle>
+                {collapsed[index] && (
+                  <FlatList
+                    data={item.semesters}
+                    keyExtractor={(item, index) => index.toString()}
+                    renderItem={renderSemester}
+                    initialNumToRender={2}
+                    maxToRenderPerBatch={10}
+                    windowSize={10}
+                  />
+                )}
+              </CourseContainer>
+            )}
+          />
+        )}
       </MainContainer>
     </ThemeProvider>
   );

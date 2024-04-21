@@ -2,7 +2,7 @@
   "expo": {
     "name": "НГПУ Расписание",
     "slug": "schedule",
-    "version": "1.2.1",
+    "version": "1.2.2",
     "orientation": "portrait",
     "icon": "./assets/NGPY_LOGO.png",
     "userInterfaceStyle": "light",
@@ -12,7 +12,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true
     },
@@ -21,7 +23,7 @@
         "foregroundImage": "./assets/NGPY_LOGO_SMALL.png"
       },
       "package": "com.oxotnik443.Schedule",
-      "versionCode": 10
+      "versionCode": 11
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -34,7 +36,6 @@
     "runtimeVersion": {
       "policy": "sdkVersion"
     },
-
     "updates": {
       "url": "https://u.expo.dev/868e8a2a-30c3-4cd3-9de7-ce3516efad75"
     },
@@ -44,7 +45,8 @@
         {
           "username": "oxotnik443"
         }
-      ]
+      ],
+      "expo-font"
     ]
   }
 }

@@ -8,7 +8,6 @@ export const MainContainer = styled.View`
   background-color: ${(props) => props.theme.backgroundColor};
 `;
 
-
 export const CourseContainer = styled.View`
   margin-bottom: 20px;
 `;
@@ -21,8 +20,7 @@ export const CourseTitle = styled.Text`
   margin-bottom: 10px;
 `;
 
-export const SemesterContainer = styled.View`
-`;
+export const SemesterContainer = styled.View``;
 
 export const SemesterTitle = styled.Text`
   font-size: 17px;
@@ -64,9 +62,23 @@ export const ContainerComponent = styled.View`
   border-radius: 10px;
   background-color: ${(props) => props.theme.containerColor};
 `;
-export const ContainerTypeControl = styled.View<{ shouldRenderBorder: boolean }>`
+export const ContainerTypeControl = styled.View<{
+  shouldRenderBorder: boolean;
+}>`
   margin-bottom: 5px;
   border-top-width: ${(props) => (props.shouldRenderBorder ? "2px" : "0px")};
   border-color: black;
 `;
-
+export const CenteredContainer = styled.View`
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+`;
+export const NoCreditBook = styled.Text`
+  text-align: center;
+  font-size: 18px;
+  color: ${(props) => props.theme.textColor};
+  font-family: "Montserrat-SemiBold";
+  justify-content: center;
+  
+`;
