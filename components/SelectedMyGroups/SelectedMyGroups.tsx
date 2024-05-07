@@ -3,10 +3,8 @@ import { TouchableOpacity, Alert, FlatList, ToastAndroid } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { getSchedule, getScheduleEducator } from "../../api/apiSchedule";
-import { setNameGroup } from "../../redux/reducers/groupsInfoReducer";
-import { removeFavoriteGroupAC } from "../../redux/reducers/favoritesReducer/favoriteGroupsReducer";
-import { removeFavoriteEducatorAC } from "../../redux/reducers/favoritesReducer/favoriteEducatorsReducer";
-import { setNameEducator } from "../../redux/reducers/educatorReducer";
+import { setNameGroup } from "../../redux/slices/GroupsInfoSlice";
+import { setNameEducator } from "../../redux/slices/EducatorSlice";
 
 import { ThemeProvider } from "styled-components/native";
 import {
@@ -21,20 +19,22 @@ import {
   ToggleButtonText,
   ToggleContainer,
 } from "./SelectedMyGroupsStyle";
-import { lightTheme } from "../../redux/reducers/settingsReducer";
+import { lightTheme } from "../../redux/slices/SettingsSlice";
 import {
   setDataScheduleStudent,
   setIsExtramuralScheduleUntilTodayStudent,
   setSelectIdGroup,
-} from "../../redux/reducers/scheduleStudentInfo";
+} from "../../redux/slices/ScheduleStudentInfoSlice";
 import {
   setDataScheduleEducator,
   setIsFullScheduleEducator,
   setSelectIdEducator,
-} from "../../redux/reducers/scheduleEducatorInfo";
+} from "../../redux/slices/ScheduleEducatorInfoSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { removeFavoriteStudentSchedule } from "../../redux/reducers/favoritesReducer/favoriteScheduleStudent";
-import { removeFavoriteEducatorSchedule } from "../../redux/reducers/favoritesReducer/favoriteScheduleEducator";
+import { removeFavoriteStudentSchedule } from "../../redux/slices/FavoritesSlice/FavoriteScheduleStudent";
+import { removeFavoriteEducatorSchedule } from "../../redux/slices/FavoritesSlice/FavoriteScheduleEducator";
+import { removeFavoriteGroup } from "../../redux/slices/FavoritesSlice/FavoriteGroupsSlice";
+import { removeFavoriteEducator } from "../../redux/slices/FavoritesSlice/FavoriteEducatorsSlice";
 
 type RootStackParamList = {
   Schedule: undefined;
@@ -42,13 +42,13 @@ type RootStackParamList = {
 };
 
 interface IFavoriteGroup {
-  favoriteGroupReducer: {
+  FavoriteGroupsSlice: {
     favoriteGroups: Array<{
       idGroup: number;
       nameGroup: string;
     }>;
   };
-  favoriteEducatorReducer: {
+  FavoriteEducatorsSlice: {
     favoriteEducators: Array<{
       idEducator: number;
       nameEducator: string;
@@ -57,7 +57,7 @@ interface IFavoriteGroup {
 }
 
 type ITheme = {
-  settingsReducer: {
+  SettingsSlice: {
     theme: any;
   };
 };
@@ -70,7 +70,7 @@ type SchuduleProps = {
 };
 
 interface Settings {
-  settingsReducer: {
+  SettingsSlice: {
     isConnected: boolean;
   };
 }
@@ -79,15 +79,15 @@ const SelectedMyGroups = ({ navigation }: SchuduleProps) => {
     "groups"
   );
   const isConnected = useSelector(
-    (state: Settings) => state.settingsReducer.isConnected
+    (state: Settings) => state.SettingsSlice.isConnected
   );
   const dispatch = useDispatch();
-  const theme = useSelector((state: ITheme) => state.settingsReducer.theme);
+  const theme = useSelector((state: ITheme) => state.SettingsSlice.theme);
   const favoritesGroup = useSelector(
-    (state: IFavoriteGroup) => state.favoriteGroupReducer.favoriteGroups
+    (state: IFavoriteGroup) => state.FavoriteGroupsSlice.favoriteGroups
   );
   const favoritesEducator = useSelector(
-    (state: IFavoriteGroup) => state.favoriteEducatorReducer.favoriteEducators
+    (state: IFavoriteGroup) => state.FavoriteEducatorsSlice.favoriteEducators
   );
   const removeGroup = useCallback(
     (idGroupToRemove: number) => {
@@ -103,7 +103,7 @@ const SelectedMyGroups = ({ navigation }: SchuduleProps) => {
             text: "Удалить",
             onPress: () => {
               removeFavoriteStudentSchedule(idGroupToRemove);
-              dispatch(removeFavoriteGroupAC(idGroupToRemove));
+              dispatch(removeFavoriteGroup(idGroupToRemove));
             },
           },
         ]
@@ -125,7 +125,7 @@ const SelectedMyGroups = ({ navigation }: SchuduleProps) => {
             text: "Удалить",
             onPress: () => {
               removeFavoriteEducatorSchedule(idEducatorToRemove);
-              dispatch(removeFavoriteEducatorAC(idEducatorToRemove));
+              dispatch(removeFavoriteEducator(idEducatorToRemove));
             },
           },
         ]
@@ -136,7 +136,7 @@ const SelectedMyGroups = ({ navigation }: SchuduleProps) => {
 
   const fetchSchedule = async (idGroup: number, nameGroup: string) => {
     try {
-      await getSchedule(idGroup, dispatch, nameGroup);
+      await getSchedule(idGroup, dispatch, nameGroup, false);
       dispatch(setSelectIdGroup(idGroup));
     } catch (error) {
       alert("Произошла ошибка: " + error);

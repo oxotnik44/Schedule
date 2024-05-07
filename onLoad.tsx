@@ -1,4 +1,3 @@
-import { useDispatch, useSelector } from "react-redux";
 import React, { useEffect, useState } from "react";
 import Navigate, { RootStackParamList } from "./Navigate";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -8,27 +7,20 @@ import { getDepartments } from "./api/apiDepartments";
 import { getEducator } from "./api/apiEducator";
 import { getNews } from "./api/apiNews";
 import { getGroups } from "./api/apiGroups";
-import { setFavoriteGroupsAC } from "./redux/reducers/favoritesReducer/favoriteGroupsReducer";
-import { setFavoriteEducatorAC } from "./redux/reducers/favoritesReducer/favoriteEducatorsReducer";
 import { useFonts } from "expo-font";
-import {
-  setConnectionStatus,
-  setTheme,
-} from "./redux/reducers/settingsReducer";
 import { StackNavigationProp } from "@react-navigation/stack";
+import { useAppDispatch } from "./redux/store";
+import { setConnectionStatus, setTheme } from "./redux/slices/SettingsSlice";
+import { setFavoriteGroups } from "./redux/slices/FavoritesSlice/FavoriteGroupsSlice";
+import { setFavoriteEducator } from "./redux/slices/FavoritesSlice/FavoriteEducatorsSlice";
+import { setTokenUser } from "./redux/slices/AuthTokenSlice";
+import { AuthOnLoad } from "./api/apiAuthentication";
+import { getFavoriteSchedule } from "./Notifications";
 type GroupsProps = {
   navigation: StackNavigationProp<RootStackParamList, "Settings">;
 };
-interface Settings {
-  settingsReducer: {
-    isConnected: boolean;
-  };
-}
 const Load = ({ navigation }: GroupsProps) => {
-  const isConnected = useSelector(
-    (state: Settings) => state.settingsReducer.isConnected
-  );
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const [loading, setLoading] = useState(true);
   const [fontsLoaded] = useFonts({
     "Montserrat-SemiBold": require("./assets/fonts/Montserrat-SemiBold.ttf"),
@@ -36,95 +28,78 @@ const Load = ({ navigation }: GroupsProps) => {
   });
 
   useEffect(() => {
-    const getFavoritesGroups = async (): Promise<void> => {
-      const storedGroups = await AsyncStorage.getItem("favoriteGroups");
-      const groups: { idGroup: number; nameGroup: string }[] = storedGroups
-        ? JSON.parse(storedGroups)
-        : [];
-      dispatch(setFavoriteGroupsAC(groups));
-    };
-
-    const getFavoritesEducators = async (): Promise<void> => {
-      const storedEducator = await AsyncStorage.getItem("favoriteEducators");
-      const educator: { idEducator: number; nameEducator: string }[] =
-        storedEducator ? JSON.parse(storedEducator) : [];
-      dispatch(setFavoriteEducatorAC(educator));
-    };
-
-    const getTheme = async (): Promise<void> => {
+    const fetchData = async () => {
       try {
+        // Получение и установка выбранной темы приложения
         const storedTheme = await AsyncStorage.getItem("selectedTheme");
         if (storedTheme) {
-          dispatch(setTheme(storedTheme)); // Передача объекта темы
+          dispatch(setTheme(storedTheme));
         }
-      } catch (error) {
-        console.error("Error while getting theme:", error);
-      }
-    };
 
-    const fetchDepartments = async (): Promise<void> => {
-      try {
-        await getDepartments(dispatch);
-      } catch (error) {
-        // Обработка ошибки
-        alert("Произошла ошибка: ");
-      }
-    };
-    const fetchEducator = async (): Promise<void> => {
-      try {
-        await getEducator(dispatch);
-      } catch (error) {
-        // Обработка ошибки
-        alert("Произошла ошибка: ");
-      }
-    };
-    const News = async (): Promise<void> => {
-      try {
-        await getNews(dispatch);
-      } catch (e) {
-        console.log(e);
-      }
-    };
-    const Groups = async (): Promise<void> => {
-      try {
-        await getGroups(dispatch);
-      } catch (error) {
-        // Обработка ошибки
-        alert("Произошла ошибка: ");
-      }
-    };
+        // Получение токена и персональных данных студента из хранилища
+        const accessToken = JSON.parse(
+          (await AsyncStorage.getItem("authTokenStorage")) || "null"
+        );
+        const personalDataStudent = accessToken
+          ? JSON.parse(
+              (await AsyncStorage.getItem("profileStudentInfoStorage")) ||
+                "null"
+            )
+          : null;
 
-    const onLoad = async (): Promise<void> => {
-      if (loading) {
-        await getTheme();
-        await getFavoritesGroups();
-        await getFavoritesEducators();
-        // await fetchScheduleIfNeeded();
-        NetInfo.fetch().then(async (state) => {
-          dispatch(setConnectionStatus(state.isConnected));
-          if (state.isConnected) {
-            await fetchEducator();
-            await fetchDepartments();
-            await News();
-            await Groups();
+        // Установка токена пользователя и авторизация, если есть токен и данные студента
+        dispatch(setTokenUser(accessToken));
+        if (accessToken && personalDataStudent) {
+          AuthOnLoad(accessToken, dispatch, personalDataStudent);
+        }
+
+        // Получение и установка избранных групп и преподавателей
+        const getStoredItems = async (key: string) => {
+          const storedData = await AsyncStorage.getItem(key);
+          return storedData ? JSON.parse(storedData) : [];
+        };
+        const storedGroups = await getStoredItems("favoriteGroups");
+        const storedEducator = await getStoredItems("favoriteEducators");
+        dispatch(setFavoriteGroups(storedGroups));
+        dispatch(setFavoriteEducator(storedEducator));
+
+        // Функция для запроса данных и обработки ошибок
+        const fetchPrimaryData = async (fetchFunction: Function) => {
+          try {
+            await fetchFunction(dispatch);
+          } catch (error) {
+            console.error("Error during fetching data:", error);
+            alert("Произошла ошибка: ");
           }
-          setLoading(false);
-        });
+        };
+
+        // Запрос основных данных: преподавателей, департаментов, новостей, групп
+        const fetchFunctions = [
+          getDepartments,
+          getEducator,
+          getNews,
+          getGroups,
+        ];
+        const isConnected = (await NetInfo.fetch()).isConnected;
+        dispatch(setConnectionStatus(isConnected));
+        if (isConnected) {
+          await Promise.all(fetchFunctions.map(fetchPrimaryData));
+        }
+        // Завершение загрузки
+        setLoading(false);
+      } catch (error) {
+        console.error("Error during loading:", error);
       }
     };
-
-    onLoad();
+    fetchData();
+    getFavoriteSchedule(dispatch);
   }, [loading]);
 
   if (!fontsLoaded) {
     return null;
   }
 
-  if (loading) {
-    return <></>; // Или можно отображать индикатор загрузки
-  } else {
-    return <Navigate navigation={navigation} />;
-  }
+  return loading ? <></> : <Navigate navigation={navigation} />;
 };
 
 export default Load;

@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { View, FlatList, Dimensions } from "react-native";
+import { View, FlatList, Dimensions, ToastAndroid } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useDispatch, useSelector } from "react-redux";
 
 import { RootStackParamList } from "../../Navigate";
-import { setNameEducator } from "../../redux/reducers/educatorReducer";
+import { setNameEducator } from "../../redux/slices/EducatorSlice";
 
 import {
   Container,
@@ -20,11 +20,13 @@ import {
 import { getScheduleEducator } from "../../api/apiSchedule";
 import { ThemeProvider } from "styled-components/native";
 
-import AddFavoriteGroups from "../Hoc/AddFavorite/AddFavorite";
 import {
+  setDataScheduleEducator,
   setIsFullScheduleEducator,
   setSelectIdEducator,
-} from "../../redux/reducers/scheduleEducatorInfo";
+} from "../../redux/slices/ScheduleEducatorInfoSlice";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import AddFavorite from "../../helper/AddFavorite/AddFavorite";
 const screenWidth = Dimensions.get("window").width;
 
 type EducatorProps = {
@@ -32,7 +34,7 @@ type EducatorProps = {
 };
 
 interface EducatorState {
-  educatorInfoReducer: {
+  EducatorInfoSlice: {
     dataEducator: [
       {
         idEducator: number;
@@ -46,51 +48,83 @@ interface EducatorState {
 }
 
 type ITheme = {
-  settingsReducer: {
+  SettingsSlice: {
     theme: any;
   };
 };
 interface Settings {
-  settingsReducer: {
+  SettingsSlice: {
     isConnected: boolean;
   };
 }
 const Educator: React.FC<EducatorProps> = ({ navigation }) => {
   const { dataEducator } = useSelector(
-    (state: EducatorState) => state.educatorInfoReducer
+    (state: EducatorState) => state.EducatorInfoSlice
   );
   const isConnected = useSelector(
-    (state: Settings) => state.settingsReducer.isConnected
+    (state: Settings) => state.SettingsSlice.isConnected
   );
   const [searchEducator, setSearchEducator] = useState("");
   const dispatch = useDispatch();
-  const theme = useSelector((state: ITheme) => state.settingsReducer.theme);
+  const theme = useSelector((state: ITheme) => state.SettingsSlice.theme);
   const filteredData = dataEducator.filter((item) => {
     const educatorName = item.nameEducator.toLocaleLowerCase();
     const educatorValue = searchEducator.toLocaleLowerCase();
 
     return educatorName.includes(educatorValue);
   });
+  const fetchNoConnected = async (idEducator: number) => {
+    console.log(idEducator);
+    const storedSchedule = await AsyncStorage.getItem("favoriteSchedule");
+    const scheduleEducator = storedSchedule
+      ? JSON.parse(storedSchedule)
+      : { groups: [], educators: [] };
+
+    const foundEducator = scheduleEducator.educators.find((item: any) => {
+      const keys = Object.keys(item);
+      return keys.includes(idEducator.toString());
+    });
+
+    if (foundEducator) {
+      dispatch(setDataScheduleEducator(foundEducator[idEducator.toString()]));
+      return true;
+    }
+
+    return false;
+  };
   const renderItemEducator = ({ item }: { item: any }) => {
     const { idEducator, nameEducator, regaliaEducator } = item;
     return (
       <ContainerEducators
-        key={idEducator}
         onPress={async () => {
-          dispatch(setNameEducator(nameEducator));
-          dispatch(setIsFullScheduleEducator(false));
-          dispatch(setSelectIdEducator(idEducator));
-
-          await getScheduleEducator(dispatch, idEducator);
-          navigation.navigate("ScheduleEducator");
+          if (!isConnected) {
+            fetchNoConnected(idEducator).then((hasData) => {
+              if (!hasData) {
+                ToastAndroid.show(
+                  "Нет сохранённого расписания",
+                  ToastAndroid.SHORT
+                );
+              } else {
+                dispatch(setNameEducator(nameEducator));
+                dispatch(setIsFullScheduleEducator(false));
+                navigation.navigate("ScheduleEducator");
+              }
+            });
+          } else {
+            dispatch(setNameEducator(nameEducator));
+            dispatch(setIsFullScheduleEducator(false));
+            dispatch(setSelectIdEducator(idEducator));
+            await getScheduleEducator(dispatch, idEducator);
+            navigation.navigate("ScheduleEducator");
+          }
         }}
       >
-        <View style={{ width: screenWidth * 0.7 }}>
+        <View style={{ width: screenWidth * 0.63 }}>
           <NameEducators numberOfLines={2}>{nameEducator}</NameEducators>
           <RegaliaEducators>Учёное звание: {regaliaEducator}</RegaliaEducators>
         </View>
         <View>
-          <AddFavoriteGroups
+          <AddFavorite
             idGroup={null}
             nameGroup={null}
             idEducator={idEducator}
@@ -104,7 +138,7 @@ const Educator: React.FC<EducatorProps> = ({ navigation }) => {
   return (
     <ThemeProvider theme={theme}>
       <Container>
-        {!isConnected ? (
+        {!isConnected && !dataEducator.length ? (
           <NoConnected>Нет соединения с интернетом</NoConnected>
         ) : (
           <View>
@@ -130,9 +164,8 @@ const Educator: React.FC<EducatorProps> = ({ navigation }) => {
 
             <FlatList
               data={filteredData}
-              keyExtractor={(item) => item.idEducator.toString()}
               renderItem={renderItemEducator}
-              showsHorizontalScrollIndicator={false} // Удаление полоски прокрутки
+              showsHorizontalScrollIndicator={false}
             />
           </View>
         )}

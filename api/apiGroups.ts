@@ -7,10 +7,8 @@ import {
   setDataGroups,
   setDataGroupsExtramuralists,
   setDataGroupsResidents,
-} from "../redux/reducers/groupsInfoReducer";
+} from "../redux/slices/GroupsInfoSlice";
 import { api } from "./baseUrl";
-
-
 
 export const getGroupsResidents = async (
   idDepartment: number,

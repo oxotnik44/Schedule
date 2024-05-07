@@ -1,12 +1,6 @@
 import axios from "axios";
-import {
-  resetEducator,
-  setDataEducator,
-} from "../redux/reducers/educatorReducer";
+import { resetEducator, setDataEducator } from "../redux/slices/EducatorSlice";
 import { api } from "./baseUrl";
-
-
-
 
 export const getEducator = async (dispatch: Function) => {
   try {
@@ -18,5 +12,3 @@ export const getEducator = async (dispatch: Function) => {
     console.error("Ошибка при получении данных об образователе:", error);
   }
 };
-
-

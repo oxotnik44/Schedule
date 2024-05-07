@@ -1,11 +1,9 @@
-import { Reducer } from "redux";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Alert } from "react-native";
-import { removeFavoriteStudentSchedule } from "./favoriteScheduleStudent";
+import { removeFavoriteStudentSchedule } from "./FavoriteScheduleStudent";
 
 const STORAGE_KEY_GROUPS = "favoriteGroups";
-const SET_FAVORITE_GROUPS = "SET_FAVORITE_GROUPS";
-const REMOVE_FAVORITE_GROUP = "REMOVE_FAVORITE_GROUP";
 
 interface IFavoriteGroup {
   idGroup: number;
@@ -15,28 +13,32 @@ interface IFavoriteGroup {
 interface IGroupState {
   favoriteGroups: IFavoriteGroup[];
 }
+
 const initialFavoriteGroupState: IGroupState = {
   favoriteGroups: [],
 };
 
-const favoriteGroupReducer: Reducer<IGroupState> = (
-  state = initialFavoriteGroupState,
-  action
-) => {
-  switch (action.type) {
-    case SET_FAVORITE_GROUPS:
-      return { ...state, favoriteGroups: action.favoriteGroups };
-    case REMOVE_FAVORITE_GROUP:
+const FavoriteGroupSlice = createSlice({
+  name: "FavoriteGroup",
+  initialState: initialFavoriteGroupState,
+  reducers: {
+    setFavoriteGroups: (state, action: PayloadAction<IFavoriteGroup[]>) => {
+      state.favoriteGroups = action.payload;
+    },
+    removeFavoriteGroup: (state, action: PayloadAction<number>) => {
       const updatedGroups = state.favoriteGroups.filter(
-        (group) => group.idGroup !== action.idGroup
+        (group) => group.idGroup !== action.payload
       );
+      removeFavoriteGroupStorage(action.payload); // Переименовано
+      state.favoriteGroups = updatedGroups;
+    },
+  },
+});
 
-      removeFavoriteGroup(action.idGroup); // Передаем idGroup
-      return { ...state, favoriteGroups: updatedGroups };
-    default:
-      return state;
-  }
-};
+export const {
+  setFavoriteGroups,
+  removeFavoriteGroup,
+} = FavoriteGroupSlice.actions;
 
 export const handleAddFavoriteGroup = (
   isFavoriteGroup: boolean,
@@ -53,7 +55,7 @@ export const handleAddFavoriteGroup = (
         {
           text: "Удалить",
           onPress: () => {
-            dispatch(removeFavoriteGroupAC(idGroup)),
+            dispatch(removeFavoriteGroup(idGroup)),
               removeFavoriteStudentSchedule(idGroup);
           },
         },
@@ -64,11 +66,11 @@ export const handleAddFavoriteGroup = (
       idGroup: idGroup,
       nameGroup: nameGroup,
     };
-    setFavoriteGroups(newGroup, dispatch);
+    setFavoriteGroupsStorage(newGroup, dispatch); // Переименовано
   }
 };
 
-export const setFavoriteGroups = async (
+export const setFavoriteGroupsStorage = async (
   newGroup: IFavoriteGroup,
   dispatch: Function
 ) => {
@@ -78,7 +80,7 @@ export const setFavoriteGroups = async (
     if (groups.length < 5) {
       groups.push(newGroup);
       await AsyncStorage.setItem(STORAGE_KEY_GROUPS, JSON.stringify(groups));
-      dispatch(setFavoriteGroupsAC(groups));
+      dispatch(setFavoriteGroups(groups));
       Alert.alert("Группа добавлена в избранное");
     } else {
       Alert.alert("Ошибка", "Превышено максимальное число избранных групп");
@@ -87,7 +89,8 @@ export const setFavoriteGroups = async (
     console.error("Ошибка сохранения группы", error);
   }
 };
-export const removeFavoriteGroup = async (idGroup: number) => {
+
+export const removeFavoriteGroupStorage = async (idGroup: number) => {
   try {
     const storedGroups = await AsyncStorage.getItem(STORAGE_KEY_GROUPS);
     if (storedGroups) {
@@ -103,12 +106,4 @@ export const removeFavoriteGroup = async (idGroup: number) => {
   }
 };
 
-export const setFavoriteGroupsAC = (favoriteGroups: IFavoriteGroup[]) => ({
-  type: SET_FAVORITE_GROUPS,
-  favoriteGroups,
-});
-export const removeFavoriteGroupAC = (idGroup: number) => ({
-  type: REMOVE_FAVORITE_GROUP,
-  idGroup,
-});
-export default favoriteGroupReducer;
+export default FavoriteGroupSlice.reducer;

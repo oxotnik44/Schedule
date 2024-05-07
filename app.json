@@ -6,6 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/NGPY_LOGO.png",
     "userInterfaceStyle": "light",
+    "scheme": "myapp",
     "splash": {
       "image": "./assets/NGPY_LOGO.png",
       "resizeMode": "contain",
@@ -20,7 +21,7 @@
         "foregroundImage": "./assets/NGPY_LOGO_SMALL.png"
       },
       "package": "com.oxotnik443.Schedule",
-      "versionCode": 10
+      "versionCode": 11
     },
     "web": {
       "favicon": "./assets/favicon.png"

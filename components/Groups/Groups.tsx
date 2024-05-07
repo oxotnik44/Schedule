@@ -1,10 +1,5 @@
 import React, { useEffect } from "react";
-import {
-  View,
-  Dimensions,
-  ToastAndroid,
-  FlatList,
-} from "react-native";
+import { View, Dimensions, ToastAndroid, FlatList } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import { StackNavigationProp } from "@react-navigation/stack";
 import {
@@ -13,14 +8,13 @@ import {
   setResidentGroupOpen,
   setExtramuralGroupOpen,
   setNameGroup,
-} from "../../redux/reducers/groupsInfoReducer";
+} from "../../redux/slices/GroupsInfoSlice";
 import { RootStackParamList } from "../../Navigate";
 import {
   getGroupsResidents,
   getGroupsExtramuralists,
 } from "../../api/apiGroups";
-import {  getSchedule } from "../../api/apiSchedule";
-import AddFavoriteGroups from "../Hoc/AddFavorite/AddFavorite";
+import { getSchedule } from "../../api/apiSchedule";
 import {
   ArrowIcon,
   Container,
@@ -34,9 +28,10 @@ import {
   setIsExtramuralScheduleUntilTodayStudent,
   setSelectIdGroup,
   setTypeGroupStudent,
-} from "../../redux/reducers/scheduleStudentInfo";
+} from "../../redux/slices/ScheduleStudentInfoSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { setFavoriteSchedule } from "../../redux/reducers/favoritesReducer/favoriteScheduleStudent";
+import { useAppDispatch, useAppSelector } from "../../redux/store";
+import AddFavorite from "../../helper/AddFavorite/AddFavorite";
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 
@@ -44,7 +39,7 @@ type GroupsProps = {
   navigation: StackNavigationProp<RootStackParamList, "Groups">;
 };
 interface GroupsState {
-  groupsInfoReducer: {
+  GroupsInfoSlice: {
     selectedGroupNumber: number;
     dataGroupsResidents: [
       {
@@ -68,31 +63,28 @@ interface GroupsState {
   };
 }
 interface DepartmentNumberState {
-  departmentInfoReducer: {
+  DepartmentInfoSlice: {
     numberDepartment: number;
   };
 }
 
 interface Settings {
-  settingsReducer: {
+  SettingsSlice: {
     isConnected: boolean;
   };
 }
 const Groups = ({ navigation }: GroupsProps) => {
-  const numberDepartment = useSelector(
-    (state: DepartmentNumberState) =>
-      state.departmentInfoReducer.numberDepartment
+  const numberDepartment = useAppSelector(
+    (state) => state.DepartmentInfoSlice.numberDepartment
   );
 
-  const dataGroups = useSelector(
-    (state: GroupsState) => state.groupsInfoReducer
+  const dataGroups = useAppSelector((state) => state.GroupsInfoSlice);
+
+  const isConnected = useAppSelector(
+    (state) => state.SettingsSlice.isConnected
   );
 
-  const isConnected = useSelector(
-    (state: Settings) => state.settingsReducer.isConnected
-  );
-
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   useEffect(() => {
     const fetchGroupResidents = async () => {
       try {
@@ -117,7 +109,7 @@ const Groups = ({ navigation }: GroupsProps) => {
   }, [numberDepartment, dispatch]);
   const fetchSchedule = async (idGroup: number, nameGroup: string) => {
     try {
-      await getSchedule(idGroup, dispatch, nameGroup);
+      await getSchedule(idGroup, dispatch, nameGroup,false);
     } catch (error) {
       alert("Произошла ошибка");
     }
@@ -134,22 +126,24 @@ const Groups = ({ navigation }: GroupsProps) => {
   let hasData = false; // Объявляем переменную hasData за пределами функции
 
   const fetchNoConnected = async (idGroup: number) => {
+    console.log(idGroup);
     const storedSchedule = await AsyncStorage.getItem("favoriteSchedule");
-    const scheduleStudent = storedSchedule ? JSON.parse(storedSchedule) : { groups: [], educators: [] };
-  
+    const scheduleStudent = storedSchedule
+      ? JSON.parse(storedSchedule)
+      : { groups: [], educators: [] };
+
     const foundGroup = scheduleStudent.groups.find((item: any) => {
       const keys = Object.keys(item);
       return keys.includes(idGroup.toString());
     });
-  
+
     if (foundGroup) {
       dispatch(setDataScheduleStudent(foundGroup[idGroup.toString()]));
       return true;
     }
-  
+
     return false;
   };
-  
 
   return (
     <Container>
@@ -165,7 +159,7 @@ const Groups = ({ navigation }: GroupsProps) => {
           data={
             dataGroups.idDepartments === 15 || dataGroups.idDepartments === 16
               ? dataGroups.dataGroupsExtramuralists.filter(
-                  (group) => group.isResidentAspirant === 0
+                  (group:any) => group.isResidentAspirant === 0
                 )
               : dataGroups.dataGroupsResidents
           }
@@ -201,7 +195,7 @@ const Groups = ({ navigation }: GroupsProps) => {
               }}
             >
               <NameGroup numberOfLines={2}>{group.nameGroup}</NameGroup>
-              <AddFavoriteGroups
+              <AddFavorite
                 idGroup={group.idGroup}
                 nameGroup={group.nameGroup}
                 idEducator={null}
@@ -219,14 +213,13 @@ const Groups = ({ navigation }: GroupsProps) => {
           isRotate={dataGroups.isExtramuralGroupOpen}
         />
       </ContainerChoiceGroup>
-
       {dataGroups.isExtramuralGroupOpen && (
         <View>
           <FlatList
             data={
               dataGroups.idDepartments === 15 || dataGroups.idDepartments === 16
                 ? dataGroups.dataGroupsExtramuralists.filter(
-                    (group) => group.isResidentAspirant === 1
+                    (group:any) => group.isResidentAspirant === 1
                   )
                 : dataGroups.dataGroupsExtramuralists
             }
@@ -246,6 +239,7 @@ const Groups = ({ navigation }: GroupsProps) => {
                       ToastAndroid.SHORT
                     );
                   } else {
+                    console.log(group.idGroup, group.nameGroup);
                     fetchSchedule(group.idGroup, group.nameGroup).then(() => {
                       dispatch(setNameGroup(group.nameGroup));
                       dispatch(setIsExtramuralScheduleUntilTodayStudent(false));
@@ -256,9 +250,9 @@ const Groups = ({ navigation }: GroupsProps) => {
                   }
                 }}
               >
-                <NameGroup>{group.nameGroup}</NameGroup>
+                <NameGroup numberOfLines={2}>{group.nameGroup}</NameGroup>
                 <View>
-                  <AddFavoriteGroups
+                  <AddFavorite
                     idGroup={group.idGroup}
                     nameGroup={group.nameGroup}
                     idEducator={null}

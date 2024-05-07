@@ -1,4 +1,4 @@
-import React, { useEffect} from "react";
+import React, { useEffect } from "react";
 import {
   Image,
   TouchableOpacity,
@@ -6,7 +6,7 @@ import {
   ToastAndroid,
 } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { NavigationContainer} from "@react-navigation/native";
+import { NavigationContainer } from "@react-navigation/native";
 import Departments from "./components/Departments/Departments";
 import Educator from "./components/Educator/Educator";
 import Schedule from "./components/Schedule/Schedule";
@@ -14,19 +14,23 @@ import { useDispatch, useSelector } from "react-redux";
 import SelectedMyGroups from "./components/SelectedMyGroups/SelectedMyGroups";
 import Groups from "./components/Groups/Groups";
 import News from "./components/News/News";
-import { resetTextSearchGroup } from "./redux/reducers/departmentsInfoReducer";
 import ScheduleEducator from "./components/Schedule/ScheduleEducator";
 import { ThemeProvider } from "styled-components/native";
 import Settings from "./components/Settings/Settings";
-import {
-  StackNavigationProp,
-} from "@react-navigation/stack";
+import { StackNavigationProp } from "@react-navigation/stack";
 import NetInfo, { useNetInfo } from "@react-native-community/netinfo";
-import { setConnectionStatus } from "./redux/reducers/settingsReducer";
 import { getDepartments } from "./api/apiDepartments";
 import { getEducator } from "./api/apiEducator";
 import { getNews } from "./api/apiNews";
 import { getGroups } from "./api/apiGroups";
+import Authorization from "./components/Authorization/Authorization";
+import { useAppDispatch, useAppSelector } from "./redux/store";
+import { setConnectionStatus } from "./redux/slices/SettingsSlice";
+import { resetTextSearchGroup } from "./redux/slices/DepartmentsInfoSlice";
+import Account from "./components/Account/Account";
+import СurrentGradesModulesStudent from "./components/Account/PersonalAccountStudent/FunctionalModulesStudent/СurrentGradesModulesStudents/СurrentGradesModulesStudent";
+import RecordBookModulesStudent from "./components/Account/PersonalAccountStudent/FunctionalModulesStudent/RecordBookModulesStudents/RecordBookModulesStudent";
+import Library from "./components/Account/PersonalAccountStudent/FunctionalModulesStudent/Library/Library";
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 export type RootStackParamList = {
@@ -40,6 +44,10 @@ export type RootStackParamList = {
   News: undefined;
   Settings: undefined;
   Authorization: undefined;
+  AC: undefined;
+  RecordBookModulesStudent: undefined;
+  СurrentGradesModulesStudent: undefined;
+  Library: undefined;
 };
 
 interface TabIconProps {
@@ -93,6 +101,8 @@ const Navigate = ({ navigation }: GroupsProps) => {
       iconSource = require("./assets/Educator.png");
     } else if (route.name === "News") {
       iconSource = require("./assets/News.png");
+    } else if (route.name === "Account") {
+      iconSource = require("./assets/Account.png");
     }
     return (
       <Image
@@ -106,20 +116,19 @@ const Navigate = ({ navigation }: GroupsProps) => {
       />
     );
   };
-  const dispatch = useDispatch();
-  const theme = useSelector((state: ITheme) => state.settingsReducer.theme);
-  const selectGroup = useSelector(
-    (state: GroupsState) => state.groupsInfoReducer.selectedGroupName
+  const dispatch = useAppDispatch();
+  const theme = useAppSelector((state) => state.SettingsSlice.theme);
+  const selectGroup = useAppSelector(
+    (state) => state.GroupsInfoSlice.selectedGroupName
   );
-  const selectEducator = useSelector(
-    (state: EducatorsState) => state.educatorInfoReducer.selectNameEducator
+  const selectEducator = useAppSelector(
+    (state) => state.EducatorInfoSlice.selectNameEducator
   );
-  const selectDepartments = useSelector(
-    (state: DepartmentsState) =>
-      state.departmentInfoReducer.selectNameDepartments
+  const selectDepartments = useAppSelector(
+    (state) => state.DepartmentInfoSlice.selectNameDepartments
   );
-  const isConnected = useSelector(
-    (state: Settings) => state.settingsReducer.isConnected
+  const isConnected = useAppSelector(
+    (state) => state.SettingsSlice.isConnected
   );
   const getHeaderTitle = (route: { name: string }) => {
     if (route.name === "ScheduleMyGroups") {
@@ -144,6 +153,12 @@ const Navigate = ({ navigation }: GroupsProps) => {
       return "Настройки";
     } else if (route.name === "Authorization") {
       return "Авторизация";
+    } else if (route.name === "Account") {
+      return "Аккаунт";
+    } else if (route.name === "RecordBookModulesStudent") {
+      return "Зачётная книжка";
+    } else if (route.name === "СurrentGradesModulesStudent") {
+      return "Текущие оценки";
     }
   };
   const getInitialData = async () => {
@@ -262,6 +277,26 @@ const Navigate = ({ navigation }: GroupsProps) => {
               ),
             })}
           />
+          <Tab.Screen
+            name="Account"
+            component={Account}
+            options={({ navigation }) => ({
+              tabBarLabel: "Аккаунт",
+              tabBarLabelStyle: {
+                fontSize: screenWidth * 0.025,
+                fontFamily: "Montserrat-Bold",
+                color: theme.navigateColor,
+              },
+              tabBarButton: (props) => (
+                <TouchableOpacity
+                  {...props}
+                  onPress={() => {
+                    navigation.navigate("Account");
+                  }}
+                />
+              ),
+            })}
+          />
 
           <Tab.Screen
             name="Educator"
@@ -282,6 +317,22 @@ const Navigate = ({ navigation }: GroupsProps) => {
                 />
               ),
             })}
+          />
+
+          <Tab.Screen
+            name="СurrentGradesModulesStudent"
+            component={СurrentGradesModulesStudent}
+            options={{ tabBarButton: () => null }}
+          />
+          <Tab.Screen
+            name="Library"
+            component={Library}
+            options={{ tabBarButton: () => null }}
+          />
+          <Tab.Screen
+            name="RecordBookModulesStudent"
+            component={RecordBookModulesStudent}
+            options={{ tabBarButton: () => null }}
           />
           <Tab.Screen
             name="Settings"

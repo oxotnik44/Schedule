@@ -1,5 +1,5 @@
 import React from "react";
-import { View, FlatList, Pressable, Linking } from "react-native";
+import { View, FlatList, Pressable, Linking, ToastAndroid } from "react-native";
 import { useSelector } from "react-redux";
 import {
   Container,
@@ -21,23 +21,30 @@ interface INewsItem {
 }
 
 interface IState {
-  newsReducer: {
+  NewsSlice: {
     newsData: INewsItem[];
   };
 }
 type ITheme = {
-  settingsReducer: {
+  SettingsSlice: {
     theme: any;
   };
 };
 interface Settings {
-  settingsReducer: {
+  SettingsSlice: {
     isConnected: boolean;
   };
 }
 const NewsItem = ({ item }: { item: INewsItem }) => {
+  const isConnected = useSelector(
+    (state: Settings) => state.SettingsSlice.isConnected
+  );
   const handlePress = () => {
-    Linking.openURL(item.link);
+    if (!isConnected) {
+      ToastAndroid.show("Нет соединения с интернетом", ToastAndroid.SHORT);
+    } else {
+      Linking.openURL(item.link);
+    }
   };
 
   return (
@@ -56,14 +63,14 @@ const NewsItem = ({ item }: { item: INewsItem }) => {
 
 const News = () => {
   const isConnected = useSelector(
-    (state: Settings) => state.settingsReducer.isConnected
+    (state: Settings) => state.SettingsSlice.isConnected
   );
-  const dataNews = useSelector((state: IState) => state.newsReducer.newsData);
-  const theme = useSelector((state: ITheme) => state.settingsReducer.theme);
+  const dataNews = useSelector((state: IState) => state.NewsSlice.newsData);
+  const theme = useSelector((state: ITheme) => state.SettingsSlice.theme);
   return (
     <ThemeProvider theme={theme}>
       <Container>
-        {!isConnected ? (
+        {!isConnected && !dataNews.length ? (
           <NoConnected>Нет соединения с интернетом</NoConnected>
         ) : (
           <FlatList

@@ -11,6 +11,7 @@ export const Container = styled.View`
   background-color: ${(props) => props.theme.backgroundColor};
 `;
 
+
 export const NoConnected = styled.Text`
   font-size: ${screenWidth * 0.055}px;
   color: ${(props) => props.theme.textColor};
@@ -28,7 +29,6 @@ export const AuthButton = styled.TouchableOpacity`
   background-color: ${(props) => props.theme.containerColor};
   padding: 10px 20px;
   border-radius: 11px;
-  margin-top: ${screenHeight * 0.02}px;
 `;
 
 export const AuthButtonText = styled.Text`

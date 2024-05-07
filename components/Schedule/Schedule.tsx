@@ -36,7 +36,7 @@ import {
   TypeWeekContainer,
   TypeWeekText,
 } from "./ScheduleStyle";
-import { setNameEducator } from "../../redux/reducers/educatorReducer";
+import { setNameEducator } from "../../redux/slices/EducatorSlice";
 
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../Navigate";
@@ -45,15 +45,15 @@ import {
   getSchedule,
   getScheduleEducator,
 } from "../../api/apiSchedule";
-import { lightTheme } from "../../redux/reducers/settingsReducer";
+import { lightTheme } from "../../redux/slices/SettingsSlice";
 import { ThemeProvider } from "styled-components/native";
-import { setSelectIdEducator } from "../../redux/reducers/scheduleEducatorInfo";
+import { setSelectIdEducator } from "../../redux/slices/ScheduleEducatorInfoSlice";
 import {
   setIsExtramuralScheduleUntilTodayStudent,
   setLastCacheEntryStudent,
-} from "../../redux/reducers/scheduleStudentInfo";
+} from "../../redux/slices/ScheduleStudentInfoSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { setFavoriteSchedule } from "../../redux/reducers/favoritesReducer/favoriteScheduleStudent";
+import { setFavoriteSchedule } from "../../redux/slices/FavoritesSlice/FavoriteScheduleStudent";
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 
@@ -90,7 +90,7 @@ interface IScheduleExtramuralInfo {
   date: string | null;
 }
 interface ScheduleState {
-  scheduleInfoStudentReducer: {
+  ScheduleInfoStudentSlice: {
     dataSchedule: {
       lastCacheEntry: {
         currentDateCache: string;
@@ -118,7 +118,7 @@ interface ScheduleState {
   };
 }
 interface FavoriteGroupsState {
-  favoriteGroupReducer: {
+  FavoriteGroupsSlice: {
     favoriteGroups: { idGroup: number; nameGroup: string }[];
   };
 }
@@ -127,52 +127,52 @@ type ScheduleProps = {
   navigation: StackNavigationProp<RootStackParamList, "Schedule">;
 };
 type ITheme = {
-  settingsReducer: {
+  SettingsSlice: {
     theme: any;
   };
 };
 interface Settings {
-  settingsReducer: {
+  SettingsSlice: {
     isConnected: boolean;
   };
 }
 interface Namegroup {
-  groupsInfoReducer: {
+  GroupsInfoSlice: {
     selectedGroupName: string;
   };
 }
 const Schedule = ({ navigation }: ScheduleProps) => {
-  const theme = useSelector((state: ITheme) => state.settingsReducer.theme);
+  const theme = useSelector((state: ITheme) => state.SettingsSlice.theme);
   moment.tz.setDefault("Asia/Novosibirsk");
   const dispatch = useDispatch();
   //есть ли подключение к инету
   const isConnected = useSelector(
-    (state: Settings) => state.settingsReducer.isConnected
+    (state: Settings) => state.SettingsSlice.isConnected
   );
   const dataSchedule = useSelector(
-    (state: ScheduleState) => state.scheduleInfoStudentReducer.dataSchedule
+    (state: ScheduleState) => state.ScheduleInfoStudentSlice.dataSchedule
   );
   const groupType = useSelector(
     (state: ScheduleState) =>
-      state.scheduleInfoStudentReducer.dataSchedule.groupType
+      state.ScheduleInfoStudentSlice.dataSchedule.groupType
   );
   const selectIdGroup = useSelector(
-    (state: ScheduleState) => state.scheduleInfoStudentReducer.selectIdGroup
+    (state: ScheduleState) => state.ScheduleInfoStudentSlice.selectIdGroup
   );
   //для заочников расписание с текущей даты или до текущей
   const isExtramuralScheduleUntilToday = useSelector(
     (state: ScheduleState) =>
-      state.scheduleInfoStudentReducer.isExtramuralScheduleUntilToday
+      state.ScheduleInfoStudentSlice.isExtramuralScheduleUntilToday
   );
   const favoriteGroups = useSelector(
-    (state: FavoriteGroupsState) => state.favoriteGroupReducer.favoriteGroups
+    (state: FavoriteGroupsState) => state.FavoriteGroupsSlice.favoriteGroups
   );
   const dataScheduleSession = useSelector(
     (state: ScheduleState) =>
-      state.scheduleInfoStudentReducer.dataSchedule.scheduleResident.session
+      state.ScheduleInfoStudentSlice.dataSchedule.scheduleResident.session
   );
   const nameGroup = useSelector(
-    (state: Namegroup) => state.groupsInfoReducer.selectedGroupName
+    (state: Namegroup) => state.GroupsInfoSlice.selectedGroupName
   );
   const [typeWeekToSwitch, setTypeWeekToSwitch] = useState("");
   //не изменяемая для показа текущей недели
@@ -381,7 +381,6 @@ const Schedule = ({ navigation }: ScheduleProps) => {
 
     return `${hours}:${minutes}:${seconds}`;
   };
-
   return (
     <ThemeProvider theme={theme}>
       <Container>
@@ -498,7 +497,7 @@ const Schedule = ({ navigation }: ScheduleProps) => {
           <FlatList
             data={weekdays}
             keyExtractor={(item, index) => index.toString()}
-            initialNumToRender={2}
+            initialNumToRender={3}
             maxToRenderPerBatch={5}
             windowSize={10}
             renderItem={({ item, index }) => {
@@ -707,7 +706,12 @@ const Schedule = ({ navigation }: ScheduleProps) => {
                         );
                       }
                     } else {
-                      await getSchedule(selectIdGroup, dispatch, nameGroup);
+                      await getSchedule(
+                        selectIdGroup,
+                        dispatch,
+                        nameGroup,
+                        false
+                      );
                       dispatch(
                         setIsExtramuralScheduleUntilTodayStudent(
                           !isExtramuralScheduleUntilToday

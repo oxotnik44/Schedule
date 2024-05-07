@@ -1,12 +1,12 @@
 import React, { useCallback } from "react";
-import { FlatList, Dimensions, View } from "react-native";
+import { FlatList, Dimensions, View, ToastAndroid } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useDispatch, useSelector } from "react-redux";
 import {
   setSelectNameDepartments,
   setNumberDepartment,
   setTextSearchGroup,
-} from "../../redux/reducers/departmentsInfoReducer";
+} from "../../redux/slices/DepartmentsInfoSlice";
 import {
   setExtramuralGroupOpen,
   setIdDepartments,
@@ -14,11 +14,9 @@ import {
   setLoadedResidents,
   setNameGroup,
   setResidentGroupOpen,
-} from "../../redux/reducers/groupsInfoReducer";
+} from "../../redux/slices/GroupsInfoSlice";
 import { getSchedule } from "../../api/apiSchedule";
 import { RootStackParamList } from "../../Navigate";
-import AddFavoriteGroups from "../Hoc/AddFavorite/AddFavorite";
-import ImageDepartmens from "../Hoc/ImageDepartmens/ImageDepartmens";
 import {
   Container,
   ContainerDepartments,
@@ -33,19 +31,20 @@ import { ThemeProvider } from "styled-components/native";
 import {
   setIsExtramuralScheduleUntilTodayStudent,
   setSelectIdGroup,
-} from "../../redux/reducers/scheduleStudentInfo";
+} from "../../redux/slices/ScheduleStudentInfoSlice";
 import {
   getGroupsExtramuralists,
   getGroupsResidents,
 } from "../../api/apiGroups";
-
+import ImageDepartmens from "../../helper/ImageDepartmens/ImageDepartmens";
+import AddFavorite from "../../helper/AddFavorite/AddFavorite";
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 type DepartmentsProps = {
-  navigation: StackNavigationProp<RootStackParamList, "Departments">;
+  navigation: StackNavigationProp<RootStackParamList>;
 };
 interface DepartmentsState {
-  departmentInfoReducer: {
+  DepartmentInfoSlice: {
     dataDepartment: [
       {
         idDepartment: number;
@@ -61,7 +60,7 @@ interface DepartmentsState {
 }
 
 interface GroupsState {
-  groupsInfoReducer: {
+  GroupsInfoSlice: {
     dataGroups: [
       {
         idGroup: number;
@@ -72,26 +71,24 @@ interface GroupsState {
   };
 }
 type ITheme = {
-  settingsReducer: {
+  SettingsSlice: {
     theme: any;
   };
 };
 interface Settings {
-  settingsReducer: {
+  SettingsSlice: {
     isConnected: boolean;
   };
 }
 const Departments: React.FC<DepartmentsProps> = ({ navigation }) => {
   const { dataDepartment, textSearchGroup } = useSelector(
-    (state: DepartmentsState) => state.departmentInfoReducer
+    (state: DepartmentsState) => state.DepartmentInfoSlice
   );
-  const dataGroups = useSelector(
-    (state: GroupsState) => state.groupsInfoReducer
-  );
+  const dataGroups = useSelector((state: GroupsState) => state.GroupsInfoSlice);
   const isConnected = useSelector(
-    (state: Settings) => state.settingsReducer.isConnected
+    (state: Settings) => state.SettingsSlice.isConnected
   );
-  const theme = useSelector((state: ITheme) => state.settingsReducer.theme);
+  const theme = useSelector((state: ITheme) => state.SettingsSlice.theme);
 
   const dispatch = useDispatch();
   const filteredData = dataGroups.dataGroups.filter((item: any) => {
@@ -102,7 +99,8 @@ const Departments: React.FC<DepartmentsProps> = ({ navigation }) => {
   const fetchSchedule = useCallback(
     async (idGroup: number, nameGroup: string) => {
       try {
-        await getSchedule(idGroup, dispatch, nameGroup);
+        console.log(idGroup, nameGroup);
+        await getSchedule(idGroup, dispatch, nameGroup, false);
       } catch (error) {
         console.log(error);
       }
@@ -141,21 +139,27 @@ const Departments: React.FC<DepartmentsProps> = ({ navigation }) => {
     const { idDepartment, fullnameDepartment, imgDepartment } = item;
     return (
       <ContainerDepartments
-        key={idDepartment}
         onPress={async () => {
-          if (idDepartment === 18) {
-            await getSchedule(3430, dispatch, item.nameGroup);
-            dispatch(setSelectIdGroup(3430));
-            dispatch(setNameGroup("Технопарк"));
-            dispatch(setIsExtramuralScheduleUntilTodayStudent(false));
-            navigation.navigate("Schedule");
+          if (!isConnected) {
+            ToastAndroid.show(
+              "Нет соединения с интернетом",
+              ToastAndroid.SHORT
+            );
           } else {
-            fetchGroups(item.idDepartment);
-            dispatch(setNumberDepartment(idDepartment));
-            dispatch(setSelectNameDepartments(fullnameDepartment));
-            navigation.navigate("Groups");
-            dispatch(setResidentGroupOpen(false));
-            dispatch(setExtramuralGroupOpen(false));
+            if (idDepartment === 18) {
+              await getSchedule(3430, dispatch, item.nameGroup, false);
+              dispatch(setSelectIdGroup(3430));
+              dispatch(setNameGroup("Технопарк"));
+              dispatch(setIsExtramuralScheduleUntilTodayStudent(false));
+              navigation.navigate("Schedule");
+            } else {
+              fetchGroups(item.idDepartment);
+              dispatch(setNumberDepartment(idDepartment));
+              dispatch(setSelectNameDepartments(fullnameDepartment));
+              navigation.navigate("Groups");
+              dispatch(setResidentGroupOpen(false));
+              dispatch(setExtramuralGroupOpen(false));
+            }
           }
         }}
       >
@@ -170,18 +174,25 @@ const Departments: React.FC<DepartmentsProps> = ({ navigation }) => {
 
     return (
       <ContainerDepartments
-        key={idGroup.toString()}
         onPress={() => {
-          fetchSchedule(idGroup, nameGroup).then(() => {
-            navigation.navigate("Schedule");
-            dispatch(setNameGroup(nameGroup));
-            dispatch(setIsExtramuralScheduleUntilTodayStudent(false));
-            dispatch(setSelectIdGroup(idGroup));
-          });
+          if (!isConnected) {
+            ToastAndroid.show(
+              "Нет соединения с интернетом",
+              ToastAndroid.SHORT
+            );
+          } else {
+            fetchSchedule(idGroup, nameGroup).then(() => {
+              console.log(idGroup);
+              navigation.navigate("Schedule");
+              dispatch(setNameGroup(nameGroup));
+              dispatch(setIsExtramuralScheduleUntilTodayStudent(false));
+              dispatch(setSelectIdGroup(idGroup));
+            });
+          }
         }}
       >
         <NameDepartments>{nameGroup}</NameDepartments>
-        <AddFavoriteGroups
+        <AddFavorite
           idGroup={idGroup}
           nameGroup={nameGroup}
           idEducator={null}
@@ -194,7 +205,7 @@ const Departments: React.FC<DepartmentsProps> = ({ navigation }) => {
   return (
     <ThemeProvider theme={theme}>
       <Container>
-        {!isConnected ? (
+        {!isConnected && !dataDepartment.length ? (
           <NoConnected>Нет соединения с интернетом</NoConnected>
         ) : (
           <View>
@@ -221,12 +232,7 @@ const Departments: React.FC<DepartmentsProps> = ({ navigation }) => {
             {isSearchInputEmpty ? (
               <FlatList
                 data={dataDepartment}
-                keyExtractor={(item) => item.idDepartment.toString()}
                 renderItem={renderItemDepartment}
-                showsHorizontalScrollIndicator={false}
-                initialNumToRender={10}
-                maxToRenderPerBatch={10}
-                windowSize={15}
                 contentContainerStyle={{
                   paddingBottom: screenHeight * 0.02,
                 }}
@@ -234,14 +240,8 @@ const Departments: React.FC<DepartmentsProps> = ({ navigation }) => {
             ) : (
               <FlatList
                 data={filteredData}
-                keyExtractor={(item, index) =>
-                  `${item.idGroup}-${index.toString()}`
-                }
-                initialNumToRender={10}
-                maxToRenderPerBatch={10}
-                windowSize={15}
                 renderItem={renderItemGroup}
-                showsHorizontalScrollIndicator={false} // Удаление полоски прокрутки
+                showsHorizontalScrollIndicator={false}
               />
             )}
           </View>

@@ -1,17 +1,15 @@
-import { Reducer } from "redux";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Alert } from "react-native";
-import { removeFavoriteEducatorSchedule } from "./favoriteScheduleEducator";
+import { removeFavoriteEducatorSchedule } from "./FavoriteScheduleEducator";
 
 const STORAGE_KEY_EDUCATOR = "favoriteEducators";
-
-const SET_FAVORITE_EDUCATOR = "SET_FAVORITE_EDUCATOR";
-const REMOVE_FAVORITE_EDUCATOR = "REMOVE_FAVORITE_EDUCATOR";
 
 interface IFavoriteEducator {
   idEducator: number;
   nameEducator: string;
 }
+
 interface IEducatorState {
   favoriteEducators: IFavoriteEducator[];
 }
@@ -20,23 +18,29 @@ const initialFavoritesState: IEducatorState = {
   favoriteEducators: [],
 };
 
-const favoriteEducatorReducer: Reducer<IEducatorState> = (
-  state = initialFavoritesState,
-  action
-) => {
-  switch (action.type) {
-    case SET_FAVORITE_EDUCATOR:
-      return { ...state, favoriteEducators: action.favoriteEducator };
-    case REMOVE_FAVORITE_EDUCATOR:
+const FavoriteEducatorSlice = createSlice({
+  name: "FavoriteEducator",
+  initialState: initialFavoritesState,
+  reducers: {
+    setFavoriteEducator: (
+      state,
+      action: PayloadAction<IFavoriteEducator[]>
+    ) => {
+      state.favoriteEducators = action.payload;
+    },
+    removeFavoriteEducator: (state, action: PayloadAction<number>) => {
       const updatedEducator = state.favoriteEducators.filter(
-        (educator: any) => educator.idEducator !== action.idEducator
+        (educator) => educator.idEducator !== action.payload
       );
-      removeFavoriteEducator(action.idEducator);
-      return { ...state, favoriteEducators: updatedEducator };
-    default:
-      return state;
-  }
-};
+      removeFavoriteEducatorStorage(action.payload);
+      state.favoriteEducators = updatedEducator;
+    },
+  },
+});
+
+export const { setFavoriteEducator, removeFavoriteEducator } =
+  FavoriteEducatorSlice.actions;
+
 export const handleAddFavoriteEduactor = (
   isFavoriteEducator: boolean,
   idEducator: number,
@@ -52,21 +56,22 @@ export const handleAddFavoriteEduactor = (
         {
           text: "Удалить",
           onPress: () => {
-            dispatch(removeFavoriteEducatorAC(idEducator)),
+            dispatch(removeFavoriteEducator(idEducator)),
               removeFavoriteEducatorSchedule(idEducator);
           },
         },
       ]
     );
   } else {
-    const newEducator = {
+    const newEducator: IFavoriteEducator = {
       idEducator: idEducator,
       nameEducator: nameEducator,
     };
-    setFavoriteEducator(newEducator, dispatch);
+    setFavoriteEducatorStorage(newEducator, dispatch);
   }
 };
-export const setFavoriteEducator = async (
+
+export const setFavoriteEducatorStorage = async (
   newEducator: IFavoriteEducator,
   dispatch: Function
 ) => {
@@ -79,7 +84,7 @@ export const setFavoriteEducator = async (
         STORAGE_KEY_EDUCATOR,
         JSON.stringify(educator)
       );
-      dispatch(setFavoriteEducatorAC(educator));
+      dispatch(setFavoriteEducator(educator));
       Alert.alert("Преподаватель добавлен в избранное");
     } else {
       Alert.alert(
@@ -91,14 +96,15 @@ export const setFavoriteEducator = async (
     console.error("Ошибка сохранения преподавателя", error);
   }
 };
-const removeFavoriteEducator = async (idEducator: number) => {
+
+export const removeFavoriteEducatorStorage = async (idEducator: number) => {
   try {
     const storedEducators = await AsyncStorage.getItem(STORAGE_KEY_EDUCATOR);
 
     if (storedEducators) {
       const educator: IFavoriteEducator[] = JSON.parse(storedEducators);
       const updatedEducator = educator.filter(
-        (educator: any) => educator.idEducator !== idEducator
+        (educator) => educator.idEducator !== idEducator
       );
       await AsyncStorage.setItem(
         STORAGE_KEY_EDUCATOR,
@@ -109,15 +115,5 @@ const removeFavoriteEducator = async (idEducator: number) => {
     console.error("Ошибка сохранения избранных групп", error);
   }
 };
-export const setFavoriteEducatorAC = (
-  favoriteEducator: IFavoriteEducator[]
-) => ({
-  type: SET_FAVORITE_EDUCATOR,
-  favoriteEducator,
-});
-export const removeFavoriteEducatorAC = (idEducator: number) => ({
-  type: REMOVE_FAVORITE_EDUCATOR,
-  idEducator,
-});
 
-export default favoriteEducatorReducer;
+export default FavoriteEducatorSlice.reducer;
