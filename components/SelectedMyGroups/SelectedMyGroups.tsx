@@ -136,7 +136,7 @@ const SelectedMyGroups = ({ navigation }: SchuduleProps) => {
 
   const fetchSchedule = async (idGroup: number, nameGroup: string) => {
     try {
-      await getSchedule(idGroup, dispatch, nameGroup);
+      await getSchedule(idGroup, dispatch, nameGroup, false);
       dispatch(setSelectIdGroup(idGroup));
     } catch (error) {
       alert("Произошла ошибка: " + error);

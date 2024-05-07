@@ -15,6 +15,7 @@ import { setFavoriteGroups } from "./redux/slices/FavoritesSlice/FavoriteGroupsS
 import { setFavoriteEducator } from "./redux/slices/FavoritesSlice/FavoriteEducatorsSlice";
 import { setTokenUser } from "./redux/slices/AuthTokenSlice";
 import { AuthOnLoad } from "./api/apiAuthentication";
+import { getFavoriteSchedule } from "./Notifications";
 type GroupsProps = {
   navigation: StackNavigationProp<RootStackParamList, "Settings">;
 };
@@ -84,22 +85,20 @@ const Load = ({ navigation }: GroupsProps) => {
         if (isConnected) {
           await Promise.all(fetchFunctions.map(fetchPrimaryData));
         }
-
         // Завершение загрузки
         setLoading(false);
       } catch (error) {
         console.error("Error during loading:", error);
       }
     };
-
     fetchData();
+    getFavoriteSchedule(dispatch);
   }, [loading]);
 
   if (!fontsLoaded) {
     return null;
   }
 
-  console.log(loading);
   return loading ? <></> : <Navigate navigation={navigation} />;
 };
 

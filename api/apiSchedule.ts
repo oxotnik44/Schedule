@@ -17,7 +17,8 @@ import { api } from "./baseUrl";
 export const getSchedule = async (
   idGroup: number,
   dispatch: Function,
-  nameGroup: string
+  nameGroup: string,
+  isNotification: boolean
 ) => {
   try {
     const response = await api.post("/getScheduleStudent", {
@@ -27,6 +28,9 @@ export const getSchedule = async (
     const data = response.data;
     dispatch(resetScheduleStudent());
     dispatch(setDataScheduleStudent(data));
+    if (isNotification) {
+      return data;
+    }
   } catch (error) {
     console.error("Error while getting schedule:", error);
   }

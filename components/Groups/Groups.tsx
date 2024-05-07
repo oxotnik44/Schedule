@@ -109,7 +109,7 @@ const Groups = ({ navigation }: GroupsProps) => {
   }, [numberDepartment, dispatch]);
   const fetchSchedule = async (idGroup: number, nameGroup: string) => {
     try {
-      await getSchedule(idGroup, dispatch, nameGroup);
+      await getSchedule(idGroup, dispatch, nameGroup,false);
     } catch (error) {
       alert("Произошла ошибка");
     }
@@ -159,7 +159,7 @@ const Groups = ({ navigation }: GroupsProps) => {
           data={
             dataGroups.idDepartments === 15 || dataGroups.idDepartments === 16
               ? dataGroups.dataGroupsExtramuralists.filter(
-                  (group) => group.isResidentAspirant === 0
+                  (group:any) => group.isResidentAspirant === 0
                 )
               : dataGroups.dataGroupsResidents
           }
@@ -213,14 +213,13 @@ const Groups = ({ navigation }: GroupsProps) => {
           isRotate={dataGroups.isExtramuralGroupOpen}
         />
       </ContainerChoiceGroup>
-
       {dataGroups.isExtramuralGroupOpen && (
         <View>
           <FlatList
             data={
               dataGroups.idDepartments === 15 || dataGroups.idDepartments === 16
                 ? dataGroups.dataGroupsExtramuralists.filter(
-                    (group) => group.isResidentAspirant === 1
+                    (group:any) => group.isResidentAspirant === 1
                   )
                 : dataGroups.dataGroupsExtramuralists
             }

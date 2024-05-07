@@ -33,13 +33,12 @@ export const setFavoriteSchedule = async (
 export const removeFavoriteStudentSchedule = async (idGroup: number) => {
   try {
     const storedSchedule = await AsyncStorage.getItem(STORAGE_KEY_SCHEDULE);
-
     if (storedSchedule) {
       const favoriteSchedule = JSON.parse(storedSchedule);
       const updatedGroups = favoriteSchedule.groups.filter(
         (group: any) => !group[idGroup]
       );
-
+      console.log(updatedGroups);
       await AsyncStorage.setItem(
         STORAGE_KEY_SCHEDULE,
         JSON.stringify({ ...favoriteSchedule, groups: updatedGroups })

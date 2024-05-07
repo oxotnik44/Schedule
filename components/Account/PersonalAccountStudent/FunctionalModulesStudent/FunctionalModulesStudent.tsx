@@ -41,7 +41,7 @@ interface iTokenUser {
     accessToken: any;
   };
 }
-const mass = [{ name: "Зачётная книжка" }, { name: "Оценки" }];
+const mass = [{ name: "Зачётная книжка" },{ name: "Библиотека" }];
 const FunctionalModulesStudent: React.FC<RecordBookModulesStudent> = ({
   navigation,
 }) => {
@@ -58,13 +58,12 @@ const FunctionalModulesStudent: React.FC<RecordBookModulesStudent> = ({
   const theme = useSelector((state: Settings) => state.SettingsSlice.theme);
   const getImageSource = (name: any) => {
     switch (name) {
-      case "Оценки":
+      case "Библиотека":
         return require("../../../../assets/Grades.png");
       case "Зачётная книжка":
         return require("../../../../assets/ReportCard.png");
     }
   }; //для смены картинки
-  console.log(accessToken);
   return (
     <ThemeProvider theme={theme}>
       <ServicesTitle>СЕРВИСЫ</ServicesTitle>
@@ -88,7 +87,7 @@ const FunctionalModulesStudent: React.FC<RecordBookModulesStudent> = ({
                         dataStudent.login,
                         dataStudent.creditBook
                       )
-                    : navigation.navigate("СurrentGradesModulesStudent");
+                    : navigation.navigate("Library");
                 }
               }}
             >

@@ -100,7 +100,7 @@ const Departments: React.FC<DepartmentsProps> = ({ navigation }) => {
     async (idGroup: number, nameGroup: string) => {
       try {
         console.log(idGroup, nameGroup);
-        await getSchedule(idGroup, dispatch, nameGroup);
+        await getSchedule(idGroup, dispatch, nameGroup, false);
       } catch (error) {
         console.log(error);
       }
@@ -147,7 +147,7 @@ const Departments: React.FC<DepartmentsProps> = ({ navigation }) => {
             );
           } else {
             if (idDepartment === 18) {
-              await getSchedule(3430, dispatch, item.nameGroup);
+              await getSchedule(3430, dispatch, item.nameGroup, false);
               dispatch(setSelectIdGroup(3430));
               dispatch(setNameGroup("Технопарк"));
               dispatch(setIsExtramuralScheduleUntilTodayStudent(false));

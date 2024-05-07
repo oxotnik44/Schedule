@@ -192,7 +192,7 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
   const fetchSchedule = async (idGroup: number, groupName: string) => {
     try {
       dispatch(setNameGroup(groupName));
-      await getSchedule(idGroup, dispatch, groupName);
+      await getSchedule(idGroup, dispatch, groupName, false);
       navigation.navigate("Schedule");
     } catch (error) {
       console.log(error);
@@ -500,8 +500,8 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
           <NoConnected>Отсутствует соединение.</NoConnected>
           <NoConnected>
             {dataScheduleEducator.lastCacheEntry &&
-             "Расписание актуально на " +
-              dataScheduleEducator.lastCacheEntry.currentDateCache +
+              "Расписание актуально на " +
+                dataScheduleEducator.lastCacheEntry.currentDateCache +
                 " " +
                 dataScheduleEducator.lastCacheEntry.currentTimeCache}
           </NoConnected>

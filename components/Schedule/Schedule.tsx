@@ -706,7 +706,12 @@ const Schedule = ({ navigation }: ScheduleProps) => {
                         );
                       }
                     } else {
-                      await getSchedule(selectIdGroup, dispatch, nameGroup);
+                      await getSchedule(
+                        selectIdGroup,
+                        dispatch,
+                        nameGroup,
+                        false
+                      );
                       dispatch(
                         setIsExtramuralScheduleUntilTodayStudent(
                           !isExtramuralScheduleUntilToday
