@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { setTokenUser } from "../redux/slices/AuthTokenSlice";
+import { setTokenUser } from "../redux/slices/AccountSlices/AuthTokenSlice";
 
 export const setAuthTokenStorage = async (
   accessToken: any,

@@ -11,9 +11,9 @@ import favoriteEducatorsReducer from "./slices/FavoritesSlice/FavoriteEducatorsS
 import SettingsSlice from "./slices/SettingsSlice";
 import { ScheduleInfoStudentSlice } from "./slices/ScheduleStudentInfoSlice";
 import { ScheduleInfoEducatorSlice } from "./slices/ScheduleEducatorInfoSlice";
-import AuthTokenSlice from "./slices/AuthTokenSlice";
-import ProfileInfoSlice from "./slices/ProfileInfoSlice";
-import SemesterGradesInfoSlice from "./slices/SemesterGradesInfoSlice";
+import AuthTokenSlice from "./slices/AccountSlices/AuthTokenSlice";
+import ProfileInfoSlice from "./slices/AccountSlices/ProfileInfoSlice";
+import SemesterGradesInfoSlice from "./slices/AccountSlices/SemesterGradesInfoSlice";
 export const store = configureStore({
   reducer: {
     DepartmentInfoSlice: DepartmentInfoSlice.reducer,

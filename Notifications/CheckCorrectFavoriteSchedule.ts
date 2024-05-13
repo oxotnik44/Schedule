@@ -1,8 +1,9 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getSchedule } from "./api/apiSchedule";
+import { getSchedule } from "../api/apiSchedule";
 import moment from "moment";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
+import { sendNotification } from "./Notifications";
 
 const STORAGE_KEY_SCHEDULE = "favoriteSchedule";
 const STORAGE_KEY_FAVORITE_GROUPS = "favoriteGroups";
@@ -30,7 +31,7 @@ const previousDate = moment().subtract(1, "days").format("DD MMMM YYYY");
 // const nextDay = "Пятница";
 const weekNumber = currentDate.isoWeek();
 
-export const getFavoriteSchedule = async (dispatch: Function) => {
+export const checkCorrectFavoriteSchedule = async (dispatch: Function) => {
   try {
     const storedSchedule = await AsyncStorage.getItem(STORAGE_KEY_SCHEDULE);
     const storedGroups = await AsyncStorage.getItem(
@@ -138,7 +139,7 @@ export const getFavoriteSchedule = async (dispatch: Function) => {
         }
       }
     }
-
+    return unchangedGroups;
     // console.log("Группы, в которых расписание изменилось:", unchangedGroups);
   } catch (err) {
     console.error(err);

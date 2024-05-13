@@ -1,5 +1,5 @@
 import axios from "axios";
-import { setSessionGrades } from "../redux/slices/SemesterGradesInfoSlice";
+import { setSessionGrades } from "../redux/slices/AccountSlices/SemesterGradesInfoSlice";
 
 export const getSemesterGrades = async (
   dispatch: Function,

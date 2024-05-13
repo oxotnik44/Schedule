@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { setProfileInfo } from "../redux/slices/ProfileInfoSlice";
+import { setProfileInfo } from "../redux/slices/AccountSlices/ProfileInfoSlice";
 
 export const setProfileStudentInfoStorage = async (
   personalDataStudent: object,

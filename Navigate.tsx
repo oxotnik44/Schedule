@@ -23,6 +23,14 @@ import { getDepartments } from "./api/apiDepartments";
 import { getEducator } from "./api/apiEducator";
 import { getNews } from "./api/apiNews";
 import { getGroups } from "./api/apiGroups";
+import Authorization from "./components/Authorization/Authorization";
+import { useAppDispatch, useAppSelector } from "./redux/store";
+import { setConnectionStatus } from "./redux/slices/SettingsSlice";
+import { resetTextSearchGroup } from "./redux/slices/DepartmentsInfoSlice";
+import Account from "./components/Account/Account";
+import СurrentGradesModulesStudent from "./components/Account/PersonalAccountStudent/FunctionalModulesStudent/СurrentGradesModulesStudents/СurrentGradesModulesStudent";
+import RecordBookModulesStudent from "./components/Account/PersonalAccountStudent/FunctionalModulesStudent/RecordBookModulesStudents/RecordBookModulesStudent";
+import Library from "./components/Account/PersonalAccountStudent/FunctionalModulesStudent/Library/Library";
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 export type RootStackParamList = {
@@ -36,6 +44,10 @@ export type RootStackParamList = {
   News: undefined;
   Settings: undefined;
   Authorization: undefined;
+  AC: undefined;
+  RecordBookModulesStudent: undefined;
+  СurrentGradesModulesStudent: undefined;
+  Library: undefined;
 };
 
 interface TabIconProps {
@@ -305,6 +317,22 @@ const Navigate = ({ navigation }: GroupsProps) => {
                 />
               ),
             })}
+          />
+
+          <Tab.Screen
+            name="СurrentGradesModulesStudent"
+            component={СurrentGradesModulesStudent}
+            options={{ tabBarButton: () => null }}
+          />
+          <Tab.Screen
+            name="Library"
+            component={Library}
+            options={{ tabBarButton: () => null }}
+          />
+          <Tab.Screen
+            name="RecordBookModulesStudent"
+            component={RecordBookModulesStudent}
+            options={{ tabBarButton: () => null }}
           />
           <Tab.Screen
             name="Settings"

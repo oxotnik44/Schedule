@@ -13,9 +13,9 @@ import { useAppDispatch } from "./redux/store";
 import { setConnectionStatus, setTheme } from "./redux/slices/SettingsSlice";
 import { setFavoriteGroups } from "./redux/slices/FavoritesSlice/FavoriteGroupsSlice";
 import { setFavoriteEducator } from "./redux/slices/FavoritesSlice/FavoriteEducatorsSlice";
-import { setTokenUser } from "./redux/slices/AuthTokenSlice";
+import { setTokenUser } from "./redux/slices/AccountSlices/AuthTokenSlice";
 import { AuthOnLoad } from "./api/apiAuthentication";
-import { getFavoriteSchedule } from "./Notifications";
+import { checkCorrectFavoriteSchedule } from "./Notifications/CheckCorrectFavoriteSchedule";
 type GroupsProps = {
   navigation: StackNavigationProp<RootStackParamList, "Settings">;
 };
@@ -92,7 +92,7 @@ const Load = ({ navigation }: GroupsProps) => {
       }
     };
     fetchData();
-    getFavoriteSchedule(dispatch);
+    checkCorrectFavoriteSchedule(dispatch);
   }, [loading]);
 
   if (!fontsLoaded) {
