@@ -84,3 +84,13 @@ export const NoConnected = styled.Text`
   text-align: center;
   width: ${screenWidth * 0.95}px;
 `;
+export const NoLibraryCard = styled.Text`
+  font-size: ${screenWidth * 0.05}px;
+  color: ${(props) => props.theme.textColor};
+  font-family: "Montserrat-SemiBold";
+  text-align: center;
+  width: ${screenWidth * 0.95}px;
+`;
+export const TextListBooks = styled.Text`
+font-size: ${screenWidth * 0.6}px
+`

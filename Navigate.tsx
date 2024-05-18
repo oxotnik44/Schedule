@@ -28,7 +28,6 @@ import { useAppDispatch, useAppSelector } from "./redux/store";
 import { setConnectionStatus } from "./redux/slices/SettingsSlice";
 import { resetTextSearchGroup } from "./redux/slices/DepartmentsInfoSlice";
 import Account from "./components/Account/Account";
-import СurrentGradesModulesStudent from "./components/Account/PersonalAccountStudent/FunctionalModulesStudent/СurrentGradesModulesStudents/СurrentGradesModulesStudent";
 import RecordBookModulesStudent from "./components/Account/PersonalAccountStudent/FunctionalModulesStudent/RecordBookModulesStudents/RecordBookModulesStudent";
 import Library from "./components/Account/PersonalAccountStudent/FunctionalModulesStudent/Library/Library";
 const screenWidth = Dimensions.get("window").width;
@@ -44,7 +43,7 @@ export type RootStackParamList = {
   News: undefined;
   Settings: undefined;
   Authorization: undefined;
-  AC: undefined;
+  Account: undefined;
   RecordBookModulesStudent: undefined;
   СurrentGradesModulesStudent: undefined;
   Library: undefined;
@@ -131,34 +130,39 @@ const Navigate = ({ navigation }: GroupsProps) => {
     (state) => state.SettingsSlice.isConnected
   );
   const getHeaderTitle = (route: { name: string }) => {
-    if (route.name === "ScheduleMyGroups") {
-      return "Моя группа";
-    } else if (route.name === "Departments") {
-      return "Расписание";
-    } else if (route.name === "SearchGroups") {
-      return "Поиск группы";
-    } else if (route.name === "Groups") {
-      return selectDepartments;
-    } else if (route.name === "Schedule") {
-      return selectGroup;
-    } else if (route.name === "ScheduleEducator") {
-      return selectEducator;
-    } else if (route.name === "Educator") {
-      return "Преподаватели";
-    } else if (route.name === "SelectedMyGroups") {
-      return "Избранное";
-    } else if (route.name === "News") {
-      return "Новости";
-    } else if (route.name === "Settings") {
-      return "Настройки";
-    } else if (route.name === "Authorization") {
-      return "Авторизация";
-    } else if (route.name === "Account") {
-      return "Аккаунт";
-    } else if (route.name === "RecordBookModulesStudent") {
-      return "Зачётная книжка";
-    } else if (route.name === "СurrentGradesModulesStudent") {
-      return "Текущие оценки";
+    switch (route.name) {
+      case "ScheduleMyGroups":
+        return "Моя группа";
+      case "Departments":
+        return "Расписание";
+      case "SearchGroups":
+        return "Поиск группы";
+      case "Groups":
+        return selectDepartments;
+      case "Schedule":
+        return selectGroup;
+      case "ScheduleEducator":
+        return selectEducator;
+      case "Educator":
+        return "Преподаватели";
+      case "SelectedMyGroups":
+        return "Избранное";
+      case "News":
+        return "Новости";
+      case "Settings":
+        return "Настройки";
+      case "Authorization":
+        return "Авторизация";
+      case "Account":
+        return "Аккаунт";
+      case "RecordBookModulesStudent":
+        return "Зачётная книжка";
+      case "СurrentGradesModulesStudent":
+        return "Текущие оценки";
+      case "Library":
+        return "Библиотека";
+      default:
+        return null; // Возвращаем null в случае, если название маршрута не соответствует ни одному из кейсов
     }
   };
   const getInitialData = async () => {
@@ -319,11 +323,6 @@ const Navigate = ({ navigation }: GroupsProps) => {
             })}
           />
 
-          <Tab.Screen
-            name="СurrentGradesModulesStudent"
-            component={СurrentGradesModulesStudent}
-            options={{ tabBarButton: () => null }}
-          />
           <Tab.Screen
             name="Library"
             component={Library}

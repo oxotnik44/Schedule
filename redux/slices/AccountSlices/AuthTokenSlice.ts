@@ -13,9 +13,12 @@ const AuthTokenSlice = createSlice({
     setTokenUser: (state, action) => {
       state.accessToken = action.payload;
     },
+    deleteTokenUser: (state, action) => {
+      state.accessToken = action.payload;
+    },
   },
 });
 
-export const { setTokenUser } = AuthTokenSlice.actions;
+export const { setTokenUser, deleteTokenUser } = AuthTokenSlice.actions;
 
 export default AuthTokenSlice.reducer;

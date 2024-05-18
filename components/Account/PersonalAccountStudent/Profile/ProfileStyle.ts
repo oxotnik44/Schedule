@@ -58,7 +58,7 @@ export const InfoCard = styled.View`
   border-radius: 10px;
   background-color: ${(props) => props.theme.containerColor};
   width: 90%;
-  align-self: center; 
+  align-self: center;
 `;
 
 export const InfoItem = styled.Text`
@@ -71,8 +71,22 @@ export const InfoItem = styled.Text`
 export const InfoTitle = styled.Text`
   font-size: 18px;
   color: ${(props) => props.theme.textColor};
-  font-family: "Montserrat-Bold"; 
+  font-family: "Montserrat-Bold";
   width: 100%;
-  text-align: center; 
+  text-align: center;
   padding-bottom: 5px;
+`;
+export const BtnLogout = styled.Pressable`
+  border-radius: 10px;
+  padding: 10px;
+  position: absolute;
+  right: 0;
+  top: 0;
+  background-color: ${(props) => props.theme.containerColor};
+`;
+export const BtnELogoutText = styled.Text`
+  font-size: 18px;
+  color: ${(props) => props.theme.textColor};
+  font-family: "Montserrat-Bold";
+  text-align: center;
 `;

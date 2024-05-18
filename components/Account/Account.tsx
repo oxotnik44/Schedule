@@ -2,35 +2,36 @@ import React from "react";
 import { Container } from "./AccountStyle";
 import Profile from "./PersonalAccountStudent/Profile/Profile";
 import Authorization from "../Authorization/Authorization";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { View } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../Navigate";
-import СurrentGradesModulesStudent from "./PersonalAccountStudent/FunctionalModulesStudent/СurrentGradesModulesStudents/СurrentGradesModulesStudent";
-import RecordBookModulesStudent from "./PersonalAccountStudent/FunctionalModulesStudent/RecordBookModulesStudents/RecordBookModulesStudent";
 import FunctionalModulesStudent from "./PersonalAccountStudent/FunctionalModulesStudent/FunctionalModulesStudent";
-type ScheduleProps = {
-  navigation: StackNavigationProp<
-    RootStackParamList,
-    "RecordBookModulesStudent"
-  >;
+
+type NavigationProps = {
+  navigation: StackNavigationProp<RootStackParamList>;
 };
+
 interface AuthUserTokenState {
   AuthTokenSlice: {
     accessToken: string | null;
   };
 }
-const Account = ({ navigation }: ScheduleProps) => {
+
+const Account: React.FC<NavigationProps> = ({ navigation }) => {
   const authTokenUser = useSelector(
-    (stata: AuthUserTokenState) => stata.AuthTokenSlice.accessToken
+    (state: AuthUserTokenState) => state.AuthTokenSlice.accessToken
   );
+  console.log(authTokenUser)
+  const dispatch = useDispatch();
+
   return (
     <Container style={{ flexDirection: "column" }}>
-      {authTokenUser === null ? (
+      {authTokenUser == null ? (
         <Authorization />
       ) : (
         <View>
-          <Profile />
+          <Profile navigation={navigation} />
           <FunctionalModulesStudent navigation={navigation} />
         </View>
       )}

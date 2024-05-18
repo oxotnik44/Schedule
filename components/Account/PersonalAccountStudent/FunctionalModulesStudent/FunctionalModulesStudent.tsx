@@ -13,11 +13,8 @@ import { RootStackParamList } from "../../../../Navigate";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { getSemesterGrades } from "../../../../api/apiUserStudent";
 
-type RecordBookModulesStudent = {
-  navigation: StackNavigationProp<
-    RootStackParamList,
-    "RecordBookModulesStudent"
-  >;
+type FunctionalModulesStudentProps = {
+  navigation: StackNavigationProp<RootStackParamList>;
 };
 interface ProfileInfo {
   ProfileInfoSlice: {
@@ -41,8 +38,8 @@ interface iTokenUser {
     accessToken: any;
   };
 }
-const mass = [{ name: "Зачётная книжка" },{ name: "Библиотека" }];
-const FunctionalModulesStudent: React.FC<RecordBookModulesStudent> = ({
+const mass = [{ name: "Зачётная книжка" }, { name: "Библиотека" }];
+const FunctionalModulesStudent: React.FC<FunctionalModulesStudentProps> = ({
   navigation,
 }) => {
   const isConnected = useSelector(

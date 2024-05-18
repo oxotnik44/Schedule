@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { ThemeProvider } from "styled-components/native";
 import { RootStackParamList } from "../../../../../Navigate";
-import { Container, NoConnected } from "./LibraryStyle";
+import { Container, NoConnected, NoLibraryCard } from "./LibraryStyle";
 
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
@@ -29,16 +29,16 @@ const Library = () => {
   );
 
   const theme = useSelector((state: ITheme) => state.SettingsSlice.theme);
-
+  const isLibraryCard = true;
   return (
     <ThemeProvider theme={theme}>
       <Container>
         {!isConnected ? (
           <NoConnected>Нет соединения с интернетом</NoConnected>
+        ) : isLibraryCard ? (
+          <Text>Список библиотечных книг на руках</Text>
         ) : (
-          <View>
-            <Text>qwe</Text>
-          </View>
+          <NoLibraryCard>У вас нет читательского билета.</NoLibraryCard>
         )}
       </Container>
     </ThemeProvider>

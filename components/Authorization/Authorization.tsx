@@ -57,6 +57,7 @@ const Authorization = () => {
               gradebooks,
               login,
             } = JSON.parse(userData);
+            console.log(JSON.parse(userData))
             const fullName = `${lastname} ${firstname} ${middlename}`;
             setAuthTokenStorage(accessToken, dispatch);
             setProfileStudentInfoStorage(

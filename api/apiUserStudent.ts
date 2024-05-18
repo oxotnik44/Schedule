@@ -1,5 +1,6 @@
 import axios from "axios";
 import { setSessionGrades } from "../redux/slices/AccountSlices/SemesterGradesInfoSlice";
+import { deleteAccessToken } from "../Storage/AuthTokenStorage";
 
 export const getSemesterGrades = async (
   dispatch: Function,
@@ -50,4 +51,20 @@ const transformData = (data: any) => {
       })),
     })),
   }));
+};
+export const logoutUser = async (
+  dispatch: Function,
+  accessToken: string,
+  navigation: any
+) => {
+  try {
+    // const responce = await axios.post("");
+    // const data = responce.data;
+    // console.log(data);
+    deleteAccessToken(dispatch,accessToken);
+    navigation.navigate("Account");
+
+  } catch (error) {
+    console.log("Не удалось выйти из аккаунта" + error.message);
+  }
 };
