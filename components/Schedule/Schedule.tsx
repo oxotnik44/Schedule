@@ -54,6 +54,7 @@ import {
 } from "../../redux/slices/ScheduleStudentInfoSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { setFavoriteSchedule } from "../../redux/slices/FavoritesSlice/FavoriteScheduleStudent";
+import { useNetInfo } from "@react-native-community/netinfo";
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 
@@ -141,11 +142,70 @@ interface Namegroup {
     selectedGroupName: string;
   };
 }
+moment.tz.setDefault("Asia/Novosibirsk");
+const weekdays = [
+  "Понедельник",
+  "Вторник",
+  "Среда",
+  "Четверг",
+  "Пятница",
+  "Суббота",
+];
+const STORAGE_KEY_SCHEDULE = "favoriteSchedule";
+
+const formatTime = (timeDiff) => {
+  const hours = String(Math.floor(timeDiff / 3600)).padStart(2, "0");
+  const minutes = String(Math.floor((timeDiff % 3600) / 60)).padStart(2, "0");
+  const seconds = String(timeDiff % 60).padStart(2, "0");
+  return `${hours}:${minutes}:${seconds}`;
+};
+
+const updateFavoriteGroup = async (
+  idGroup,
+  favoriteGroups,
+  dataSchedule,
+  dispatch
+) => {
+  try {
+    const storedSchedule = await AsyncStorage.getItem(STORAGE_KEY_SCHEDULE);
+    let scheduleStudent = storedSchedule
+      ? JSON.parse(storedSchedule)
+      : { groups: [], educators: [] };
+
+    const isFavoriteGroup = favoriteGroups.some(
+      (groupFavorite) => groupFavorite.idGroup === idGroup
+    );
+    const isFavoriteScheduleGroup = scheduleStudent.groups.some((group) =>
+      group.hasOwnProperty(idGroup)
+    );
+
+    const NovosibirskTime = moment.tz("Asia/Novosibirsk");
+    const currentTimeCache = NovosibirskTime.format("HH:mm:ss");
+    const currentDateCache = NovosibirskTime.format("D MMMM YYYY");
+    const lastCacheEntry = { currentTimeCache, currentDateCache };
+
+    if (isFavoriteGroup && isFavoriteScheduleGroup) {
+      const newDataSchedule = { ...dataSchedule, lastCacheEntry };
+      const groupIndex = scheduleStudent.groups.findIndex(
+        (group) => Object.keys(group)[0] === idGroup.toString()
+      );
+
+      if (groupIndex !== -1) {
+        scheduleStudent.groups[groupIndex][idGroup] = newDataSchedule;
+        await AsyncStorage.setItem(
+          STORAGE_KEY_SCHEDULE,
+          JSON.stringify(scheduleStudent)
+        );
+      }
+    } else if (!isFavoriteScheduleGroup && isFavoriteGroup) {
+      setFavoriteSchedule(dataSchedule, idGroup, lastCacheEntry); // Добавление новой записи в расписание
+    }
+  } catch (error) {
+    console.error("Ошибка при обновлении расписания", error);
+  }
+};
 const Schedule = ({ navigation }: ScheduleProps) => {
   const theme = useSelector((state: ITheme) => state.SettingsSlice.theme);
-  moment.tz.setDefault("Asia/Novosibirsk");
-  const dispatch = useDispatch();
-  //есть ли подключение к инету
   const isConnected = useSelector(
     (state: Settings) => state.SettingsSlice.isConnected
   );
@@ -159,7 +219,6 @@ const Schedule = ({ navigation }: ScheduleProps) => {
   const selectIdGroup = useSelector(
     (state: ScheduleState) => state.ScheduleInfoStudentSlice.selectIdGroup
   );
-  //для заочников расписание с текущей даты или до текущей
   const isExtramuralScheduleUntilToday = useSelector(
     (state: ScheduleState) =>
       state.ScheduleInfoStudentSlice.isExtramuralScheduleUntilToday
@@ -174,51 +233,42 @@ const Schedule = ({ navigation }: ScheduleProps) => {
   const nameGroup = useSelector(
     (state: Namegroup) => state.GroupsInfoSlice.selectedGroupName
   );
+
+  const dispatch = useDispatch();
+
   const [typeWeekToSwitch, setTypeWeekToSwitch] = useState("");
-  //не изменяемая для показа текущей недели
   const [currentTypeWeek, setCurrentTypeWeek] = useState<
     "numerator" | "denominator"
   >();
-  //проверка дня для времени до и после пары
-  const [currentDayForResident, setСurrentDayForResident] =
+  const [currentDayForResident, setCurrentDayForResident] =
     useState<string>("Понедельник");
-  //проверка дня для текущей пары
   const [currentDayForExtramuralist, setCurrentDayForExtramuralist] =
     useState<string>("");
-  //просто текущее время
   const [currentTime, setCurrentTime] = useState<string>("");
-  //массив с началом пар для времени до и после пары
-  const arrayStartsPairs: any[] = [];
   const [timeArray, setTimeArray] = useState("");
   const [timeDifferences, setTimeDifference] = useState<string>("");
-  const weekdays = [
-    "Понедельник",
-    "Вторник",
-    "Среда",
-    "Четверг",
-    "Пятница",
-    "Суббота",
-  ];
-  // Эффект для определения типа недели
+  const arrayStartsPairs: any[] = [];
+
   useEffect(() => {
     const currentDate = moment();
     const weekNumber = currentDate.isoWeek();
     const isNumeratorWeek =
-      (weekNumber + dataSchedule.scheduleResident.weekCorrection) % 2 === 1; // Если номер недели нечетный, то это "numerator"
+      (weekNumber + dataSchedule.scheduleResident.weekCorrection) % 2 === 1;
     const typeToSwitch = isNumeratorWeek ? "numerator" : "denominator";
 
     setCurrentTypeWeek(typeToSwitch);
     setTypeWeekToSwitch(typeToSwitch);
   }, [dataSchedule]);
-  // Эффект для обновления времени каждую секунду
+
   useEffect(() => {
     const interval = setInterval(() => {
       const date = moment().tz("Asia/Novosibirsk").locale("ru");
       const day = weekdays[date.day() === 0 ? 6 : date.day() - 1];
       const time = date.format("HH:mm:ss");
       const dayExtramuralist = date.format("D MMMM YYYY");
+
       setCurrentDayForExtramuralist(dayExtramuralist);
-      setСurrentDayForResident(day);
+      setCurrentDayForResident(day);
       setCurrentTime(time);
     }, 1000);
 
@@ -226,7 +276,7 @@ const Schedule = ({ navigation }: ScheduleProps) => {
       clearInterval(interval);
     };
   }, []);
-  // Эффект для поиска следующей пары по времени
+
   useEffect(() => {
     const currentTimeParts = currentTime.split(":").map(Number);
     const currentTimeInSeconds =
@@ -253,74 +303,28 @@ const Schedule = ({ navigation }: ScheduleProps) => {
     }
   }, [currentTime, arrayStartsPairs]);
 
-  let updateFavoriteGroup;
-  const STORAGE_KEY_SCHEDULE = "favoriteSchedule";
-  // Эффект обновления избранных групп
   useEffect(() => {
-    // Обновление избранных групп, если установлено соединение
     if (isConnected) {
-      updateFavoriteGroup = async (idGroup: number) => {
-        try {
-          const storedSchedule = await AsyncStorage.getItem(
-            STORAGE_KEY_SCHEDULE
-          );
-          let scheduleStudent = storedSchedule
-            ? JSON.parse(storedSchedule)
-            : { groups: [], educators: [] };
-
-          // Проверка, является ли группа избранной
-          const isFavoriteGroup = favoriteGroups.some(
-            (groupFavorite) => groupFavorite.idGroup === idGroup
-          );
-          const isFavoriteScheduleGroup = scheduleStudent.groups.some(
-            (group: any) => group.hasOwnProperty(idGroup)
-          );
-
-          // Получение времени Новосибирска
-          const NovosibirskTime = moment.tz("Asia/Novosibirsk");
-          const currentTimeCache = NovosibirskTime.format("HH:mm:ss");
-          const currentDateCache = NovosibirskTime.format("D MMMM YYYY");
-          const lastCacheEntry = { currentTimeCache, currentDateCache };
-
-          if (isFavoriteGroup && isFavoriteScheduleGroup) {
-            const newDataSchedule = { ...dataSchedule, lastCacheEntry };
-            const groupIndex = scheduleStudent.groups.findIndex(
-              (group: any) => Object.keys(group)[0] === idGroup.toString()
-            );
-
-            if (groupIndex !== -1) {
-              scheduleStudent.groups[groupIndex][idGroup] = newDataSchedule;
-              await AsyncStorage.setItem(
-                STORAGE_KEY_SCHEDULE,
-                JSON.stringify(scheduleStudent)
-              );
-            }
-          } else if (!isFavoriteScheduleGroup && isFavoriteGroup) {
-            setFavoriteSchedule(dataSchedule, idGroup, lastCacheEntry); // Добавление новой записи в расписание
-          }
-        } catch (error) {
-          console.error("Ошибка при обновлении расписания", error);
-        }
-      };
-
-      // Вызов обновления избранных групп при изменении selectIdGroup
-      updateFavoriteGroup(selectIdGroup);
+      updateFavoriteGroup(
+        selectIdGroup,
+        favoriteGroups,
+        dataSchedule,
+        dispatch
+      );
     }
   }, [selectIdGroup, dataSchedule, isConnected, favoriteGroups]);
 
-  // Эффект получения данных
   useEffect(() => {
     const fetchData = async () => {
-      // Получение данных, если соединение не установлено
       if (!isConnected) {
-        const storedSchedule = await AsyncStorage.getItem("favoriteSchedule");
+        const storedSchedule = await AsyncStorage.getItem(STORAGE_KEY_SCHEDULE);
 
         if (storedSchedule) {
           const scheduleStudent = JSON.parse(storedSchedule);
 
           if (scheduleStudent && scheduleStudent.groups) {
             const foundGroup = scheduleStudent.groups.find(
-              (item: any) => Object.keys(item)[0] === selectIdGroup.toString()
+              (item) => Object.keys(item)[0] === selectIdGroup.toString()
             );
 
             if (foundGroup) {
@@ -333,15 +337,10 @@ const Schedule = ({ navigation }: ScheduleProps) => {
       }
     };
 
-    // Выполнение запроса данных
     fetchData();
   }, [isConnected, selectIdGroup]);
 
-  // Добавлен isFavoriteGroup в зависимости
-  const fetchScheduleEducator = async (
-    fullNameEducator: string,
-    idEducator: number
-  ) => {
+  const fetchScheduleEducator = async (fullNameEducator, idEducator) => {
     try {
       dispatch(setNameEducator(fullNameEducator));
       await getScheduleEducator(dispatch, idEducator);
@@ -350,37 +349,26 @@ const Schedule = ({ navigation }: ScheduleProps) => {
       console.log(error);
     }
   };
-  // Определяем расписание на текущую неделю в зависимости от выбранного типа недели (numerator или denominator)
+
   const currentWeekSchedule =
     typeWeekToSwitch === "numerator"
       ? dataSchedule.scheduleResident.numerator
       : dataSchedule.scheduleResident.denominator;
 
-  // Фильтруем расписание по каждому дню недели и сохраняем в массиве initialFilteredSchedule
   const initialFilteredSchedule = weekdays.map((weekday) =>
     currentWeekSchedule.filter(
       (item) => item.weekday === weekday || item.date === weekday
     )
   );
 
-  // Проходим по отфильтрованному расписанию и извлекаем начальное время занятий для текущего дня
   initialFilteredSchedule.forEach((schedule) => {
     schedule.forEach((scheduleItem) => {
-      const [start] = scheduleItem.numberPair.split("-"); // Извлекаем начальное время
+      const [start] = scheduleItem.numberPair.split("-");
       if (scheduleItem.weekday === currentDayForResident) {
-        arrayStartsPairs.push(start); // Добавляем начальное время в массив для текущего дня
+        arrayStartsPairs.push(start);
       }
     });
   });
-
-  // Функция для форматирования времени в формат HH:mm:ss
-  const formatTime = (timeDiff: number) => {
-    const hours = String(Math.floor(timeDiff / 3600)).padStart(2, "0");
-    const minutes = String(Math.floor((timeDiff % 3600) / 60)).padStart(2, "0");
-    const seconds = String(timeDiff % 60).padStart(2, "0");
-
-    return `${hours}:${minutes}:${seconds}`;
-  };
   return (
     <ThemeProvider theme={theme}>
       <Container>
@@ -919,7 +907,7 @@ const Schedule = ({ navigation }: ScheduleProps) => {
           <FlatList
             data={dataScheduleSession}
             keyExtractor={(item, index) => index.toString()}
-            initialNumToRender={3}
+            initialNumToRender={4}
             maxToRenderPerBatch={10}
             windowSize={10}
             renderItem={({ item, index }) => (

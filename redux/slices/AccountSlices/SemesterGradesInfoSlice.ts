@@ -1,7 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-
-
 interface ISemesterGrades {
   dataSemesterGrades: {
     numberCourse: number;
@@ -33,11 +31,10 @@ export const initialState: ISemesterGrades = {
     {
       numberCourse: 0,
       nameCourse: "",
-      semesters: []
-    }
-  ]
+      semesters: [],
+    },
+  ],
 };
-
 
 const SemesterGradesInfoSlice = createSlice({
   name: "Grades",

@@ -16,6 +16,8 @@ import { setFavoriteEducator } from "./redux/slices/FavoritesSlice/FavoriteEduca
 import { setTokenUser } from "./redux/slices/AccountSlices/AuthTokenSlice";
 import { AuthOnLoad } from "./api/apiAuthentication";
 import { checkCorrectFavoriteSchedule } from "./Notifications/CheckCorrectFavoriteSchedule";
+import { setProfileInfo } from "./redux/slices/AccountSlices/ProfileInfoSlice";
+import { getCreditBookStudent } from "./api/apiUserStudent";
 type GroupsProps = {
   navigation: StackNavigationProp<RootStackParamList, "Settings">;
 };
@@ -51,6 +53,11 @@ const Load = ({ navigation }: GroupsProps) => {
         dispatch(setTokenUser(accessToken));
         if (accessToken && personalDataStudent) {
           AuthOnLoad(accessToken, dispatch, personalDataStudent);
+          getCreditBookStudent(
+            accessToken,
+            dispatch,
+            personalDataStudent.login
+          );
         }
 
         // Получение и установка избранных групп и преподавателей

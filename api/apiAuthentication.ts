@@ -1,6 +1,7 @@
 import axios from "axios";
 import { setProfileInfo } from "../redux/slices/AccountSlices/ProfileInfoSlice";
 interface ProfileState {
+  login: string;
   fullName: string;
   numberGroup: string;
   email: string;

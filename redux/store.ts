@@ -13,6 +13,7 @@ import { ScheduleInfoEducatorSlice } from "./slices/ScheduleEducatorInfoSlice";
 import AuthTokenSlice from "./slices/AccountSlices/AuthTokenSlice";
 import ProfileInfoSlice from "./slices/AccountSlices/ProfileInfoSlice";
 import SemesterGradesInfoSlice from "./slices/AccountSlices/SemesterGradesInfoSlice";
+import LibraryInfoSlice from "./slices/AccountSlices/LibraryInfoSlice";
 export const store = configureStore({
   reducer: {
     DepartmentInfoSlice: DepartmentInfoSlice.reducer,
@@ -27,6 +28,7 @@ export const store = configureStore({
     AuthTokenSlice: AuthTokenSlice,
     SemesterGradesInfoSlice: SemesterGradesInfoSlice,
     ProfileInfoSlice: ProfileInfoSlice,
+    LibraryInfoSlice: LibraryInfoSlice,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

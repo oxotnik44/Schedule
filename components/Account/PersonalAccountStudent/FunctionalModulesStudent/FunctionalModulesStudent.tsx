@@ -8,11 +8,19 @@ import {
   ModuleName,
   ServicesTitle,
 } from "./FunctionalModulesStudentStyle";
-import { Pressable, ScrollView, Text, ToastAndroid } from "react-native";
+import {
+  Dimensions,
+  Pressable,
+  ScrollView,
+  Text,
+  ToastAndroid,
+  View,
+} from "react-native";
 import { RootStackParamList } from "../../../../Navigate";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { getSemesterGrades } from "../../../../api/apiUserStudent";
-
+const screenWidth = Dimensions.get("window").width;
+const screenHeight = Dimensions.get("window").height;
 type FunctionalModulesStudentProps = {
   navigation: StackNavigationProp<RootStackParamList>;
 };
@@ -38,7 +46,11 @@ interface iTokenUser {
     accessToken: any;
   };
 }
-const mass = [{ name: "Зачётная книжка" }, { name: "Библиотека" }];
+const mass = [
+  { name: "Зачётная книжка" },
+  { name: "Библиотека" },
+  { name: "Личные данные" },
+];
 const FunctionalModulesStudent: React.FC<FunctionalModulesStudentProps> = ({
   navigation,
 }) => {
@@ -59,52 +71,60 @@ const FunctionalModulesStudent: React.FC<FunctionalModulesStudentProps> = ({
         return require("../../../../assets/Grades.png");
       case "Зачётная книжка":
         return require("../../../../assets/ReportCard.png");
+      case "Личные данные":
+        return require("../../../../assets/ReportCard.png");
+      default:
+        return;
     }
   }; //для смены картинки
   return (
     <ThemeProvider theme={theme}>
-      <ServicesTitle>СЕРВИСЫ</ServicesTitle>
-      <ScrollView>
-        <Container>
-          {mass.map((item, index) => (
-            <Pressable
-              key={index}
-              onPress={() => {
-                if (!isConnected) {
-                  ToastAndroid.show(
-                    "Нет соединения с интернетом",
-                    ToastAndroid.SHORT
-                  );
-                } else {
-                  item.name === "Зачётная книжка"
-                    ? getSemesterGrades(
-                        dispatch,
-                        navigation,
-                        accessToken,
-                        dataStudent.login,
-                        dataStudent.creditBook
-                      )
-                    : navigation.navigate("Library");
-                }
-              }}
-            >
-              <ContainerFunctionalModule
-                style={{
-                  height: 140,
-                  width: 170,
-                  marginLeft: index % 2 === 0 ? 10 : 20,
+      <View style={{ marginTop: screenHeight * 0.12 }}>
+        <ServicesTitle>СЕРВИСЫ</ServicesTitle>
+        <ScrollView>
+          <Container>
+            {mass.map((item, index) => (
+              <Pressable
+                key={index}
+                onPress={() => {
+                  if (!isConnected) {
+                    ToastAndroid.show(
+                      "Нет соединения с интернетом",
+                      ToastAndroid.SHORT
+                    );
+                  } else {
+                    item.name === "Зачётная книжка"
+                      ? getSemesterGrades(
+                          dispatch,
+                          navigation,
+                          accessToken,
+                          dataStudent.login,
+                          dataStudent.creditBook
+                        )
+                      : item.name === "Личные данные"
+                      ? navigation.navigate("FullInfoStudent")
+                      : navigation.navigate("Library");
+                  }
                 }}
               >
-                <ModuleImage
-                  resizeMode="contain"
-                  source={getImageSource(item.name)}
-                />
-                <ModuleName>{item.name}</ModuleName>
-              </ContainerFunctionalModule>
-            </Pressable>
-          ))}
-        </Container>
-      </ScrollView>
+                <ContainerFunctionalModule
+                  style={{
+                    height: 140,
+                    width: 170,
+                    marginLeft: index % 2 === 0 ? 10 : 20,
+                  }}
+                >
+                  <ModuleImage
+                    resizeMode="contain"
+                    source={getImageSource(item.name)}
+                  />
+                  <ModuleName>{item.name}</ModuleName>
+                </ContainerFunctionalModule>
+              </Pressable>
+            ))}
+          </Container>
+        </ScrollView>
+      </View>
     </ThemeProvider>
   );
 };

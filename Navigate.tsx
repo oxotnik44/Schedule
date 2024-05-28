@@ -30,6 +30,8 @@ import { resetTextSearchGroup } from "./redux/slices/DepartmentsInfoSlice";
 import Account from "./components/Account/Account";
 import RecordBookModulesStudent from "./components/Account/PersonalAccountStudent/FunctionalModulesStudent/RecordBookModulesStudents/RecordBookModulesStudent";
 import Library from "./components/Account/PersonalAccountStudent/FunctionalModulesStudent/Library/Library";
+import FullInfoStudent from "./components/Account/PersonalAccountStudent/FunctionalModulesStudent/FullInfoStudent/FullInfoStudent";
+
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 export type RootStackParamList = {
@@ -47,6 +49,7 @@ export type RootStackParamList = {
   RecordBookModulesStudent: undefined;
   СurrentGradesModulesStudent: undefined;
   Library: undefined;
+  FullInfoStudent: undefined;
 };
 
 interface TabIconProps {
@@ -161,6 +164,8 @@ const Navigate = ({ navigation }: GroupsProps) => {
         return "Текущие оценки";
       case "Library":
         return "Библиотека";
+      case "FullInfoStudent":
+        "Личные данные";
       default:
         return null; // Возвращаем null в случае, если название маршрута не соответствует ни одному из кейсов
     }
@@ -351,6 +356,11 @@ const Navigate = ({ navigation }: GroupsProps) => {
           <Tab.Screen
             name="ScheduleEducator"
             component={ScheduleEducator}
+            options={{ tabBarButton: () => null }}
+          />
+          <Tab.Screen
+            name="FullInfoStudent"
+            component={FullInfoStudent}
             options={{ tabBarButton: () => null }}
           />
           <Tab.Screen

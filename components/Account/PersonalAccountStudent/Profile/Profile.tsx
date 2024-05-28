@@ -74,7 +74,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
           source={require("../../../../assets/Account.png")}
         />
         <ProfileNameText>{dataStudent.fullName}</ProfileNameText>
-        <ProfileInfoContainer>
+        {/* <ProfileInfoContainer>
           <TouchableOpacity onPress={() => setIsInfoVisible(!isInfoVisible)}>
             <InfoTitle>Полная информация</InfoTitle>
           </TouchableOpacity>
@@ -84,7 +84,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
               <InfoItem>Email: {dataStudent.email}</InfoItem>
             </InfoCard>
           )}
-        </ProfileInfoContainer>
+        </ProfileInfoContainer> */}
       </Container>
     </ThemeProvider>
   );
