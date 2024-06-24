@@ -11,72 +11,6 @@ export const Container = styled.View`
   background-color: ${(props) => props.theme.backgroundColor};
 `;
 
-export const ContainerDepartments = styled.TouchableOpacity`
-  width: ${screenWidth * 0.9}px;
-  min-height: ${screenHeight * 0.1}px;
-  height: auto;
-  background-color: ${(props) => props.theme.containerColor};
-  border-radius: 20px;
-  margin-top: ${screenHeight * 0.025}px;
-  flex-direction: row;
-  align-items: center;
-  padding: 0 ${screenWidth * 0.05}px;
-`;
-
-export const NameDepartments = styled.Text`
-  margin-left: ${screenWidth * 0.01}px;
-  width: ${screenWidth * 0.6}px;
-  height: auto;
-  color: ${(props) => props.theme.textColor};
-  font-size: ${screenWidth * 0.04}px;
-  font-family: "Montserrat-SemiBold";
-  padding-vertical: 10px;
-`;
-
-export const ContainerSearchGroups = styled.View`
-  align-items: center;
-  border-radius: 20px;
-  margin-top: ${screenHeight * 0.02}px;
-`;
-
-export const SearchInput = styled.TextInput`
-  font-size: ${screenWidth * 0.045}px;
-  border-radius: 13px;
-  flex: 1;
-  margin-left: 10px;
-  color: ${(props) => props.theme.textSearchColor};
-`;
-
-export const SearchButton = styled.TouchableOpacity`
-  width: ${screenWidth * 0.3}px;
-  height: ${screenHeight * 0.05}px;
-  align-items: center;
-  justify-content: center;
-  border-radius: 10px;
-  background-color: #babfcf;
-  margin-top: ${screenHeight * 0.015}px;
-`;
-
-export const SearchButtonText = styled.Text`
-  color: black;
-  font-size: ${screenWidth * 0.05}px;
-`;
-
-export const SearchImage = styled.Image`
-  width: ${screenWidth * 0.06}px;
-  height: ${screenWidth * 0.06}px;
-  tint-color: ${(props) => props.theme.imageColor};
-`;
-export const SearchContainer = styled.View`
-  width: ${screenWidth * 0.9}px;
-  height: ${screenHeight * 0.06}px;
-  flex-direction: row;
-  align-items: center;
-  border-radius: 13px;
-  background-color: ${(props) => props.theme.containerSearchColor};
-  elevation: 4;
-  padding-horizontal: ${screenWidth * 0.03}px;
-`;
 export const NoConnected = styled.Text`
   font-size: ${screenWidth * 0.055}px;
   color: ${(props) => props.theme.textColor};
@@ -84,13 +18,42 @@ export const NoConnected = styled.Text`
   text-align: center;
   width: ${screenWidth * 0.95}px;
 `;
-export const NoLibraryCard = styled.Text`
+
+export const ErrorMessage = styled.Text`
   font-size: ${screenWidth * 0.05}px;
   color: ${(props) => props.theme.textColor};
   font-family: "Montserrat-SemiBold";
   text-align: center;
   width: ${screenWidth * 0.95}px;
 `;
-export const TextListBooks = styled.Text`
-font-size: ${screenWidth * 0.6}px
-`
+
+export const BookItemContainer = styled.View`
+  flex-direction: row;
+  padding: ${screenHeight * 0.012}px;
+  border-bottom-width: ${screenHeight * 0.002}px;
+  border-bottom-color: ${(props) => props.theme.borderColor};
+  width: ${screenWidth * 0.9}px;
+  align-items: center;
+`;
+
+export const BookCover = styled.Image`
+  width: ${screenWidth * 0.25}px;
+  height: ${screenHeight * 0.19}px;
+  margin-right: ${screenWidth * 0.03}px;
+`;
+
+export const BookInfo = styled.View`
+  flex: 1;
+`;
+
+export const BookTitle = styled.Text`
+  font-size: ${screenWidth * 0.04}px;
+  color: ${(props) => props.theme.textColor};
+  font-family: "Montserrat-Bold";
+`;
+
+export const BookReturnDate = styled.Text`
+  font-size: ${screenWidth * 0.035}px;
+  color: ${(props) => props.theme.textColor};
+  font-family: "Montserrat-Regular";
+`;

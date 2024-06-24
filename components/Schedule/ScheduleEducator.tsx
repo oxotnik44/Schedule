@@ -436,7 +436,7 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
             <Text
               style={{
                 color: theme === lightTheme ? "#004C6F" : "#FFFFFF",
-                fontSize: screenWidth * 0.043,
+                fontSize: screenWidth * 0.0424,
                 textAlign: "center",
                 fontFamily: "Montserrat-SemiBold",
               }}
@@ -514,6 +514,7 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
           initialNumToRender={3}
           maxToRenderPerBatch={10}
           windowSize={10}
+          showsVerticalScrollIndicator={false}
           renderItem={({ item: weekday }) => {
             const filteredSchedule =
               typeWeekToSwitch === "numerator"
@@ -552,6 +553,7 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
                   initialNumToRender={5}
                   maxToRenderPerBatch={10}
                   windowSize={10}
+                  showsVerticalScrollIndicator={false}
                   renderItem={({ item }) => {
                     const [start, end] = item.numberPair.split("-");
                     const startTime = moment(start, "HH:mm");
@@ -761,6 +763,7 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
             initialNumToRender={3}
             maxToRenderPerBatch={10}
             windowSize={10}
+            showsVerticalScrollIndicator={false}
             contentContainerStyle={{
               paddingBottom: isConnected
                 ? screenHeight * 0.04
@@ -775,6 +778,7 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
                   initialNumToRender={5}
                   maxToRenderPerBatch={10}
                   windowSize={10}
+                  showsVerticalScrollIndicator={false}
                   renderItem={({ item, index }) => {
                     const [start, end] = item.numberPair.split("-");
                     const startTime = moment(start, "HH:mm");
@@ -854,6 +858,7 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
           initialNumToRender={3}
           maxToRenderPerBatch={10}
           windowSize={10}
+          showsVerticalScrollIndicator={false}
           renderItem={({ item, index }) => (
             <View key={index} style={{ marginTop: screenHeight * 0.02 }}>
               <DateText>{item.date && item.date}</DateText>
@@ -863,6 +868,7 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
                 initialNumToRender={5}
                 maxToRenderPerBatch={10}
                 windowSize={10}
+                showsVerticalScrollIndicator={false}
                 renderItem={({ item, index }) => {
                   const [start, end] = item.numberPair.split("-");
                   const startTime = moment(start, "HH:mm");

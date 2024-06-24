@@ -72,7 +72,7 @@ export const InfoTitle = styled.Text`
   font-size: 18px;
   color: ${(props) => props.theme.textColor};
   font-family: "Montserrat-Bold";
-  width: 100%;
+  width: 100%; 
   text-align: center;
   padding-bottom: 5px;
 `;
@@ -80,12 +80,12 @@ export const BtnLogout = styled.Pressable`
   border-radius: 10px;
   padding: 10px;
   position: absolute;
-  right: 0;
-  top: 0;
+  right: ${screenWidth * 0.02}px;
+  top: ${screenHeight * 0.01}px;
   background-color: ${(props) => props.theme.containerColor};
 `;
 export const BtnELogoutText = styled.Text`
-  font-size: 18px;
+  font-size: ${screenWidth*0.05}px;
   color: ${(props) => props.theme.textColor};
   font-family: "Montserrat-Bold";
   text-align: center;

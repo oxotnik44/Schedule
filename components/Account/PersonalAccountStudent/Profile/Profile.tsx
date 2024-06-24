@@ -4,18 +4,12 @@ import {
   BtnELogoutText,
   BtnLogout,
   Container,
-  InfoCard,
-  InfoItem,
-  InfoTitle,
   ProfileImage,
-  ProfileInfoContainer,
-  ProfileNameText,
 } from "./ProfileStyle";
 import { ThemeProvider } from "styled-components/native";
-import { TouchableOpacity } from "react-native";
-import { logoutUser } from "../../../../api/apiUserStudent";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../../../Navigate";
+import { deleteAccessToken } from "../../../../Storage/AuthTokenStorage";
 
 type ProfileProps = {
   navigation: StackNavigationProp<RootStackParamList>;
@@ -62,29 +56,19 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
   return (
     <ThemeProvider theme={theme}>
       <Container style={{ marginBottom: isInfoVisible ? 300 : 0 }}>
-        <BtnLogout
-          onPress={() => {
-            logoutUser(dispatch, accessToken, navigation);
-          }}
-        >
-          <BtnELogoutText>Выход</BtnELogoutText>
-        </BtnLogout>
         <ProfileImage
           resizeMode="contain"
           source={require("../../../../assets/Account.png")}
         />
-        <ProfileNameText>{dataStudent.fullName}</ProfileNameText>
-        {/* <ProfileInfoContainer>
-          <TouchableOpacity onPress={() => setIsInfoVisible(!isInfoVisible)}>
-            <InfoTitle>Полная информация</InfoTitle>
-          </TouchableOpacity>
-          {isInfoVisible && (
-            <InfoCard>
-              <InfoItem>Номер группы: {dataStudent.numberGroup} </InfoItem>
-              <InfoItem>Email: {dataStudent.email}</InfoItem>
-            </InfoCard>
-          )}
-        </ProfileInfoContainer> */}
+        <BtnLogout
+          onPress={() => {
+            deleteAccessToken(dispatch);
+            navigation.navigate("Account");
+            console.log("Токен успешно удалён");
+          }}
+        >
+          <BtnELogoutText>Выход</BtnELogoutText>
+        </BtnLogout>
       </Container>
     </ThemeProvider>
   );

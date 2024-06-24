@@ -165,7 +165,7 @@ const Educator: React.FC<EducatorProps> = ({ navigation }) => {
             <FlatList
               data={filteredData}
               renderItem={renderItemEducator}
-              showsHorizontalScrollIndicator={false}
+              showsVerticalScrollIndicator={false}
             />
           </View>
         )}

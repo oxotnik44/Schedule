@@ -236,12 +236,13 @@ const Departments: React.FC<DepartmentsProps> = ({ navigation }) => {
                 contentContainerStyle={{
                   paddingBottom: screenHeight * 0.02,
                 }}
+                showsVerticalScrollIndicator={false}
               />
             ) : (
               <FlatList
                 data={filteredData}
                 renderItem={renderItemGroup}
-                showsHorizontalScrollIndicator={false}
+                showsVerticalScrollIndicator={false}
               />
             )}
           </View>

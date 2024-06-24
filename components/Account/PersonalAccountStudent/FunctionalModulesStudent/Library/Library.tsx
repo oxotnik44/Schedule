@@ -1,25 +1,27 @@
-import React, { useCallback } from "react";
-import {
-  FlatList,
-  Dimensions,
-  View,
-  ToastAndroid,
-  Text,
-  Pressable,
-} from "react-native";
+import React, { useEffect } from "react";
+import { FlatList, Dimensions, View, Text, Image } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useDispatch, useSelector } from "react-redux";
-
 import { ThemeProvider } from "styled-components/native";
 import { RootStackParamList } from "../../../../../Navigate";
-import { Container, NoConnected, NoLibraryCard } from "./LibraryStyle";
-import { getCreditBookStudent } from "../../../../../api/apiUserStudent";
+import {
+  Container,
+  NoConnected,
+  ErrorMessage,
+  BookItemContainer,
+  BookCover,
+  BookInfo,
+  BookTitle,
+  BookReturnDate,
+} from "./LibraryStyle";
 
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
+
 type LibraryProps = {
   navigation: StackNavigationProp<RootStackParamList>;
 };
+
 type ProfileUser = {
   ProfileInfoSlice: {
     personalDataStudent: {
@@ -36,31 +38,37 @@ type ProfileUser = {
     };
   };
 };
+
 type ITheme = {
   SettingsSlice: {
     theme: any;
   };
 };
+
 interface Settings {
   SettingsSlice: {
     isConnected: boolean;
   };
 }
+
 interface iTokenUser {
   AuthTokenSlice: {
     accessToken: any;
   };
 }
-interface BooksState {
-  idBook: number;
-  dateReceipt: string | null;
-  nameBook: string;
+
+interface BookState {
+  bookCover: string | null;
+  bookTitle: string;
+  dataReturn: string;
+  url: string;
 }
+
 interface Library {
   LibraryInfoSlice: {
     dateLibrary: {
-      cardLibrary: string | null;
-      booksList: BooksState[];
+      booksList: BookState[];
+      status: number | null;
     };
   };
 }
@@ -68,35 +76,52 @@ const Library = () => {
   const isConnected = useSelector(
     (state: Settings) => state.SettingsSlice.isConnected
   );
-  const dispatch = useDispatch();
   const theme = useSelector((state: ITheme) => state.SettingsSlice.theme);
-  const profileUser = useSelector(
-    (state: ProfileUser) => state.ProfileInfoSlice.personalDataStudent
-  );
-  const accessToken = useSelector(
-    (state: iTokenUser) => state.AuthTokenSlice.accessToken
-  );
-  const Library = useSelector(
+
+  const { booksList, status } = useSelector(
     (state: Library) => state.LibraryInfoSlice.dateLibrary
   );
-  const isLibraryCard = true;
+
+  const renderBookItem = ({ item }: { item: BookState }) => (
+    <BookItemContainer>
+      <BookCover source={{ uri: item.bookCover }} />
+      <BookInfo>
+        <BookTitle>{item.bookTitle}</BookTitle>
+        <BookReturnDate>Дата возврата: {item.dataReturn}</BookReturnDate>
+      </BookInfo>
+    </BookItemContainer>
+  );
+
+  const getContent = () => {
+    if (!isConnected) {
+      return <NoConnected>Нет соединения с интернетом</NoConnected>;
+    }
+    switch (status) {
+      case 204:
+        return <ErrorMessage>Нет доступных книг</ErrorMessage>;
+      case 404:
+        return (
+          <ErrorMessage>У вас нет читательского билета.</ErrorMessage>
+        );
+      case 500:
+        return (
+          <ErrorMessage>Что-то пошло не так. Попробуйте позже</ErrorMessage>
+        );
+      default:
+        return (
+          <FlatList
+            data={booksList}
+            renderItem={renderBookItem}
+            keyExtractor={(item) => item.url}
+            showsVerticalScrollIndicator={false}
+          />
+        );
+    }
+  };
+
   return (
     <ThemeProvider theme={theme}>
-      <Container>
-        {!isConnected ? (
-          <NoConnected>Нет соединения с интернетом</NoConnected>
-        ) : isLibraryCard ? (
-          <Pressable
-            onPress={() => {
-              getCreditBookStudent(accessToken, dispatch, profileUser.login);
-            }}
-          >
-            <Text>Список библиотечных книг на руках</Text>
-          </Pressable>
-        ) : (
-          <NoLibraryCard>У вас нет читательского билета.</NoLibraryCard>
-        )}
-      </Container>
+      <Container>{getContent()}</Container>
     </ThemeProvider>
   );
 };

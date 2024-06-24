@@ -378,7 +378,7 @@ const Schedule = ({ navigation }: ScheduleProps) => {
               <Text
                 style={{
                   color: theme.textColor,
-                  fontSize: screenWidth * 0.043,
+                  fontSize: screenWidth * 0.04263,
                   textAlign: "center",
                   fontFamily: "Montserrat-SemiBold",
                 }}
@@ -410,7 +410,7 @@ const Schedule = ({ navigation }: ScheduleProps) => {
               <Text
                 style={{
                   color: theme.textColor,
-                  fontSize: screenWidth * 0.043,
+                  fontSize: screenWidth * 0.04263,
                   textAlign: "center",
                   fontFamily: "Montserrat-SemiBold",
                 }}
@@ -488,6 +488,7 @@ const Schedule = ({ navigation }: ScheduleProps) => {
             initialNumToRender={3}
             maxToRenderPerBatch={5}
             windowSize={10}
+            showsVerticalScrollIndicator={false}
             renderItem={({ item, index }) => {
               const timeFilteredSchedule = initialFilteredSchedule[index];
 
@@ -541,6 +542,7 @@ const Schedule = ({ navigation }: ScheduleProps) => {
                     initialNumToRender={6}
                     maxToRenderPerBatch={5}
                     windowSize={10}
+                    showsVerticalScrollIndicator={false}
                     renderItem={({ item }) => {
                       const [start, end] = item.numberPair.split("-");
                       const startTime = moment(start, "HH:mm");
@@ -779,6 +781,7 @@ const Schedule = ({ navigation }: ScheduleProps) => {
               initialNumToRender={3}
               maxToRenderPerBatch={10}
               windowSize={10}
+              showsVerticalScrollIndicator={false}
               contentContainerStyle={{
                 paddingBottom: isConnected
                   ? screenHeight * 0
@@ -801,6 +804,7 @@ const Schedule = ({ navigation }: ScheduleProps) => {
                     initialNumToRender={5}
                     maxToRenderPerBatch={10}
                     windowSize={10}
+                    showsVerticalScrollIndicator={false}
                     renderItem={({ item, index }) => {
                       const [start, end] = item.numberPair.split("-");
                       const startTime = moment(start, "HH:mm");
@@ -910,6 +914,7 @@ const Schedule = ({ navigation }: ScheduleProps) => {
             initialNumToRender={4}
             maxToRenderPerBatch={10}
             windowSize={10}
+            showsVerticalScrollIndicator={false}
             renderItem={({ item, index }) => (
               <View
                 key={index}
@@ -927,6 +932,7 @@ const Schedule = ({ navigation }: ScheduleProps) => {
                   initialNumToRender={5}
                   maxToRenderPerBatch={10}
                   windowSize={10}
+                  showsVerticalScrollIndicator={false}
                   renderItem={({ item, index }) => {
                     const [start, end] = item.numberPair.split("-");
                     const startTime = moment(start, "HH:mm");

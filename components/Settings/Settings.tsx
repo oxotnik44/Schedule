@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, Switch, Dimensions, Linking } from "react-native";
+import {
+  View,
+  Text,
+  Switch,
+  Dimensions,
+  Linking,
+  ToastAndroid,
+} from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import {
   lightTheme,
@@ -16,15 +23,19 @@ import {
 
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
-type ITheme = {
+interface Settings {
   SettingsSlice: {
+    isConnected: boolean;
     theme: any;
   };
-};
+}
+
 const Settings = () => {
   const [isDarkMode, setIsDarkMode] = useState(false); // Состояние для темной темы
-  const theme = useSelector((state: ITheme) => state.SettingsSlice.theme);
-
+  const theme = useSelector((state: Settings) => state.SettingsSlice.theme);
+  const isConnected = useSelector(
+    (state: Settings) => state.SettingsSlice.isConnected
+  );
   useEffect(() => {
     setIsDarkMode(theme === darkTheme);
   }, [theme]);
@@ -72,7 +83,16 @@ const Settings = () => {
         <TextPrivacyPolicy>Политика конфиденциальности</TextPrivacyPolicy>
         <BtnPrivacyPolicy
           onPress={() => {
-            Linking.openURL("https://schedule.nspu.ru/api/Privacy_policy.html");
+            if (!isConnected) {
+              ToastAndroid.show(
+                "Нет соединения с интернетом",
+                ToastAndroid.SHORT
+              );
+            } else {
+              Linking.openURL(
+                "https://schedule.nspu.ru/api/Privacy_policy.html"
+              );
+            }
           }}
         >
           <Text

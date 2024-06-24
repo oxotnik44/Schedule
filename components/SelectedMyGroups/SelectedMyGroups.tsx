@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useState } from "react";
 import { TouchableOpacity, Alert, FlatList, ToastAndroid } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -89,50 +89,44 @@ const SelectedMyGroups = ({ navigation }: SchuduleProps) => {
   const favoritesEducator = useSelector(
     (state: IFavoriteGroup) => state.FavoriteEducatorsSlice.favoriteEducators
   );
-  const removeGroup = useCallback(
-    (idGroupToRemove: number) => {
-      Alert.alert(
-        "Подтверждение удаления",
-        "Вы точно хотите удалить группу из избранных?",
-        [
-          {
-            text: "Отмена",
-            style: "cancel",
+  const removeGroup = (idGroupToRemove: number) => {
+    Alert.alert(
+      "Подтверждение удаления",
+      "Вы точно хотите удалить группу из избранных?",
+      [
+        {
+          text: "Отмена",
+          style: "cancel",
+        },
+        {
+          text: "Удалить",
+          onPress: () => {
+            removeFavoriteStudentSchedule(idGroupToRemove);
+            dispatch(removeFavoriteGroup(idGroupToRemove));
           },
-          {
-            text: "Удалить",
-            onPress: () => {
-              removeFavoriteStudentSchedule(idGroupToRemove);
-              dispatch(removeFavoriteGroup(idGroupToRemove));
-            },
+        },
+      ]
+    );
+  };
+  const removeEducator = (idEducatorToRemove: number) => {
+    Alert.alert(
+      "Подтверждение удаления",
+      "Вы точно хотите удалить преподавателя из избранного?",
+      [
+        {
+          text: "Отмена",
+          style: "cancel",
+        },
+        {
+          text: "Удалить",
+          onPress: () => {
+            removeFavoriteEducatorSchedule(idEducatorToRemove);
+            dispatch(removeFavoriteEducator(idEducatorToRemove));
           },
-        ]
-      );
-    },
-    [dispatch]
-  );
-  const removeEducator = useCallback(
-    (idEducatorToRemove: number) => {
-      Alert.alert(
-        "Подтверждение удаления",
-        "Вы точно хотите удалить преподавателя из избранного?",
-        [
-          {
-            text: "Отмена",
-            style: "cancel",
-          },
-          {
-            text: "Удалить",
-            onPress: () => {
-              removeFavoriteEducatorSchedule(idEducatorToRemove);
-              dispatch(removeFavoriteEducator(idEducatorToRemove));
-            },
-          },
-        ]
-      );
-    },
-    [dispatch]
-  );
+        },
+      ]
+    );
+  };
 
   const fetchSchedule = async (idGroup: number, nameGroup: string) => {
     try {
@@ -142,6 +136,7 @@ const SelectedMyGroups = ({ navigation }: SchuduleProps) => {
       alert("Произошла ошибка: " + error);
     }
   };
+
   let hasDataStudent = false; // Объявляем переменную hasDataStudent за пределами функции
   let hasDataEducator = false; // Объявляем переменную hasDataStudent за пределами функции
 
@@ -164,6 +159,7 @@ const SelectedMyGroups = ({ navigation }: SchuduleProps) => {
     });
     return hasDataStudent; // Возвращаем hasDataStudent
   };
+
   const fetchNoConnectedEducator = async (
     idEducator: number,
     hasDataEducator: boolean
@@ -183,92 +179,96 @@ const SelectedMyGroups = ({ navigation }: SchuduleProps) => {
     });
     return hasDataEducator; // Возвращаем hasDataStudent
   };
-  const renderGroupItem = useCallback(
-    ({ item }: { item: { idGroup: number; nameGroup: string } }) => (
-      <TouchableOpacity
-        onPress={() => {
-          if (!isConnected) {
-            fetchNoConnectedGroup(item.idGroup, hasDataStudent).then(
-              (hasDataStudent) => {
-                if (!hasDataStudent) {
-                  ToastAndroid.show(
-                    "Нет сохранённого расписания",
-                    ToastAndroid.SHORT
-                  );
-                } else {
-                  dispatch(setNameGroup(item.nameGroup));
-                  dispatch(setIsExtramuralScheduleUntilTodayStudent(false));
-                  dispatch(setSelectIdGroup(item.idGroup));
-                  navigation.navigate("Schedule");
-                }
+
+  const renderGroupItem = ({
+    item,
+  }: {
+    item: { idGroup: number; nameGroup: string };
+  }) => (
+    <TouchableOpacity
+      onPress={() => {
+        if (!isConnected) {
+          fetchNoConnectedGroup(item.idGroup, hasDataStudent).then(
+            (hasDataStudent) => {
+              if (!hasDataStudent) {
+                ToastAndroid.show(
+                  "Нет сохранённого расписания",
+                  ToastAndroid.SHORT
+                );
+              } else {
+                dispatch(setNameGroup(item.nameGroup));
+                dispatch(setIsExtramuralScheduleUntilTodayStudent(false));
+                dispatch(setSelectIdGroup(item.idGroup));
+                navigation.navigate("Schedule");
               }
-            );
-          } else {
-            fetchSchedule(item.idGroup, item.nameGroup).then(() => {
-              dispatch(setNameGroup(item.nameGroup));
-              dispatch(setIsExtramuralScheduleUntilTodayStudent(false));
-              dispatch(setSelectIdGroup(item.idGroup));
-              navigation.navigate("Schedule");
-            });
-          }
-        }}
-      >
-        <ContainerGroup>
-          <GroupText numberOfLines={1} ellipsizeMode="tail">
-            {item.nameGroup}
-          </GroupText>
-          <IconContainer onPress={() => removeGroup(item.idGroup)}>
-            <IconDelete
-              source={require("../../assets/Delete.png")}
-              style={{ resizeMode: "contain" }}
-            />
-          </IconContainer>
-        </ContainerGroup>
-      </TouchableOpacity>
-    ),
-    [dispatch, fetchSchedule, navigation, removeGroup]
+            }
+          );
+        } else {
+          fetchSchedule(item.idGroup, item.nameGroup).then(() => {
+            dispatch(setNameGroup(item.nameGroup));
+            dispatch(setIsExtramuralScheduleUntilTodayStudent(false));
+            dispatch(setSelectIdGroup(item.idGroup));
+            navigation.navigate("Schedule");
+          });
+        }
+      }}
+    >
+      <ContainerGroup>
+        <GroupText numberOfLines={1} ellipsizeMode="tail">
+          {item.nameGroup}
+        </GroupText>
+        <IconContainer onPress={() => removeGroup(item.idGroup)}>
+          <IconDelete
+            source={require("../../assets/Delete.png")}
+            style={{ resizeMode: "contain" }}
+          />
+        </IconContainer>
+      </ContainerGroup>
+    </TouchableOpacity>
   );
 
-  const renderEducatorItem = useCallback(
-    ({ item }: { item: { idEducator: number; nameEducator: string } }) => (
-      <TouchableOpacity
-        style={{ flexDirection: "row" }}
-        onPress={async () => {
-          if (!isConnected) {
-            fetchNoConnectedEducator(item.idEducator, hasDataEducator).then(
-              (hasDataEducator) => {
-                if (!hasDataEducator) {
-                  ToastAndroid.show(
-                    "Нет сохранённого расписания",
-                    ToastAndroid.SHORT
-                  );
-                } else {
-                  dispatch(setSelectIdEducator(item.idEducator));
-                  dispatch(setNameEducator(item.nameEducator));
-                  dispatch(setIsFullScheduleEducator(false));
-                  navigation.navigate("ScheduleEducator"); // Добавляем переход
-                }
-              }
+  const renderEducatorItem = ({
+    item,
+  }: {
+    item: { idEducator: number; nameEducator: string };
+  }) => (
+    <TouchableOpacity
+      style={{ flexDirection: "row" }}
+      onPress={async () => {
+        let hasDataEducator = false;
+        if (!isConnected) {
+          hasDataEducator = await fetchNoConnectedEducator(
+            item.idEducator,
+            hasDataEducator
+          );
+          if (!hasDataEducator) {
+            ToastAndroid.show(
+              "Нет сохранённого расписания",
+              ToastAndroid.SHORT
             );
           } else {
-            await getScheduleEducator(dispatch, item.idEducator);
             dispatch(setSelectIdEducator(item.idEducator));
             dispatch(setNameEducator(item.nameEducator));
-
-            navigation.navigate("ScheduleEducator"); // Добавляем переход
+            dispatch(setIsFullScheduleEducator(false));
+            navigation.navigate("ScheduleEducator");
           }
-        }}
-      >
-        <ContainerGroup>
-          <GroupText>{item.nameEducator}</GroupText>
-          <IconContainer onPress={() => removeEducator(item.idEducator)}>
-            <IconDelete source={require("../../assets/Delete.png")} />
-          </IconContainer>
-        </ContainerGroup>
-      </TouchableOpacity>
-    ),
-    [removeEducator]
+        } else {
+          await getScheduleEducator(dispatch, item.idEducator);
+          dispatch(setSelectIdEducator(item.idEducator));
+          dispatch(setNameEducator(item.nameEducator));
+          navigation.navigate("ScheduleEducator");
+        }
+      }}
+    >
+      <ContainerGroup>
+        <GroupText>{item.nameEducator}</GroupText>
+        <IconContainer onPress={() => removeEducator(item.idEducator)}>
+          <IconDelete source={require("../../assets/Delete.png")} />
+        </IconContainer>
+      </ContainerGroup>
+    </TouchableOpacity>
   );
+
   return (
     <ThemeProvider theme={theme}>
       <Container>
@@ -311,6 +311,7 @@ const SelectedMyGroups = ({ navigation }: SchuduleProps) => {
               data={favoritesGroup}
               keyExtractor={(item) => `${item.idGroup}`}
               renderItem={renderGroupItem}
+              showsVerticalScrollIndicator={false}
             />
           ) : (
             <CenteredContainer>
@@ -324,6 +325,7 @@ const SelectedMyGroups = ({ navigation }: SchuduleProps) => {
               data={favoritesEducator}
               keyExtractor={(item) => `${item.idEducator}`}
               renderItem={renderEducatorItem}
+              showsVerticalScrollIndicator={false}
             />
           ) : (
             <CenteredContainer>

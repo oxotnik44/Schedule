@@ -12,9 +12,11 @@ interface ProfileState {
   profileLearning: string;
   yearEntry: string;
 }
+
 interface IState {
   personalDataStudent: ProfileState;
 }
+
 const initialProfileState: IState = {
   personalDataStudent: {
     login: "",
@@ -40,9 +42,12 @@ const ProfileInfoSlice = createSlice({
         ...action.payload,
       };
     },
+    clearProfileInfo: (state) => {
+      state.personalDataStudent = initialProfileState.personalDataStudent;
+    },
   },
 });
 
-export const { setProfileInfo } = ProfileInfoSlice.actions;
+export const { setProfileInfo, clearProfileInfo } = ProfileInfoSlice.actions;
 
 export default ProfileInfoSlice.reducer;

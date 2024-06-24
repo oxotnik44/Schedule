@@ -30,6 +30,7 @@ export const InfoValue = styled.Text`
   color: ${(props) => props.theme.textColor};
   font-family: "Montserrat-Regular";
   width: ${screenWidth * 0.5}px;
+  user-select: text;
 `;
 
 export const NoConnected = styled.Text`
@@ -38,4 +39,19 @@ export const NoConnected = styled.Text`
   font-family: "Montserrat-SemiBold";
   text-align: center;
   width: ${screenWidth * 0.95}px;
+`;
+export const CopyButtonContainer = styled.TouchableOpacity`
+  padding: 10px;
+  background-color: ${(props) => props.theme.containerColor};
+  border-radius: 5px;
+  margin-top: 10px;
+  width: ${screenWidth * 0.9}px;
+  align-self: center;
+`;
+
+export const CopyButtonText = styled.Text`
+  color: ${(props) => props.theme.textColor};
+  font-size: ${screenWidth * 0.04}px;
+  text-align: center;
+  font-family: "Montserrat-SemiBold";
 `;

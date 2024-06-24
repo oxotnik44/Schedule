@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { ThemeProvider } from "styled-components/native";
-import { Text, View, FlatList } from "react-native";
+import { Text, View, FlatList, TouchableOpacity } from "react-native";
+
 import {
   MainContainer,
   CourseContainer,
@@ -13,8 +14,11 @@ import {
   TableRowHeader,
   ContainerComponent,
   ContainerTypeControl,
+  ContainerDiscipline,
   NoCreditBook,
   CenteredContainer,
+  ArrowIcon,
+  ButtonOpenCourse,
 } from "./RecordBookModulesStudentStyle";
 
 interface Settings {
@@ -57,91 +61,90 @@ const RecordBookModulesStudent = () => {
   const semesterGradesData = useSelector(
     (state: ISemesterGrades) => state.SemesterGradesInfoSlice.dataSemesterGrades
   );
-
   const [collapsed, setCollapsed] = useState<boolean[]>([]);
-  const toggleCollapsed = (index: number) => {
-    const newCollapsed = [...collapsed];
-    newCollapsed[index] = !newCollapsed[index];
-    setCollapsed(newCollapsed);
+
+  const toggleCourse = (index: number) => {
+    const newCollapsedState = [...collapsed];
+    newCollapsedState[index] = !newCollapsedState[index];
+    setCollapsed(newCollapsedState);
   };
 
-  const renderSemester = ({ item: semester, index: semesterIndex }: any) => (
+  const renderSemester = ({ item: semester, index: semesterIndex }) => (
     <SemesterContainer key={semesterIndex}>
       <SemesterTitle>{semester.numberSemester} семестр</SemesterTitle>
-      {semester.typeComponent.map(
-        (typeComponent: any, typeComponentIndex: number) => (
-          <ContainerComponent key={typeComponentIndex}>
-            <TableRow>
-              <TableRowHeader>Компонент:</TableRowHeader>
-              <TitleValue>{typeComponent.nameControl}</TitleValue>
-            </TableRow>
-            {typeComponent.typeControl.map(
-              (typeControl: any, typeControlIndex: number) => (
-                <ContainerTypeControl
-                  key={typeControlIndex}
-                  shouldRenderBorder={typeControlIndex > 0}
-                >
-                  <TableRow>
-                    <TableRowHeader>Контроль:</TableRowHeader>
-                    <TitleValue>{typeControl.nameTypeControl}</TitleValue>
-                  </TableRow>
-                  {typeControl.disciplines.map(
-                    (discipline: any, disciplineIndex: number) => {
-                      const isLastDiscipline =
-                        disciplineIndex === typeControl.disciplines.length - 1;
-                      return (
-                        <View key={disciplineIndex}>
-                          <TableRow>
-                            <TableRowHeader>Дисциплина:</TableRowHeader>
-                            <TitleValue>{discipline.nameDiscipline}</TitleValue>
-                          </TableRow>
-                          <TableRow>
-                            <TableRowHeader>Оценка:</TableRowHeader>
-                            <TitleValue>{discipline.grade}</TitleValue>
-                          </TableRow>
-                          <TableRow isLast={isLastDiscipline}>
-                            <TableRowHeader>Код компетенции:</TableRowHeader>
-                            <TitleValue>
-                              {discipline.listCompetencies
-                                .map(
-                                  (competency: any) => competency.competencyCode
-                                )
-                                .join(", ")}
-                            </TitleValue>
-                          </TableRow>
-                        </View>
-                      );
-                    }
-                  )}
-                </ContainerTypeControl>
-              )
-            )}
-          </ContainerComponent>
-        )
-      )}
+      {semester.typeComponent.map((typeComponent, typeComponentIndex) => (
+        <ContainerComponent key={typeComponentIndex}>
+          <TableRow>
+            <TableRowHeader>Компонент:</TableRowHeader>
+            <TitleValue>{typeComponent.nameControl}</TitleValue>
+          </TableRow>
+          {typeComponent.typeControl.map((typeControl, typeControlIndex) => (
+            <ContainerTypeControl
+              key={typeControlIndex}
+              shouldRenderBorder={typeControlIndex > 0}
+            >
+              <TableRow>
+                <TableRowHeader>Контроль:</TableRowHeader>
+                <TitleValue>{typeControl.nameTypeControl}</TitleValue>
+              </TableRow>
+              {typeControl.disciplines.map((discipline, disciplineIndex) => {
+                const isLastDiscipline =
+                  disciplineIndex === typeControl.disciplines.length - 1;
+                return (
+                  <ContainerDiscipline key={disciplineIndex}>
+                    <TableRow>
+                      <TableRowHeader>Дисциплина:</TableRowHeader>
+                      <TitleValue>{discipline.nameDiscipline}</TitleValue>
+                    </TableRow>
+                    <TableRow>
+                      <TableRowHeader>Оценка:</TableRowHeader>
+                      <TitleValue>{discipline.grade}</TitleValue>
+                    </TableRow>
+                    <TableRow isLast={isLastDiscipline} isCompetencyCode={true}>
+                      <TableRowHeader>Код компетенции:</TableRowHeader>
+                      <TitleValue>
+                        {discipline.listCompetencies
+                          .map((competency) => competency.competencyCode)
+                          .join(", ")}
+                      </TitleValue>
+                    </TableRow>
+                  </ContainerDiscipline>
+                );
+              })}
+            </ContainerTypeControl>
+          ))}
+        </ContainerComponent>
+      ))}
     </SemesterContainer>
   );
-
   return (
     <ThemeProvider theme={theme}>
       <MainContainer>
         {semesterGradesData === null ? (
           <CenteredContainer>
-            <NoCreditBook>Нет зачетной книжки или оценок в ней</NoCreditBook>
+            <NoCreditBook>Нет зачетной книжки или оценок в ней.</NoCreditBook>
           </CenteredContainer>
         ) : (
           <FlatList
             data={semesterGradesData}
             keyExtractor={(item, index) => index.toString()}
+            showsVerticalScrollIndicator={false}
             renderItem={({ item, index }) => (
               <CourseContainer key={index}>
-                <CourseTitle onPress={() => toggleCollapsed(index)}>
-                  {item.numberCourse} курс
-                </CourseTitle>
+                <ButtonOpenCourse onPress={() => toggleCourse(index)}>
+                  <CourseTitle>{item.numberCourse} курс</CourseTitle>
+                  <ArrowIcon
+                    source={require("../../../../../assets/ArrowBack.png")}
+                    isRotate={collapsed[index]}
+                  />
+                </ButtonOpenCourse>
                 {collapsed[index] && (
                   <FlatList
                     data={item.semesters}
-                    keyExtractor={(item, index) => index.toString()}
+                    keyExtractor={(item, semesterIndex) =>
+                      semesterIndex.toString()
+                    }
+                    showsVerticalScrollIndicator={false}
                     renderItem={renderSemester}
                     initialNumToRender={2}
                     maxToRenderPerBatch={10}

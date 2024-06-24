@@ -54,7 +54,7 @@ export const GroupText = styled.Text`
   font-family: Montserrat-SemiBold;
 `;
 export const TextNoFavorites = styled.Text`
-  font-size: ${screenWidth * 0.06}px;
+  font-size: ${screenWidth * 0.055}px;
   justify-content: center;
   color: ${(props) => props.theme.textColor};
   font-family: Montserrat-SemiBold;
