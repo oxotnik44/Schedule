@@ -76,12 +76,12 @@ interface DepartmentsState {
 }
 const Tab = createBottomTabNavigator();
 type ITheme = {
-  settingsReducer: {
+  SettingsSlice: {
     theme: any;
   };
 };
-interface Settings {
-  settingsReducer: {
+interface SettingsState {
+  SettingsSlice: {
     isConnected: boolean;
   };
 }
@@ -119,7 +119,7 @@ const Navigate = ({ navigation }: GroupsProps) => {
     );
   };
   const dispatch = useAppDispatch();
-  const theme = useAppSelector((state) => state.SettingsSlice.theme);
+  const theme = useAppSelector((state: ITheme) => state.SettingsSlice.theme);
   const selectGroup = useAppSelector(
     (state) => state.GroupsInfoSlice.selectedGroupName
   );
@@ -165,7 +165,7 @@ const Navigate = ({ navigation }: GroupsProps) => {
       case "Library":
         return "Библиотека";
       case "FullInfoStudent":
-        "Личные данные";
+        return "Личные данные";
       default:
         return null; // Возвращаем null в случае, если название маршрута не соответствует ни одному из кейсов
     }
