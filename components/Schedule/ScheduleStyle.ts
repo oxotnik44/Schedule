@@ -183,6 +183,7 @@ export const CommentsText = styled.Text`
   color: ${(props) => props.theme.textColor};
   font-size: ${screenWidth * 0.034}px;
   font-family: "Montserrat-SemiBold";
+  text-align: center;
 `;
 export const DateText = styled.Text`
   color: ${(props) => props.theme.textColor};
@@ -199,7 +200,6 @@ export const BtnGetScheduleExtramural = styled.TouchableOpacity`
   justify-content: center;
   margin-top: ${screenHeight * 0.01}px;
   align-items: center;
-
 `;
 export const TimeToLesson = styled.Text`
   color: ${(props) => props.theme.textColor};
@@ -232,4 +232,18 @@ export const ScheduleCloseView = styled.Text`
   justify-content: center;
   color: ${(props) => props.theme.textColor};
   font-family: Montserrat-SemiBold;
+`;
+export const CarouselItemContainer = styled.View`
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 20px;
+  margin-vertical: 10px;
+  align-items: center;
+  justify-content: center;
+  width: ${screenWidth * 0.8}px; // Ширина элемента карусели
+`;
+export const CarouselItem = styled.View`
+  padding: 16px;
+  background-color: #f0f0f0; // Пример цвета, можно заменить на ваш
+  border-radius: 8px;
 `;

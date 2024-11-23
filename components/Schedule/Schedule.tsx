@@ -72,6 +72,7 @@ interface IScheduleInfo {
   fullNameEducator: string;
   regaliaEducator: string;
   date: string;
+  weeks: string;
 }
 interface IScheduleExtramuralInfo {
   idPair: number;
@@ -89,6 +90,7 @@ interface IScheduleExtramuralInfo {
   fullNameEducator: string;
   regaliaEducator: string;
   date: string | null;
+  weeks: string;
 }
 interface ScheduleState {
   ScheduleInfoStudentSlice: {
@@ -112,6 +114,7 @@ interface ScheduleState {
         date: string;
         schedule: IScheduleExtramuralInfo[];
       }[];
+      currentWeekNumber: string;
     };
     selectIdEducator: number;
     selectIdGroup: number;
@@ -233,6 +236,7 @@ const Schedule = ({ navigation }: ScheduleProps) => {
   const nameGroup = useSelector(
     (state: Namegroup) => state.GroupsInfoSlice.selectedGroupName
   );
+  let hasWeekday: any = null;
 
   const dispatch = useDispatch();
 
@@ -241,10 +245,11 @@ const Schedule = ({ navigation }: ScheduleProps) => {
     "numerator" | "denominator"
   >();
   const [currentDayForResident, setCurrentDayForResident] =
-    useState<string>("Понедельник");
+    useState<string>("");
   const [currentDayForExtramuralist, setCurrentDayForExtramuralist] =
     useState<string>("");
   const [currentTime, setCurrentTime] = useState<string>("");
+
   const [timeArray, setTimeArray] = useState("");
   const [timeDifferences, setTimeDifference] = useState<string>("");
   const arrayStartsPairs: any[] = [];
@@ -255,7 +260,6 @@ const Schedule = ({ navigation }: ScheduleProps) => {
     const isNumeratorWeek =
       (weekNumber + dataSchedule.scheduleResident.weekCorrection) % 2 === 1;
     const typeToSwitch = isNumeratorWeek ? "numerator" : "denominator";
-
     setCurrentTypeWeek(typeToSwitch);
     setTypeWeekToSwitch(typeToSwitch);
   }, [dataSchedule]);
@@ -369,6 +373,18 @@ const Schedule = ({ navigation }: ScheduleProps) => {
       }
     });
   });
+  hasWeekday =
+    typeWeekToSwitch === "numerator"
+      ? dataSchedule.scheduleResident.numerator.some(
+          (item: IScheduleInfo) =>
+            (item.hasOwnProperty("weekday") && item.weekday !== "") ||
+            (item.hasOwnProperty("date") && item.date !== "")
+        )
+      : dataSchedule.scheduleResident.denominator.some(
+          (item: IScheduleInfo) =>
+            (item.hasOwnProperty("weekday") && item.weekday !== "") ||
+            (item.hasOwnProperty("date") && item.date !== "")
+        );
   return (
     <ThemeProvider theme={theme}>
       <Container>
@@ -383,7 +399,8 @@ const Schedule = ({ navigation }: ScheduleProps) => {
                   fontFamily: "Montserrat-SemiBold",
                 }}
               >
-                {currentTypeWeek === "numerator" && "Текущая"}
+                {currentTypeWeek === "numerator" &&
+                  ` ${"Текущая №" + dataSchedule.currentWeekNumber}`}
               </Text>
               <TypeWeekButton
                 onPress={() => {
@@ -415,7 +432,8 @@ const Schedule = ({ navigation }: ScheduleProps) => {
                   fontFamily: "Montserrat-SemiBold",
                 }}
               >
-                {currentTypeWeek === "denominator" && "Текущая"}
+                {currentTypeWeek === "denominator" &&
+                  ` ${"Текущая №" + dataSchedule.currentWeekNumber}`}
               </Text>
               <TypeWeekButton
                 onPress={() => {
@@ -491,6 +509,7 @@ const Schedule = ({ navigation }: ScheduleProps) => {
             showsVerticalScrollIndicator={false}
             renderItem={({ item, index }) => {
               const timeFilteredSchedule = initialFilteredSchedule[index];
+              const matchingIdPairs: string[] = [];
 
               if (timeFilteredSchedule.length === 0) {
                 return (
@@ -522,6 +541,38 @@ const Schedule = ({ navigation }: ScheduleProps) => {
                   </View>
                 );
               }
+              timeFilteredSchedule.forEach((pair: any) => {
+                // Замените any на тип вашего объекта
+                if (pair.weeks) {
+                  const weekRanges = pair.weeks.trim().split(/(?=\()/);
+
+                  weekRanges.forEach((week: string) => {
+                    // Проверка на диапазон недель
+                    const rangeNumbers = week.match(/\d+-\d+/);
+                    if (rangeNumbers) {
+                      const [start, end] = rangeNumbers[0]
+                        .split("-")
+                        .map(Number);
+                      if (
+                        +dataSchedule.currentWeekNumber >= start &&
+                        +dataSchedule.currentWeekNumber <= end
+                      ) {
+                        matchingIdPairs.push(pair.idPair);
+                      }
+                    } else {
+                      // Проверка на одиночное число
+                      const singleWeekNumber = week.match(/\d+/);
+                      if (
+                        singleWeekNumber &&
+                        parseInt(singleWeekNumber[0], 10) ===
+                          +dataSchedule.currentWeekNumber
+                      ) {
+                        matchingIdPairs.push(pair.idPair);
+                      }
+                    }
+                  });
+                }
+              });
 
               return (
                 <View key={item}>
@@ -546,13 +597,13 @@ const Schedule = ({ navigation }: ScheduleProps) => {
                     renderItem={({ item }) => {
                       const [start, end] = item.numberPair.split("-");
                       const startTime = moment(start, "HH:mm");
+
                       const endTime = moment(end, "HH:mm");
                       const isCurrent =
-                        currentDayForResident === (item.weekday || item.date) &&
-                        moment(currentTime, "HH:mm:ss").isSameOrAfter(
-                          startTime
-                        ) &&
-                        moment(currentTime, "HH:mm:ss").isSameOrBefore(endTime);
+                        currentDayForResident ===
+                          (hasWeekday ? item.weekday : item.date) &&
+                        moment(currentTime, "HH:mm").isSameOrAfter(startTime) &&
+                        moment(currentTime, "HH:mm").isSameOrBefore(endTime);
 
                       const isColorPair = isCurrent;
                       const timeDifference = moment.utc(
@@ -563,6 +614,14 @@ const Schedule = ({ navigation }: ScheduleProps) => {
                       const formattedTimeDifference = timeDifference
                         .format("HH:mm:ss")
                         .padStart(8, "0");
+                      const textColorInner =
+                        !item.weeks ||
+                        item.weeks.trim() === "" ||
+                        matchingIdPairs.includes(item.idPair as any)
+                          ? theme.textColor
+                          : theme === lightTheme
+                          ? "#a0a0a0" // Светло-серый цвет для текста
+                          : "#606060"; // Темно-серый цвет для текста
 
                       return (
                         <View
@@ -571,16 +630,24 @@ const Schedule = ({ navigation }: ScheduleProps) => {
                         >
                           <ContainerPair
                             isColorPair={
-                              theme === lightTheme
-                                ? isColorPair
-                                  ? "#C3C9DE"
-                                  : "#d9d9d999"
-                                : isColorPair
-                                ? "#4B61B0"
-                                : "#46464699"
+                              // Проверяем совпадение по idPair или если weeks пустой
+                              !item.weeks ||
+                              item.weeks.trim() === "" ||
+                              matchingIdPairs.includes(item.idPair as any)
+                                ? theme === lightTheme
+                                  ? isColorPair
+                                    ? "#C3C9DE"
+                                    : "#d9d9d999"
+                                  : isColorPair
+                                  ? "#4B61B0"
+                                  : "#46464699"
+                                : "transparent" // Если пары нет в массиве, ставим прозрачный фон
                             }
                           >
-                            <TextNamePair ellipsizeMode="tail">
+                            <TextNamePair
+                              ellipsizeMode="tail"
+                              style={{ color: textColorInner }} // Применяем цвет текста
+                            >
                               {item.namePair}
                             </TextNamePair>
                             <View style={{ flexDirection: "row" }}>
@@ -603,31 +670,44 @@ const Schedule = ({ navigation }: ScheduleProps) => {
                                     }
                                   }}
                                 >
-                                  <TextNameEducator>
+                                  <TextNameEducator
+                                    style={{ color: textColorInner }} // Применяем цвет текста
+                                  >
                                     {item.nameEducator &&
                                       item.nameEducator +
                                         " " +
                                         item.regaliaEducator}
                                   </TextNameEducator>
                                 </TouchableOpacity>
-                                <TextRoomNumber>
+                                <TextRoomNumber
+                                  style={{ color: textColorInner }} // Применяем цвет текста
+                                >
                                   {item.roomNumber &&
                                     "Кабинет №" + item.roomNumber}
                                 </TextRoomNumber>
                               </ContainerLeft>
                               <ContainerRight>
-                                <TextNumberPair>
+                                <TextNumberPair
+                                  style={{ color: textColorInner }} // Применяем цвет текста
+                                >
                                   {item.numberPair && item.numberPair}
                                 </TextNumberPair>
-                                <TextTypePair>
-                                  {item.typePair &&
-                                    "Тип пары: " + item.typePair}
-                                </TextTypePair>
-                                {isCurrent ? (
+                                {!item.weeks && item.typePair && (
+                                  <TextTypePair
+                                    style={{ color: textColorInner }} // Применяем цвет текста
+                                  >
+                                    {"Тип пары: " + item.typePair}
+                                  </TextTypePair>
+                                )}
+                                {isCurrent &&
+                                matchingIdPairs.includes(item.idPair as any) ? (
                                   <TimeToLesson>
                                     До окончания пары: {formattedTimeDifference}
                                   </TimeToLesson>
                                 ) : (
+                                  matchingIdPairs.includes(
+                                    item.idPair as any
+                                  ) && // Проверяем, что недели совпадают
                                   item.weekday === currentDayForResident &&
                                   timeArray === start && (
                                     <TimeToLesson>
@@ -639,22 +719,70 @@ const Schedule = ({ navigation }: ScheduleProps) => {
                             </View>
 
                             {item.comments && (
-                              <CommentsText style={{ textAlign: "center" }}>
+                              <CommentsText
+                                style={{
+                                  textAlign: "center",
+                                  color: textColorInner,
+                                }}
+                              >
                                 {/^(https?:\/\/|www\.|https?:\/\/www\.)[\w\-.]+\.[a-zA-Z]{2,}(\/\S*)?$/.test(
                                   item.comments
                                 ) ? (
                                   <Text
+                                    style={{ textDecorationLine: "underline" }}
                                     onPress={() =>
                                       Linking.openURL(item.comments)
                                     }
                                   >
-                                    {item.comments}
+                                    Ссылка
                                   </Text>
                                 ) : (
                                   item.comments
                                 )}
                               </CommentsText>
                             )}
+                            {item.weeks &&
+                              item.weeks.trim() !== "" &&
+                              item.weeks
+                                .split(/(?=\()/) // Разделяем строку на части, начиная с символа '('
+                                .filter((part) => part.trim() !== "") // Фильтруем пустые строки
+                                .map((week, idx) => {
+                                  const currentWeekNumber =
+                                    +dataSchedule.currentWeekNumber;
+
+                                  // Извлекаем числа из строки формата "(10-12)" или одну неделю
+                                  const weekRange = week.match(/\d+-\d+/);
+                                  const isWithinRange = weekRange
+                                    ? weekRange[0]
+                                        .split("-")
+                                        .map(Number)
+                                        .some(
+                                          (num) => num === currentWeekNumber
+                                        )
+                                    : week.match(/\d+/)
+                                    ? parseInt(week.match(/\d+/)[0], 10) ===
+                                      currentWeekNumber
+                                    : false;
+
+                                  // Устанавливаем цвет текста
+                                  const textColorWeek = isWithinRange
+                                    ? theme.textColor
+                                    : theme === lightTheme
+                                    ? "#a0a0a0" // Светло-серый цвет для текста
+                                    : "#606060"; // Темно-серый цвет для текста
+
+                                  return (
+                                    <View key={idx} style={{ marginBottom: 5 }}>
+                                      <CommentsText
+                                        style={{
+                                          color: textColorWeek,
+                                        }}
+                                      >
+                                        {week.trim() + " нед"}
+                                      </CommentsText>
+                                    </View>
+                                  );
+                                })}
                           </ContainerPair>
                         </View>
                       );
@@ -872,14 +1000,19 @@ const Schedule = ({ navigation }: ScheduleProps) => {
                             </ContainerRight>
                           </View>
                           {item.comments && (
-                            <CommentsText style={{ textAlign: "center" }}>
+                            <CommentsText
+                              style={{
+                                textAlign: "center",
+                              }}
+                            >
                               {/^(https?:\/\/|www\.|https?:\/\/www\.)[\w\-.]+\.[a-zA-Z]{2,}(\/\S*)?$/.test(
                                 item.comments
                               ) ? (
                                 <Text
+                                  style={{ textDecorationLine: "underline" }}
                                   onPress={() => Linking.openURL(item.comments)}
                                 >
-                                  {item.comments}
+                                  Ссылка
                                 </Text>
                               ) : (
                                 item.comments
@@ -1008,14 +1141,19 @@ const Schedule = ({ navigation }: ScheduleProps) => {
                           </ContainerRight>
                         </View>
                         {item.comments && (
-                          <CommentsText style={{ textAlign: "center" }}>
+                          <CommentsText
+                            style={{
+                              textAlign: "center",
+                            }}
+                          >
                             {/^(https?:\/\/|www\.|https?:\/\/www\.)[\w\-.]+\.[a-zA-Z]{2,}(\/\S*)?$/.test(
                               item.comments
                             ) ? (
                               <Text
+                                style={{ textDecorationLine: "underline" }}
                                 onPress={() => Linking.openURL(item.comments)}
                               >
-                                {item.comments}
+                                Ссылка
                               </Text>
                             ) : (
                               item.comments

@@ -16,6 +16,7 @@ interface IScheduleInfo {
   fullNameEducator: string;
   regaliaEducator: string;
   date: string | null;
+  weeks: string | null;
 }
 interface IScheduleExtramuralInfo {
   idPair: number;
@@ -50,8 +51,10 @@ interface IState {
         date: string;
         schedule: IScheduleExtramuralInfo[];
       }[];
+      allTypeWeeks: string[][];
     };
     scheduleExtramural: { date: string; schedule: IScheduleExtramuralInfo[] }[];
+    currentWeekNumber: string;
   };
   typeGroupStudent: string;
   selectIdGroup: number;
@@ -71,8 +74,10 @@ export const initialScheduleState: IState = {
       numerator: [],
       denominator: [],
       session: [],
+      allTypeWeeks: [],
     },
     scheduleExtramural: [],
+    currentWeekNumber: "",
   },
   typeGroupStudent: "",
   selectIdGroup: 0,
@@ -91,6 +96,7 @@ export const ScheduleInfoStudentSlice = createSlice({
         numerator: [],
         denominator: [],
         session: [],
+        allTypeWeeks: [],
       };
       state.dataSchedule.scheduleExtramural = [];
     },

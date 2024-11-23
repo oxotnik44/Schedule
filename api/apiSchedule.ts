@@ -46,7 +46,7 @@ export const getScheduleEducator = async (
       id_prep: idEducator,
     });
     const data = responce.data;
-
+    // console.log(data.scheduleResident.numerator[0].weekday);
     dispatch(resetScheduleEducator());
     dispatch(setDataScheduleEducator(data));
   } catch (error) {

@@ -10,6 +10,6 @@ export const getDepartments = async (dispatch: Function) => {
     dispatch(resetDepartment());
     dispatch(setDataDepartment(data));
   } catch (error) {
-    console.error("Error while adding review:", error);
+    console.error("Error while get departments:", error);
   }
 };

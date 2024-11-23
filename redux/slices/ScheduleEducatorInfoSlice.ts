@@ -14,6 +14,7 @@ interface IScheduleInfo {
   fullNameEducator: string;
   regaliaEducator: string;
   date: string | null;
+  weeks: string | null;
 }
 
 interface IScheduleExtramuralInfo {
@@ -52,6 +53,7 @@ interface IState {
       }[];
     };
     scheduleExtramural: { date: string; schedule: IScheduleExtramuralInfo[] }[];
+    currentWeekNumber: string;
   };
   typeGroupEducator: string;
   selectIdEducator: number;
@@ -74,6 +76,7 @@ export const initialScheduleState: IState = {
       session: [],
     },
     scheduleExtramural: [],
+    currentWeekNumber: "",
   },
   typeGroupEducator: "",
   selectIdEducator: 0,
