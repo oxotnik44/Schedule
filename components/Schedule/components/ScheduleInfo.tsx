@@ -23,8 +23,8 @@ interface ScheduleCardProps {
   currentWeekNumber: number;
   isResident: boolean;
   isEducator: boolean;
-  currentTime: string;
-  latestEndTime: moment.Moment;
+  currentTime?: string;
+  latestEndTime?: moment.Moment;
 }
 
 export const ScheduleInfo: FC<ScheduleCardProps> = ({

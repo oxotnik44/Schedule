@@ -29,8 +29,8 @@ interface ScheduleItemProps {
   navigation: any; // Указать точный тип для React Navigation
   isResident: boolean;
   isEducator: boolean;
-  currentTime: string;
-  latestEndTime: moment.Moment;
+  currentTime?: string;
+  latestEndTime?: moment.Moment;
 }
 
 export const PairItem: FC<ScheduleItemProps> = ({

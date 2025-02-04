@@ -17,14 +17,12 @@ export const setFavoriteSchedule = async (
       lastCacheEntry,
     };
     scheduleStudent.groups.push({ [idGroup]: dataScheduleStudent });
-    console.log(scheduleStudent);
     await AsyncStorage.setItem(
       STORAGE_KEY_SCHEDULE,
       JSON.stringify(scheduleStudent)
     );
     const stored = await AsyncStorage.getItem(STORAGE_KEY_SCHEDULE);
     const storedd = stored ? JSON.parse(stored) : [];
-    console.log(storedd);
   } catch (error) {
     console.error("Ошибка сохранения группы", error);
   }

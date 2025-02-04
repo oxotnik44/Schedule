@@ -126,7 +126,11 @@ export const TextSelfStudy = styled.Text`
   color: ${(props) => props.theme.textColor};
   font-size: ${screenWidth * 0.05}px;
   text-align: center;
-  margin-top: ${screenHeight * 0.02}px;
+  margin-top: ${screenHeight * 0.01}px;
+  font-family: "Montserrat-SemiBold";
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
 
 // export const SelectedGroupButton = styled.TouchableOpacity`

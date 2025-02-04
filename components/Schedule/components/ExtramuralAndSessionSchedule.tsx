@@ -52,6 +52,7 @@ const ExtramuralAndSessionSchedule: React.FC<ResidentExtramuralListProps> = ({
             flex: 1,
             justifyContent: "center",
             alignItems: "center",
+            marginBottom: isEducator ? screenHeight * 0.03 : 0, // Условный отступ
           }}
         >
           <Text

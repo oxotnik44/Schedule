@@ -18,7 +18,13 @@ export const CommentText: React.FC<CommentTextProps> = ({
     );
 
   return (
-    <Text style={{ textAlign: "center", color: textColor }}>
+    <Text
+      style={{
+        textAlign: "center",
+        color: textColor,
+        fontFamily: "Montserrat-SemiBold",
+      }}
+    >
       {isLink ? (
         <Text
           style={{ textDecorationLine: "underline" }}

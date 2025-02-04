@@ -1,6 +1,6 @@
 import "moment/locale/ru";
 import "moment-timezone";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { View } from "react-native";
 import { Dimensions } from "react-native";
@@ -23,7 +23,6 @@ import { ScheduleState } from "./types/sheduleStudentTypes";
 import useWeekTypeSwitcher from "./hooks/useWeekTypeSwitcher";
 import useCurrentDateTime from "./hooks/useCurrentDateTime";
 import useScheduleTimeDiff from "./hooks/useScheduleTimeDiff";
-import useFavoriteGroupUpdate from "./hooks/useFavoriteGroupUpdate";
 import useStoredSchedule from "./hooks/useStoredSchedule";
 import { weekdays } from "./utils/timeUtils";
 import { fetchScheduleEducator } from "./api/educatorApi";
@@ -35,6 +34,9 @@ import ScheduleExtramuralVisibilityToggle from "./components/ScheduleExtramuralV
 import ExtramuralAndSessionSchedule from "./components/ExtramuralAndSessionSchedule";
 import TypeWeekPanel from "./components/ResidentTypeWeekPanel";
 import moment from "moment";
+import useFavoriteUpdate from "./hooks/useFavoriteUpdate";
+import useLatestEndTime from "./hooks/useLatestEndTime";
+import { setIsExtramuralScheduleUntilTodayStudent } from "../../redux/slices/ScheduleStudentInfoSlice";
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 
@@ -111,50 +113,34 @@ const Schedule = ({ navigation }: ScheduleProps) => {
     setTimeDifference,
     setTimeArray
   );
-  useFavoriteGroupUpdate(
+  useFavoriteUpdate(
     selectIdGroup,
     favoriteGroups,
     dataSchedule,
+    null,
+    null,
+    null,
     dispatch,
     isConnected
   );
-  useStoredSchedule(selectIdGroup, isConnected, dispatch);
+  useStoredSchedule(selectIdGroup, null, isConnected, dispatch);
 
   const currentWeekSchedule = dataSchedule.scheduleResident[typeWeekToSwitch];
 
-  const initialFilteredSchedule = (weekdays || []).map((weekday) =>
-    (currentWeekSchedule || []).filter((item) =>
-      [item.weekday, item.date].includes(weekday)
-    )
-  );
+  const initialFilteredSchedule = useMemo(() => {
+    return (weekdays || []).map((weekday) =>
+      (currentWeekSchedule || []).filter((item) =>
+        [item.weekday, item.date].includes(weekday)
+      )
+    );
+  }, [currentWeekSchedule, weekdays]);
   initialFilteredSchedule.flat().forEach(({ numberPair, weekday }) => {
     if (weekday === currentDayForResident)
       arrayStartsPairs.push(numberPair?.split("-")[0] || "");
   });
 
   hasWeekday = hasWeekdayInSchedule(dataSchedule);
-  const [latestEndTime, setLatestEndTime] = useState(moment("00:00", "HH:mm"));
-
-  useEffect(() => {
-    let tempLatestEndTime = moment("00:00", "HH:mm"); // Начальное время для сравнения
-
-    initialFilteredSchedule.forEach((schedule) => {
-      if (schedule.length > 0) {
-        schedule.forEach((item) => {
-          const [start, end] = item.numberPair.split("-"); // Разделяем время начала и окончания
-          const endTime = moment(end, "HH:mm"); // Преобразуем время окончания в moment
-
-          // Если текущее время окончания позже самого большого, обновляем его
-          if (endTime.isAfter(tempLatestEndTime)) {
-            tempLatestEndTime = endTime;
-          }
-        });
-      }
-    });
-
-    // Обновляем состояние с найденным самым поздним временем окончания
-    setLatestEndTime(tempLatestEndTime);
-  }, []); // В зависимости от filteredSchedules
+  const latestEndTime = useLatestEndTime(initialFilteredSchedule);
   return (
     <ThemeProvider theme={theme}>
       <Container>
@@ -198,20 +184,25 @@ const Schedule = ({ navigation }: ScheduleProps) => {
         dataSchedule.extramuralIsActive ? (
           <View>
             <ScheduleExtramuralVisibilityToggle
-              isExtramuralScheduleUntilToday={isExtramuralScheduleUntilToday}
+              isFullSchedule={isExtramuralScheduleUntilToday} // Изменили название пропса
               isConnected={isConnected}
               screenWidth={screenWidth}
               screenHeight={screenHeight}
               theme={theme}
               lightTheme={lightTheme}
-              selectIdGroup={selectIdGroup}
               dispatch={dispatch}
-              nameGroup={nameGroup}
-              getSchedule={getSchedule}
-              getFullScheduleStudentExtramuralist={
-                getFullScheduleStudentExtramuralist
+              toggleFullSchedule={() =>
+                setIsExtramuralScheduleUntilTodayStudent(
+                  !isExtramuralScheduleUntilToday
+                )
+              }
+              fetchSchedule={() =>
+                isExtramuralScheduleUntilToday
+                  ? getSchedule(selectIdGroup, dispatch, nameGroup, false)
+                  : getFullScheduleStudentExtramuralist(dispatch, selectIdGroup)
               }
             />
+
             <ExtramuralAndSessionSchedule
               dataSchedule={dataSchedule} // Передаем dataSchedule
               screenHeight={screenHeight} // Передаем screenHeight
