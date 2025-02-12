@@ -117,6 +117,9 @@ export const ScheduleInfoEducatorSlice = createSlice({
     setLastCacheEntryEducator: (state, action) => {
       state.dataSchedule.lastCacheEntry = action.payload;
     },
+    setCurrentWeekNumberEducator: (state, action) => {
+      state.dataSchedule.currentWeekNumber = action.payload;
+    },
   },
 });
 export const {
@@ -128,5 +131,6 @@ export const {
   setDataEducatorExtramural,
   setIsFullScheduleEducator,
   setLastCacheEntryEducator,
+  setCurrentWeekNumberEducator,
 } = ScheduleInfoEducatorSlice.actions;
 export default ScheduleInfoEducatorSlice.reducer;

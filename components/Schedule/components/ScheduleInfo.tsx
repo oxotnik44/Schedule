@@ -60,7 +60,6 @@ export const ScheduleInfo: FC<ScheduleCardProps> = ({
         ? "#4B61B0"
         : "#46464699"
       : "transparent";
-
   return (
     <View key={item.idPair} style={{ alignItems: "center" }}>
       <ContainerPair isColorPair={backgroundColor}>

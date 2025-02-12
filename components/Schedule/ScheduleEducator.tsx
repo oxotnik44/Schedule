@@ -1,60 +1,20 @@
 import moment from "moment";
 import "moment/locale/ru";
 import "moment-timezone";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ToastAndroid,
-  FlatList,
-  Linking,
-} from "react-native";
-import { Dimensions } from "react-native";
-import {
-  BtnGetScheduleExtramural,
-  CenteredContainer,
-  CommentsText,
-  Container,
-  ContainerLeft,
-  ContainerPair,
-  ContainerRight,
-  DateText,
-  IsSession,
-  NoConnected,
-  TextNameGroup,
-  TextNamePair,
-  TextNumberPair,
-  TextRoomNumber,
-  TextSelfStudy,
-  TextTypePair,
-  TextWeekday,
-  TimeToLesson,
-  ToggleButton,
-  ToggleButtonText,
-  ToggleContainer,
-  TypeWeekButton,
-  TypeWeekContainer,
-  TypeWeekText,
-} from "./ScheduleStyle";
-import { setNameGroup } from "../../redux/slices/GroupsInfoSlice";
+import { ActivityIndicator, View } from "react-native";
+import { Dimensions, Text } from "react-native";
+import { CenteredContainer, Container, IsSession } from "./ScheduleStyle";
 import {
   getFullScheduleEducatorExtramural,
-  getSchedule,
   getScheduleEducator,
+  getScheduleEducatorByWeek,
 } from "../../api/apiSchedule";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../Navigate";
 import { lightTheme } from "../../redux/slices/SettingsSlice";
-import {
-  setIsFullScheduleEducator,
-  setLastCacheEntryEducator,
-} from "../../redux/slices/ScheduleEducatorInfoSlice";
-import { setSelectIdGroup } from "../../redux/slices/ScheduleStudentInfoSlice";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { setFavoriteSchedule } from "../../redux/slices/FavoritesSlice/FavoriteScheduleEducator";
-import { fetchSchedule } from "./api/groupApi";
+import { setIsFullScheduleEducator } from "../../redux/slices/ScheduleEducatorInfoSlice";
 import useWeekTypeSwitcher from "./hooks/useWeekTypeSwitcher";
 import { hasWeekdayInSchedule } from "./Helpers/scheduleHelpers";
 import useCurrentDateTime from "./hooks/useCurrentDateTime";
@@ -69,6 +29,10 @@ import useFavoriteUpdate from "./hooks/useFavoriteUpdate";
 import useLatestEndTime from "./hooks/useLatestEndTime";
 import { weekdays } from "./utils/timeUtils";
 import ScheduleExtramuralVisibilityToggle from "./components/ScheduleExtramuralVisibilityToggle";
+import { useHandleSwipe } from "./hooks/useHandleSwipe";
+import { useAppSelector } from "../../redux/store";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import SwipeableContainer from "./components/SwipeableContainer";
 
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
@@ -166,9 +130,13 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
   const dataScheduleEducator = useSelector(
     (state: ScheduleState) => state.ScheduleInfoEducatorSlice.dataSchedule
   );
+  const nameEducator = useAppSelector(
+    (state) => state.EducatorInfoSlice.selectNameEducator
+  );
   const selectIdEducator = useSelector(
     (state: ScheduleState) => state.ScheduleInfoEducatorSlice.selectIdEducator
   );
+
   const isFullSchedule = useSelector(
     (state: ScheduleState) => state.ScheduleInfoEducatorSlice.isFullSchedule
   );
@@ -216,12 +184,19 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
       }
     });
   });
-
   hasWeekday = hasWeekdayInSchedule(dataScheduleEducator);
+  const { handleSwipe, isLoading, numberOfSwipes } = useHandleSwipe({
+    dataSchedule: dataScheduleEducator,
+    selectId: selectIdEducator,
+    dispatch,
+    name: nameEducator,
+    getScheduleByWeek: getScheduleEducatorByWeek,
+  });
   useWeekTypeSwitcher(
     dataScheduleEducator,
     setCurrentTypeWeek,
-    setTypeWeekToSwitch
+    setTypeWeekToSwitch,
+    numberOfSwipes
   );
 
   useCurrentDateTime(
@@ -249,8 +224,14 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
   );
 
   useStoredSchedule(null, selectIdEducator, isConnected, dispatch);
-
-  const latestEndTime = useLatestEndTime(filteredSchedules);
+  const filteredByCurrentDay = useMemo(() => {
+    return filteredSchedules.map((item) => {
+      return item.filter(
+        (schedule) => schedule.weekday === currentDayForResident
+      );
+    });
+  }, [filteredSchedules, currentDayForResident]);
+  const latestEndTime = useLatestEndTime(filteredByCurrentDay);
   const dataScheduleSession = dataScheduleEducator.scheduleResident.session;
   return (
     <Container>
@@ -264,6 +245,7 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
         userType="educator"
         setGroupType={setGroupType}
         groupType={groupType}
+        dispatch={dispatch}
       />
 
       {groupType === "resident" && (
@@ -274,6 +256,7 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
           typeWeekToSwitch={typeWeekToSwitch}
           theme={theme}
           screenWidth={screenWidth}
+          dispatch={dispatch}
         />
       )}
 
@@ -282,25 +265,37 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
           lastCacheEntry={dataScheduleEducator.lastCacheEntry}
         />
       )}
-      {groupType === "resident" && (
-        <ResidentScheduleList
-          weekdays={weekdays}
-          initialFilteredSchedule={filteredSchedules}
-          dataSchedule={dataScheduleEducator}
-          currentDayForResident={currentDayForResident}
-          currentTime={currentTime}
-          hasWeekday={hasWeekday}
-          isConnected={isConnected}
-          timeArray={timeArray}
-          timeDifferences={timeDifferences}
-          navigation={navigation}
-          theme={theme}
-          lightTheme={lightTheme}
-          screenWidth={screenWidth}
-          screenHeight={screenHeight}
-          latestEndTime={latestEndTime}
-        />
-      )}
+      <GestureHandlerRootView>
+        {isLoading ? (
+          <View>
+            <ActivityIndicator size="large" color="#0000ff" />
+            <Text>Обновление данных...</Text>
+          </View>
+        ) : (
+          groupType === "resident" && (
+            <SwipeableContainer onSwipeComplete={handleSwipe}>
+              <ResidentScheduleList
+                weekdays={weekdays}
+                initialFilteredSchedule={filteredSchedules}
+                dataSchedule={dataScheduleEducator}
+                currentDayForResident={currentDayForResident}
+                currentTime={currentTime}
+                hasWeekday={hasWeekday}
+                isConnected={isConnected}
+                timeArray={timeArray}
+                timeDifferences={timeDifferences}
+                navigation={navigation}
+                theme={theme}
+                lightTheme={lightTheme}
+                screenWidth={screenWidth}
+                screenHeight={screenHeight}
+                latestEndTime={latestEndTime}
+                isEducator={true}
+              />
+            </SwipeableContainer>
+          )
+        )}
+      </GestureHandlerRootView>
 
       {groupType === "extramural" && (
         <View>

@@ -35,22 +35,70 @@ export const getSchedule = async (
     console.error("Error while getting schedule:", error);
   }
 };
-
+export const getScheduleStudentByWeek = async (
+  idGroup: number,
+  dispatch: Function,
+  nameGroup: string,
+  isNotification: boolean,
+  currentWeek: number,
+  currentWeekNumber: number
+) => {
+  try {
+    const response = await api.post("/getScheduleStudentByWeek", {
+      id_group: idGroup,
+      name: nameGroup,
+      currentWeek: currentWeek,
+      currentWeekNumber: currentWeekNumber,
+    });
+    const data = response.data;
+    dispatch(resetScheduleStudent());
+    dispatch(setDataScheduleStudent(data));
+    if (isNotification) {
+      return data;
+    }
+  } catch (error) {
+    console.error("Error while getting schedule:", error);
+  }
+};
+export const getScheduleEducatorByWeek = async (
+  idEducator: number,
+  dispatch: Function,
+  nameEducator: string,
+  isNotification: boolean,
+  currentWeek: number,
+  currentWeekNumber: number
+) => {
+  try {
+    const response = await api.post("/getScheduleEducatorByWeek", {
+      id_prep: idEducator,
+      name: nameEducator,
+      currentWeek: currentWeek,
+      currentWeekNumber: currentWeekNumber,
+    });
+    const data = response.data;
+    dispatch(resetScheduleEducator());
+    dispatch(setDataScheduleEducator(data));
+    if (isNotification) {
+      return data;
+    }
+  } catch (error) {
+    console.error("Error while getting schedule:", error);
+  }
+};
 export const getScheduleEducator = async (
   dispatch: Function,
   idEducator: number
 ) => {
   try {
-    console.log(idEducator);
     const responce = await api.post("/getScheduleEducator", {
       id_prep: idEducator,
     });
     const data = responce.data;
-    // console.log(data.scheduleResident.numerator[0].weekday);
     dispatch(resetScheduleEducator());
     dispatch(setDataScheduleEducator(data));
   } catch (error) {
-    console.error("Error while getting groups:", error);
+    dispatch(resetScheduleEducator());
+    console.error("Error while getting educatorSchedule:", error);
   }
 };
 

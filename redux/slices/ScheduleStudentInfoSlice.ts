@@ -121,6 +121,9 @@ export const ScheduleInfoStudentSlice = createSlice({
     setExtramuralIsActive: (state, action) => {
       state.dataSchedule.extramuralIsActive = action.payload;
     },
+    setCurrentWeekNumberStudent: (state, action) => {
+      state.dataSchedule.currentWeekNumber = action.payload;
+    },
   },
 });
 
@@ -134,6 +137,7 @@ export const {
   setIsExtramuralScheduleUntilTodayStudent,
   setLastCacheEntryStudent,
   setExtramuralIsActive,
+  setCurrentWeekNumberStudent,
 } = ScheduleInfoStudentSlice.actions;
 
 export default ScheduleInfoStudentSlice.reducer;

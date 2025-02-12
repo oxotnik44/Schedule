@@ -17,7 +17,6 @@ const useLatestEndTime = (filteredSchedules: any[]) => {
         }
       });
     });
-
     setLatestEndTime(tempLatestEndTime);
   }, [filteredSchedules]);
 

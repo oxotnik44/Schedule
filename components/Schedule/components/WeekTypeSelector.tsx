@@ -6,6 +6,7 @@ import {
   TypeWeekContainer,
   TypeWeekText,
 } from "../ScheduleStyle";
+import { setCurrentWeekNumberEducator } from "../../../redux/slices/ScheduleEducatorInfoSlice";
 
 interface FractionWeekPanelProps {
   currentTypeWeek: string;
@@ -14,6 +15,7 @@ interface FractionWeekPanelProps {
   typeWeekToSwitch: string;
   theme: any;
   screenWidth: number;
+  dispatch: Function;
 }
 
 const WeekTypeSelector: React.FC<FractionWeekPanelProps> = ({
@@ -23,6 +25,7 @@ const WeekTypeSelector: React.FC<FractionWeekPanelProps> = ({
   typeWeekToSwitch,
   theme,
   screenWidth,
+  dispatch,
 }) => {
   const getTextColor = (type: string) => {
     return theme === lightTheme
@@ -48,7 +51,12 @@ const WeekTypeSelector: React.FC<FractionWeekPanelProps> = ({
           `Текущая № ${dataScheduleEducator.currentWeekNumber}`}
       </Text>
       <TypeWeekButton
-        onPress={() => setTypeWeekToSwitch(type)}
+        onPress={() => {
+          setTypeWeekToSwitch(type);
+          dispatch(
+            setCurrentWeekNumberEducator(dataScheduleEducator.currentWeekNumber+1)
+          );
+        }}
         activeOpacity={0.9}
       >
         <TypeWeekText typeWeek={getTextColor(type)}>{label}</TypeWeekText>

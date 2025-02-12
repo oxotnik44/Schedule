@@ -1,9 +1,9 @@
 import "moment/locale/ru";
 import "moment-timezone";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { View } from "react-native";
-import { Dimensions } from "react-native";
+import { ActivityIndicator, View } from "react-native";
+import { Dimensions, Text } from "react-native";
 import {
   CenteredContainer,
   Container,
@@ -16,6 +16,7 @@ import { RootStackParamList } from "../../Navigate";
 import {
   getFullScheduleStudentExtramuralist,
   getSchedule,
+  getScheduleStudentByWeek,
 } from "../../api/apiSchedule";
 import { lightTheme } from "../../redux/slices/SettingsSlice";
 import { ThemeProvider } from "styled-components/native";
@@ -24,7 +25,7 @@ import useWeekTypeSwitcher from "./hooks/useWeekTypeSwitcher";
 import useCurrentDateTime from "./hooks/useCurrentDateTime";
 import useScheduleTimeDiff from "./hooks/useScheduleTimeDiff";
 import useStoredSchedule from "./hooks/useStoredSchedule";
-import { weekdays } from "./utils/timeUtils";
+import { getWeekNumber, weekdays } from "./utils/timeUtils";
 import { fetchScheduleEducator } from "./api/educatorApi";
 import { hasWeekdayInSchedule } from "./Helpers/scheduleHelpers";
 import { NoConnectionMessage } from "./ui/NoConnectionMessage";
@@ -33,13 +34,17 @@ import ResidentScheduleList from "./components/ResidentScheduleList";
 import ScheduleExtramuralVisibilityToggle from "./components/ScheduleExtramuralVisibilityToggle";
 import ExtramuralAndSessionSchedule from "./components/ExtramuralAndSessionSchedule";
 import TypeWeekPanel from "./components/ResidentTypeWeekPanel";
-import moment from "moment";
 import useFavoriteUpdate from "./hooks/useFavoriteUpdate";
 import useLatestEndTime from "./hooks/useLatestEndTime";
 import { setIsExtramuralScheduleUntilTodayStudent } from "../../redux/slices/ScheduleStudentInfoSlice";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
+import React from "react";
 
+import SwipeableContainer from "./components/SwipeableContainer";
+import { useHandleSwipe } from "./hooks/useHandleSwipe";
 interface FavoriteGroupsState {
   FavoriteGroupsSlice: {
     favoriteGroups: { idGroup: number; nameGroup: string }[];
@@ -79,15 +84,20 @@ const Schedule = ({ navigation }: ScheduleProps) => {
   const favoriteGroups = useSelector(
     (state: FavoriteGroupsState) => state.FavoriteGroupsSlice.favoriteGroups
   );
-
   const nameGroup = useSelector(
     (state: Namegroup) => state.GroupsInfoSlice.selectedGroupName
   );
 
   let hasWeekday: any = null;
-
   const dispatch = useDispatch();
 
+  const { handleSwipe, isLoading, numberOfSwipes } = useHandleSwipe({
+    dataSchedule,
+    selectId: selectIdGroup,
+    dispatch,
+    name: nameGroup,
+    getScheduleByWeek: getScheduleStudentByWeek,
+  });
   const [typeWeekToSwitch, setTypeWeekToSwitch] = useState("");
   const [currentTypeWeek, setCurrentTypeWeek] = useState<
     "numerator" | "denominator" | "session"
@@ -100,7 +110,13 @@ const Schedule = ({ navigation }: ScheduleProps) => {
   const [timeArray, setTimeArray] = useState("");
   const [timeDifferences, setTimeDifference] = useState<string>("");
   const arrayStartsPairs: any[] = [];
-  useWeekTypeSwitcher(dataSchedule, setCurrentTypeWeek, setTypeWeekToSwitch);
+
+  useWeekTypeSwitcher(
+    dataSchedule,
+    setCurrentTypeWeek,
+    setTypeWeekToSwitch,
+    numberOfSwipes
+  );
   useCurrentDateTime(
     setCurrentDayForExtramuralist,
     setCurrentDayForResident,
@@ -126,7 +142,6 @@ const Schedule = ({ navigation }: ScheduleProps) => {
   useStoredSchedule(selectIdGroup, null, isConnected, dispatch);
 
   const currentWeekSchedule = dataSchedule.scheduleResident[typeWeekToSwitch];
-
   const initialFilteredSchedule = useMemo(() => {
     return (weekdays || []).map((weekday) =>
       (currentWeekSchedule || []).filter((item) =>
@@ -140,7 +155,15 @@ const Schedule = ({ navigation }: ScheduleProps) => {
   });
 
   hasWeekday = hasWeekdayInSchedule(dataSchedule);
-  const latestEndTime = useLatestEndTime(initialFilteredSchedule);
+
+  const filteredByCurrentDay = useMemo(() => {
+    return initialFilteredSchedule.map((item) => {
+      return item.filter(
+        (schedule) => schedule.weekday === currentDayForResident
+      );
+    });
+  }, [initialFilteredSchedule, currentDayForResident]);
+  const latestEndTime = useLatestEndTime(filteredByCurrentDay);
   return (
     <ThemeProvider theme={theme}>
       <Container>
@@ -153,6 +176,7 @@ const Schedule = ({ navigation }: ScheduleProps) => {
             typeWeekToSwitch={typeWeekToSwitch}
             screenWidth={screenWidth}
             userType="student"
+            dispatch={dispatch}
           />
         )}
 
@@ -160,25 +184,38 @@ const Schedule = ({ navigation }: ScheduleProps) => {
           <NoConnectionMessage lastCacheEntry={dataSchedule.lastCacheEntry} />
         )}
 
-        {groupType === "resident" && typeWeekToSwitch !== "session" && (
-          <ResidentScheduleList
-            weekdays={weekdays}
-            initialFilteredSchedule={initialFilteredSchedule}
-            dataSchedule={dataSchedule}
-            currentDayForResident={currentDayForResident}
-            currentTime={currentTime}
-            hasWeekday={hasWeekday}
-            isConnected={isConnected}
-            timeArray={timeArray}
-            timeDifferences={timeDifferences}
-            navigation={navigation}
-            theme={theme}
-            lightTheme={lightTheme}
-            screenWidth={screenWidth}
-            screenHeight={screenHeight}
-            latestEndTime={latestEndTime}
-          />
-        )}
+        <GestureHandlerRootView>
+          {isLoading ? (
+            <View>
+              <ActivityIndicator size="large" color="#0000ff" />
+              <Text>Обновление данных...</Text>
+            </View>
+          ) : (
+            groupType === "resident" &&
+            typeWeekToSwitch !== "session" && (
+              <SwipeableContainer onSwipeComplete={handleSwipe}>
+                <ResidentScheduleList
+                  weekdays={weekdays}
+                  initialFilteredSchedule={initialFilteredSchedule}
+                  dataSchedule={dataSchedule}
+                  currentDayForResident={currentDayForResident}
+                  currentTime={currentTime}
+                  hasWeekday={hasWeekday}
+                  isConnected={isConnected}
+                  timeArray={timeArray}
+                  timeDifferences={timeDifferences}
+                  navigation={navigation}
+                  theme={theme}
+                  lightTheme={lightTheme}
+                  screenWidth={screenWidth}
+                  screenHeight={screenHeight}
+                  latestEndTime={latestEndTime}
+                  isEducator={false}
+                />
+              </SwipeableContainer>
+            )
+          )}
+        </GestureHandlerRootView>
         {groupType !== "resident" &&
         groupType !== "session" &&
         dataSchedule.extramuralIsActive ? (

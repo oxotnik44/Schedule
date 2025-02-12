@@ -20,6 +20,7 @@ interface Props {
   screenWidth: number;
   screenHeight: number;
   latestEndTime: moment.Moment;
+  isEducator: boolean;
 }
 
 const ResidentScheduleList: React.FC<Props> = ({
@@ -38,6 +39,7 @@ const ResidentScheduleList: React.FC<Props> = ({
   screenWidth,
   screenHeight,
   latestEndTime,
+  isEducator,
 }) => {
   return (
     <FlatList
@@ -50,7 +52,6 @@ const ResidentScheduleList: React.FC<Props> = ({
       renderItem={({ item, index }) => {
         const timeFilteredSchedule = initialFilteredSchedule[index];
         const matchingIdPairs: string[] = [];
-
         if (timeFilteredSchedule.length === 0) {
           return (
             <SelfStudyDay
@@ -64,20 +65,35 @@ const ResidentScheduleList: React.FC<Props> = ({
         }
         timeFilteredSchedule.forEach(({ weeks, idPair }: any) => {
           if (!weeks) return;
+
           weeks
             .trim()
             .split(/(?=\()/)
             .forEach((week: string) => {
+              // Обработка диапазонов, например "27-29"
               const [start, end] =
                 week
                   .match(/\d+-\d+/)?.[0]
                   .split("-")
                   .map(Number) || [];
-              const singleWeekNumber = week.match(/\d+/)?.[0];
+
+              // Обработка одиночных недель, например "27, 30"
+              const singleWeeks = week.match(/\d+/g);
+
+              if (singleWeeks) {
+                singleWeeks.forEach((weekNumber) => {
+                  if (+dataSchedule.currentWeekNumber === Number(weekNumber)) {
+                    matchingIdPairs.push(idPair);
+                  }
+                });
+              }
+
+              // Проверка диапазонов
               if (
-                (+dataSchedule.currentWeekNumber >= start &&
-                  +dataSchedule.currentWeekNumber <= end) ||
-                +dataSchedule.currentWeekNumber === Number(singleWeekNumber)
+                start &&
+                end && // Если это диапазон
+                +dataSchedule.currentWeekNumber >= start &&
+                +dataSchedule.currentWeekNumber <= end
               ) {
                 matchingIdPairs.push(idPair);
               }
@@ -147,7 +163,7 @@ const ResidentScheduleList: React.FC<Props> = ({
                     isColorPair={isCurrent}
                     currentWeekNumber={+dataSchedule.currentWeekNumber}
                     isResident={true}
-                    isEducator={false}
+                    isEducator={isEducator}
                     currentTime={currentTime}
                     latestEndTime={latestEndTime}
                   />

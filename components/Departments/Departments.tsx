@@ -182,7 +182,7 @@ const Departments: React.FC<DepartmentsProps> = ({ navigation }) => {
             );
           } else {
             fetchSchedule(idGroup, nameGroup).then(() => {
-              console.log(idGroup);
+              console.log(nameGroup);
               navigation.navigate("Schedule");
               dispatch(setNameGroup(nameGroup));
               dispatch(setIsExtramuralScheduleUntilTodayStudent(false));

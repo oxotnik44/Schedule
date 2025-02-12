@@ -21,16 +21,32 @@ export const WeekHighlight: React.FC<WeekHighlightProps> = ({
         .split(/(?=\()/) // Разделяем строку на части, начиная с символа '('
         .filter((part) => part.trim() !== "") // Фильтруем пустые строки
         .map((week, idx) => {
-          // Извлекаем числа из строки формата "(10-12)" или одну неделю
-          const weekRange = week.match(/\d+-\d+/);
-          const isWithinRange = weekRange
-            ? weekRange[0]
-                .split("-")
-                .map(Number)
-                .some((num) => num === currentWeekNumber)
-            : week.match(/\d+/)
-            ? parseInt(week.match(/\d+/)[0], 10) === currentWeekNumber
-            : false;
+          // Обрабатываем диапазоны и конкретные недели
+          const weekRanges = week.split(","); // Разделяем по запятой, чтобы учесть все значения
+          let isWithinRange = false;
+
+          weekRanges.forEach((weekRange) => {
+            const rangeMatch = weekRange.match(/\d+-\d+/); // Проверяем на диапазон
+            const singleWeekMatch = weekRange.match(/\d+/); // Проверяем на одиночные недели
+
+            if (rangeMatch) {
+              // Если это диапазон недель, например "24-27"
+              const [startWeek, endWeek] = rangeMatch[0].split("-").map(Number);
+              // Проверяем, входит ли текущая неделя в диапазон
+              if (
+                currentWeekNumber >= startWeek &&
+                currentWeekNumber <= endWeek
+              ) {
+                isWithinRange = true;
+              }
+            } else if (singleWeekMatch) {
+              // Если это одиночная неделя
+              const weekNumber = parseInt(singleWeekMatch[0], 10);
+              if (weekNumber === currentWeekNumber) {
+                isWithinRange = true;
+              }
+            }
+          });
 
           // Устанавливаем цвет текста
           const textColorWeek = isWithinRange
@@ -41,7 +57,12 @@ export const WeekHighlight: React.FC<WeekHighlightProps> = ({
 
           return (
             <View key={idx} style={{ marginBottom: 5 }}>
-              <Text style={{ color: textColorWeek }}>
+              <Text
+                style={{
+                  color: textColorWeek,
+                  fontFamily: "Montserrat-SemiBold",
+                }}
+              >
                 {week.trim() + " нед"}
               </Text>
             </View>

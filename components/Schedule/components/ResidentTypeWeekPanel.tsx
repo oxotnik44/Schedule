@@ -17,6 +17,7 @@ interface ResidentTypeWeekPanelProps {
   userType: "student" | "educator";
   setGroupType?: (type: EducatorWeekType) => void; // Обновили тип
   groupType?: EducatorWeekType; // Сделали необязательным
+  dispatch: Function;
 }
 
 const TypeWeekPanel: React.FC<ResidentTypeWeekPanelProps> = ({
@@ -29,6 +30,7 @@ const TypeWeekPanel: React.FC<ResidentTypeWeekPanelProps> = ({
   userType,
   setGroupType,
   groupType,
+  dispatch,
 }) => {
   const getTextColor = (typeWeek: string) => {
     const isActive =
@@ -43,7 +45,6 @@ const TypeWeekPanel: React.FC<ResidentTypeWeekPanelProps> = ({
       ? "#004C6F"
       : "#004C6FB2";
   };
-
   const weekTypes =
     userType === "student"
       ? ["numerator", "denominator", "session"]
@@ -89,7 +90,6 @@ const TypeWeekPanel: React.FC<ResidentTypeWeekPanelProps> = ({
               {type === "extramural" && "Заочные"}
             </TypeWeekText>
           </TypeWeekButton>
-          
         </View>
       ))}
     </TypeWeekContainer>
