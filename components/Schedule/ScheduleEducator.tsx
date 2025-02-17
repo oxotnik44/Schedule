@@ -1,7 +1,7 @@
 import moment from "moment";
 import "moment/locale/ru";
 import "moment-timezone";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { ActivityIndicator, View } from "react-native";
 import { Dimensions, Text } from "react-native";
@@ -75,6 +75,7 @@ interface IScheduleExtramuralInfo {
 }
 interface ScheduleState {
   ScheduleInfoEducatorSlice: {
+    randomNumber: number;
     dataSchedule: {
       lastCacheEntry: {
         currentDateCache: string;
@@ -121,6 +122,10 @@ interface FavoriteEducatorsState {
   };
 }
 const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
+  const { randomNumber } = useSelector(
+    (state: ScheduleState) => state.ScheduleInfoEducatorSlice
+  );
+
   const theme = useSelector((state: ITheme) => state.SettingsSlice.theme);
   const dispatch = useDispatch();
   const isConnected = useSelector(
@@ -196,7 +201,8 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
     dataScheduleEducator,
     setCurrentTypeWeek,
     setTypeWeekToSwitch,
-    numberOfSwipes
+    numberOfSwipes,
+    randomNumber
   );
 
   useCurrentDateTime(
@@ -246,6 +252,7 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
         setGroupType={setGroupType}
         groupType={groupType}
         dispatch={dispatch}
+        setCurrentTypeWeek={setCurrentTypeWeek}
       />
 
       {groupType === "resident" && (
@@ -257,6 +264,7 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
           theme={theme}
           screenWidth={screenWidth}
           dispatch={dispatch}
+          setCurrentTypeWeek={setCurrentTypeWeek}
         />
       )}
 

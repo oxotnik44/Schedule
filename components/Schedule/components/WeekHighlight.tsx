@@ -14,7 +14,6 @@ export const WeekHighlight: React.FC<WeekHighlightProps> = ({
   lightTheme,
 }) => {
   if (!weeks || weeks.trim() === "") return null;
-
   return (
     <>
       {weeks

@@ -45,7 +45,6 @@ const Authorization = () => {
     } else {
       const baseUrl = "https://schedulemobilebackend.nspu.ru:3000/login";
       const callbackUrl = Linking.createURL("App", { scheme: "myapp" });
-
       try {
         const response = await axios.post(
           "https://schedulemobilebackend.nspu.ru:3000/setIpAddressMobileForAuth",
@@ -79,7 +78,6 @@ const Authorization = () => {
                 gradebooks,
                 login,
               } = JSON.parse(userData);
-              console.log(JSON.parse(userData));
               const fullName = `${lastname} ${firstname} ${middlename}`;
               setAuthTokenStorage(accessToken, dispatch);
               const dataStudent = await getCreditBookStudent(

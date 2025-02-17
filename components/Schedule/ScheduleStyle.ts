@@ -124,9 +124,9 @@ export const TextRoomNumber = styled.Text`
 
 export const TextSelfStudy = styled.Text`
   color: ${(props) => props.theme.textColor};
-  font-size: ${screenWidth * 0.05}px;
+  font-size: ${screenWidth * 0.045}px;
   text-align: center;
-  margin-top: ${screenHeight * 0.01}px;
+  margin-top: ${screenHeight * 0.015}px;
   font-family: "Montserrat-SemiBold";
   display: flex;
   justify-content: center;

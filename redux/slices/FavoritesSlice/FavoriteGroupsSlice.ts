@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Alert } from "react-native";
+import { Alert, ToastAndroid } from "react-native";
 import { removeFavoriteStudentSchedule } from "./FavoriteScheduleStudent";
 
 const STORAGE_KEY_GROUPS = "favoriteGroups";
@@ -35,10 +35,8 @@ const FavoriteGroupSlice = createSlice({
   },
 });
 
-export const {
-  setFavoriteGroups,
-  removeFavoriteGroup,
-} = FavoriteGroupSlice.actions;
+export const { setFavoriteGroups, removeFavoriteGroup } =
+  FavoriteGroupSlice.actions;
 
 export const handleAddFavoriteGroup = (
   isFavoriteGroup: boolean,
@@ -81,9 +79,12 @@ export const setFavoriteGroupsStorage = async (
       groups.push(newGroup);
       await AsyncStorage.setItem(STORAGE_KEY_GROUPS, JSON.stringify(groups));
       dispatch(setFavoriteGroups(groups));
-      Alert.alert("Группа добавлена в избранное");
+      ToastAndroid.show("Группа добавлена в избранное", ToastAndroid.SHORT);
     } else {
-      Alert.alert("Ошибка", "Превышено максимальное число избранных групп");
+      ToastAndroid.show(
+        "Превышено максимальное число избранных групп",
+        ToastAndroid.SHORT
+      );
     }
   } catch (error) {
     console.error("Ошибка сохранения группы", error);

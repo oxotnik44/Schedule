@@ -59,7 +59,7 @@ const ExtramuralAndSessionSchedule: React.FC<ResidentExtramuralListProps> = ({
             style={{
               fontFamily: "Montserrat-Bold",
               color: theme.textColor,
-              marginTop: screenHeight * 0.01,
+              marginBottom: screenHeight * 0.01,
               fontSize: screenWidth * 0.055,
             }}
           >

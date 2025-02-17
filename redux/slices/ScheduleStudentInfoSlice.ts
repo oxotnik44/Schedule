@@ -36,6 +36,7 @@ interface IScheduleExtramuralInfo {
   typePairRetake: string;
 }
 interface IState {
+  randomNumber: number;
   dataSchedule: {
     lastCacheEntry: {
       currentDateCache: string;
@@ -62,6 +63,7 @@ interface IState {
 }
 
 export const initialScheduleState: IState = {
+  randomNumber: 0,
   dataSchedule: {
     lastCacheEntry: {
       currentDateCache: "",
@@ -89,7 +91,9 @@ export const ScheduleInfoStudentSlice = createSlice({
   reducers: {
     setDataScheduleStudent: (state, action) => {
       state.dataSchedule = action.payload;
+      state.randomNumber = Math.floor(Math.random() * 1000001); // Генерируем число от 0 до 100000
     },
+
     resetScheduleStudent: (state) => {
       state.dataSchedule.scheduleResident = {
         weekCorrection: 0,

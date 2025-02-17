@@ -34,6 +34,7 @@ export interface IScheduleExtramuralInfo {
 }
 export interface ScheduleState {
   ScheduleInfoStudentSlice: {
+    randomNumber: number;
     dataSchedule: {
       lastCacheEntry: {
         currentDateCache: string;

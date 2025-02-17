@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Alert } from "react-native";
+import { Alert, ToastAndroid } from "react-native";
 import { removeFavoriteEducatorSchedule } from "./FavoriteScheduleEducator";
 
 const STORAGE_KEY_EDUCATOR = "favoriteEducators";
@@ -85,11 +85,14 @@ export const setFavoriteEducatorStorage = async (
         JSON.stringify(educator)
       );
       dispatch(setFavoriteEducator(educator));
-      Alert.alert("Преподаватель добавлен в избранное");
+      ToastAndroid.show(
+        "Преподаватель добавлен в избранное",
+        ToastAndroid.SHORT
+      );
     } else {
-      Alert.alert(
-        "Ошибка",
-        "Превышено максимальное число избранных преподавателей"
+      ToastAndroid.show(
+        "Превышено максимальное число избранных преподавателей",
+        ToastAndroid.SHORT
       );
     }
   } catch (error) {

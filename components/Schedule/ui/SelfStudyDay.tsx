@@ -34,7 +34,7 @@ export const SelfStudyDay: FC<SelfStudyDayProps> = ({
       <ContainerPair
         isColorPair={theme === lightTheme ? "#d9d9d999" : "#46464699"}
         style={{
-          height: 60,
+          height: screenHeight * 0.06,
           alignItems: "center",
           justifyContent: "center",
         }}

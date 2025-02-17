@@ -6,7 +6,8 @@ const useWeekTypeSwitcher = (
   dataSchedule,
   setCurrentTypeWeek,
   setTypeWeekToSwitch,
-  numberOfSwipes
+  numberOfSwipes,
+  randomNumber
 ) => {
   useEffect(() => {
     const typeToSwitch =
@@ -18,7 +19,7 @@ const useWeekTypeSwitcher = (
         : "denominator";
     setCurrentTypeWeek(typeToSwitch);
     setTypeWeekToSwitch(typeToSwitch);
-  }, [dataSchedule]);
+  }, [randomNumber]);
 };
 
 export default useWeekTypeSwitcher;

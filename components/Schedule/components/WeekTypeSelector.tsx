@@ -16,6 +16,7 @@ interface FractionWeekPanelProps {
   theme: any;
   screenWidth: number;
   dispatch: Function;
+  setCurrentTypeWeek: any;
 }
 
 const WeekTypeSelector: React.FC<FractionWeekPanelProps> = ({
@@ -26,6 +27,7 @@ const WeekTypeSelector: React.FC<FractionWeekPanelProps> = ({
   theme,
   screenWidth,
   dispatch,
+  setCurrentTypeWeek,
 }) => {
   const getTextColor = (type: string) => {
     return theme === lightTheme
@@ -52,10 +54,16 @@ const WeekTypeSelector: React.FC<FractionWeekPanelProps> = ({
       </Text>
       <TypeWeekButton
         onPress={() => {
-          setTypeWeekToSwitch(type);
-          dispatch(
-            setCurrentWeekNumberEducator(dataScheduleEducator.currentWeekNumber+1)
-          );
+          if (typeWeekToSwitch !== type) {
+            dispatch(
+              setCurrentWeekNumberEducator(
+                dataScheduleEducator.currentWeekNumber +
+                  (type === "numerator" ? -1 : 1)
+              )
+            );
+            setTypeWeekToSwitch(type);
+            setCurrentTypeWeek(type);
+          }
         }}
         activeOpacity={0.9}
       >

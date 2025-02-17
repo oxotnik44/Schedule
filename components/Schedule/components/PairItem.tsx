@@ -57,11 +57,11 @@ export const PairItem: FC<ScheduleItemProps> = ({
       ToastAndroid.show("Нет соединения с интернетом", ToastAndroid.SHORT);
     } else {
       dispatch(setSelectIdEducator(item.idEducator));
-      console.log(isEducator)
+      console.log(isEducator);
       if (isEducator) {
         fetchSchedule(item.idGroup, item.groupName, dispatch, navigation);
       } else {
-        console.log(item)
+        console.log(item);
         fetchScheduleEducator(
           item.fullNameEducator,
           item.idEducator,
@@ -104,7 +104,8 @@ export const PairItem: FC<ScheduleItemProps> = ({
           ) : (
             item.weekday === currentDayForResident &&
             timeArray === start &&
-            momentTime < latestEndTime && (
+            momentTime < latestEndTime &&
+            timeDifferences && (
               <TimeToLesson>До начала пары: {timeDifferences}</TimeToLesson>
             )
           ))}

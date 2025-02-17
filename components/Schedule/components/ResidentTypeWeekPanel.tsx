@@ -6,6 +6,8 @@ import {
   TypeWeekContainer,
   TypeWeekText,
 } from "../ScheduleStyle";
+import { setCurrentWeekNumberEducator } from "../../../redux/slices/ScheduleEducatorInfoSlice";
+import { setCurrentWeekNumberStudent } from "../../../redux/slices/ScheduleStudentInfoSlice";
 type EducatorWeekType = "resident" | "extramural" | "session";
 interface ResidentTypeWeekPanelProps {
   currentTypeWeek: string;
@@ -18,6 +20,7 @@ interface ResidentTypeWeekPanelProps {
   setGroupType?: (type: EducatorWeekType) => void; // Обновили тип
   groupType?: EducatorWeekType; // Сделали необязательным
   dispatch: Function;
+  setCurrentTypeWeek: any;
 }
 
 const TypeWeekPanel: React.FC<ResidentTypeWeekPanelProps> = ({
@@ -31,6 +34,7 @@ const TypeWeekPanel: React.FC<ResidentTypeWeekPanelProps> = ({
   setGroupType,
   groupType,
   dispatch,
+  setCurrentTypeWeek,
 }) => {
   const getTextColor = (typeWeek: string) => {
     const isActive =
@@ -70,6 +74,25 @@ const TypeWeekPanel: React.FC<ResidentTypeWeekPanelProps> = ({
           <TypeWeekButton
             onPress={() => {
               if (userType === "student") {
+                if (type !== "session" && typeWeekToSwitch !== type) {
+                  let newWeekNumber = dataSchedule.currentWeekNumber;
+
+                  if (
+                    typeWeekToSwitch === "numerator" &&
+                    type === "denominator"
+                  ) {
+                    newWeekNumber += 1;
+                  } else if (
+                    typeWeekToSwitch === "denominator" &&
+                    type === "numerator"
+                  ) {
+                    newWeekNumber -= 1;
+                  }
+
+                  dispatch(setCurrentWeekNumberStudent(newWeekNumber));
+
+                  setCurrentTypeWeek(type);
+                }
                 setTypeWeekToSwitch(type);
               } else if (
                 setGroupType &&

@@ -16,7 +16,6 @@ const useScheduleTimeDiff = (
       const [hours, minutes] = schedule.split("-")[0].split(":").map(Number);
       return currentTimeInSeconds < hours * 3600 + minutes * 60;
     });
-
     if (nextSchedule) {
       const [hours, minutes] = nextSchedule
         .split("-")[0]
@@ -25,6 +24,8 @@ const useScheduleTimeDiff = (
       const timeDiff = hours * 3600 + minutes * 60 - currentTimeInSeconds;
       setTimeDifference(formatTime(timeDiff));
       setTimeArray(`${hours}:${minutes}`);
+    } else {
+      setTimeDifference(null);
     }
   }, [currentTime, arrayStartsPairs]);
 };

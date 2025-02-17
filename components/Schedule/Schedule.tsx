@@ -71,6 +71,10 @@ interface Namegroup {
 }
 
 const Schedule = ({ navigation }: ScheduleProps) => {
+  const { randomNumber } = useSelector(
+    (state: ScheduleState) => state.ScheduleInfoStudentSlice
+  );
+
   const theme = useSelector((state: ITheme) => state.SettingsSlice.theme);
   const isConnected = useSelector(
     (state: Settings) => state.SettingsSlice.isConnected
@@ -106,16 +110,18 @@ const Schedule = ({ navigation }: ScheduleProps) => {
     useState<string>("Понедельник");
   const [currentDayForExtramuralist, setCurrentDayForExtramuralist] =
     useState<string>("");
+
   const [currentTime, setCurrentTime] = useState<string>("");
   const [timeArray, setTimeArray] = useState("");
-  const [timeDifferences, setTimeDifference] = useState<string>("");
+  const [timeDifferences, setTimeDifference] = useState<string|null>("");
   const arrayStartsPairs: any[] = [];
 
   useWeekTypeSwitcher(
     dataSchedule,
     setCurrentTypeWeek,
     setTypeWeekToSwitch,
-    numberOfSwipes
+    numberOfSwipes,
+    randomNumber
   );
   useCurrentDateTime(
     setCurrentDayForExtramuralist,
@@ -177,6 +183,7 @@ const Schedule = ({ navigation }: ScheduleProps) => {
             screenWidth={screenWidth}
             userType="student"
             dispatch={dispatch}
+            setCurrentTypeWeek={setCurrentTypeWeek}
           />
         )}
 
