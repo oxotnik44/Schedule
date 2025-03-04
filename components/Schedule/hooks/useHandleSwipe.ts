@@ -1,5 +1,10 @@
-import { useState, Dispatch } from "react";
+import { useState } from "react";
 import { getWeekNumber } from "../utils/timeUtils";
+import { useAppSelector, useAppDispatch } from "../../../redux/store";
+import {
+  setNumberOfSwipes,
+  setWeekNumber,
+} from "../../../redux/slices/SwipesSlice";
 
 interface UseHandleSwipeProps {
   dataSchedule: any;
@@ -7,6 +12,8 @@ interface UseHandleSwipeProps {
   dispatch: Function;
   name: string;
   getScheduleByWeek: any;
+  currentTypeWeek: any;
+  typeWeekToSwitch: any;
 }
 
 export const useHandleSwipe = ({
@@ -15,26 +22,28 @@ export const useHandleSwipe = ({
   dispatch,
   name,
   getScheduleByWeek,
+  currentTypeWeek,
+  typeWeekToSwitch,
 }: UseHandleSwipeProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [numberOfSwipes, setNumberOfSwipes] = useState(0);
+  const numberOfSwipes = useAppSelector(
+    (state) => state.SwipesSlice.numberOfSwipes
+  );
+  const appDispatch = useAppDispatch();
+  const weekNumber = useAppSelector((state) => state.SwipesSlice.weekNumber);
 
   const handleSwipe = (direction: "вправо" | "влево") => {
     setIsLoading(true);
-
     let newWeekNumber = Number(dataSchedule.currentWeekNumber);
-    let weekNumber = getWeekNumber();
-
     if (direction === "вправо") {
       newWeekNumber -= 1;
-      weekNumber -= 1;
-      setNumberOfSwipes((prev) => prev - 1);
+      appDispatch(setNumberOfSwipes(numberOfSwipes - 1));
+      appDispatch(setWeekNumber(weekNumber - 1));
     } else if (direction === "влево") {
       newWeekNumber += 1;
-      weekNumber += 1;
-      setNumberOfSwipes((prev) => prev + 1);
+      appDispatch(setWeekNumber(weekNumber + 1));
+      appDispatch(setNumberOfSwipes(numberOfSwipes + 1));
     }
-
     getScheduleByWeek(
       selectId,
       dispatch,

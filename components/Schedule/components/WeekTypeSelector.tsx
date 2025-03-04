@@ -7,6 +7,9 @@ import {
   TypeWeekText,
 } from "../ScheduleStyle";
 import { setCurrentWeekNumberEducator } from "../../../redux/slices/ScheduleEducatorInfoSlice";
+import { numberWeekFunction } from "../Helpers/scheduleHelpers";
+import { setCurrentWeekNumberStudent } from "../../../redux/slices/ScheduleStudentInfoSlice";
+import { setNumberOfSwipes } from "../../../redux/slices/SwipesSlice";
 
 interface FractionWeekPanelProps {
   currentTypeWeek: string;
@@ -17,6 +20,8 @@ interface FractionWeekPanelProps {
   screenWidth: number;
   dispatch: Function;
   setCurrentTypeWeek: any;
+  currentWeekNumber: number | null;
+  numberOfSwipes: number;
 }
 
 const WeekTypeSelector: React.FC<FractionWeekPanelProps> = ({
@@ -28,6 +33,8 @@ const WeekTypeSelector: React.FC<FractionWeekPanelProps> = ({
   screenWidth,
   dispatch,
   setCurrentTypeWeek,
+  currentWeekNumber,
+  numberOfSwipes,
 }) => {
   const getTextColor = (type: string) => {
     return theme === lightTheme
@@ -44,25 +51,38 @@ const WeekTypeSelector: React.FC<FractionWeekPanelProps> = ({
       <Text
         style={{
           color: theme === lightTheme ? "#004C6F" : "#FFFFFF",
-          fontSize: screenWidth * 0.0424,
+          fontSize: screenWidth * 0.04,
           textAlign: "center",
           fontFamily: "Montserrat-SemiBold",
         }}
       >
-        {currentTypeWeek === type &&
-          `Текущая № ${dataScheduleEducator.currentWeekNumber}`}
+        {numberWeekFunction(
+          type,
+          dataScheduleEducator,
+          currentTypeWeek,
+          currentWeekNumber,
+          numberOfSwipes,
+          typeWeekToSwitch
+        )}
       </Text>
       <TypeWeekButton
         onPress={() => {
           if (typeWeekToSwitch !== type) {
-            dispatch(
-              setCurrentWeekNumberEducator(
-                dataScheduleEducator.currentWeekNumber +
-                  (type === "numerator" ? -1 : 1)
-              )
-            );
+            let newWeekNumber = dataScheduleEducator.currentWeekNumber;
+            let newNumberOfSwipes = numberOfSwipes;
+            if (typeWeekToSwitch === "numerator" && type === "denominator") {
+              newWeekNumber += 1;
+              newNumberOfSwipes += 1;
+            } else if (
+              typeWeekToSwitch === "denominator" &&
+              type === "numerator"
+            ) {
+              newWeekNumber -= 1;
+              newNumberOfSwipes -= 1;
+            }
+            dispatch(setCurrentWeekNumberEducator(newWeekNumber));
+            dispatch(setNumberOfSwipes(newNumberOfSwipes));
             setTypeWeekToSwitch(type);
-            setCurrentTypeWeek(type);
           }
         }}
         activeOpacity={0.9}

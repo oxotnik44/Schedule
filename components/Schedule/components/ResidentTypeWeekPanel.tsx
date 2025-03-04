@@ -8,6 +8,8 @@ import {
 } from "../ScheduleStyle";
 import { setCurrentWeekNumberEducator } from "../../../redux/slices/ScheduleEducatorInfoSlice";
 import { setCurrentWeekNumberStudent } from "../../../redux/slices/ScheduleStudentInfoSlice";
+import { numberWeekFunction } from "../Helpers/scheduleHelpers";
+import { setNumberOfSwipes } from "../../../redux/slices/SwipesSlice";
 type EducatorWeekType = "resident" | "extramural" | "session";
 interface ResidentTypeWeekPanelProps {
   currentTypeWeek: string;
@@ -21,6 +23,8 @@ interface ResidentTypeWeekPanelProps {
   groupType?: EducatorWeekType; // Сделали необязательным
   dispatch: Function;
   setCurrentTypeWeek: any;
+  currentWeekNumber: number | null;
+  numberOfSwipes: number;
 }
 
 const TypeWeekPanel: React.FC<ResidentTypeWeekPanelProps> = ({
@@ -35,6 +39,8 @@ const TypeWeekPanel: React.FC<ResidentTypeWeekPanelProps> = ({
   groupType,
   dispatch,
   setCurrentTypeWeek,
+  currentWeekNumber,
+  numberOfSwipes,
 }) => {
   const getTextColor = (typeWeek: string) => {
     const isActive =
@@ -61,13 +67,19 @@ const TypeWeekPanel: React.FC<ResidentTypeWeekPanelProps> = ({
             <Text
               style={{
                 color: theme.textColor,
-                fontSize: screenWidth * 0.04263,
+                fontSize: screenWidth * 0.04,
                 textAlign: "center",
                 fontFamily: "Montserrat-SemiBold",
               }}
             >
-              {currentTypeWeek === type &&
-                `Текущая № ${dataSchedule.currentWeekNumber}`}
+              {numberWeekFunction(
+                type,
+                dataSchedule,
+                currentTypeWeek,
+                currentWeekNumber,
+                numberOfSwipes,
+                typeWeekToSwitch
+              )}
             </Text>
           )}
 
@@ -76,22 +88,22 @@ const TypeWeekPanel: React.FC<ResidentTypeWeekPanelProps> = ({
               if (userType === "student") {
                 if (type !== "session" && typeWeekToSwitch !== type) {
                   let newWeekNumber = dataSchedule.currentWeekNumber;
-
+                  let newNumberOfSwipes = numberOfSwipes;
                   if (
                     typeWeekToSwitch === "numerator" &&
                     type === "denominator"
                   ) {
                     newWeekNumber += 1;
+                    newNumberOfSwipes += 1;
                   } else if (
                     typeWeekToSwitch === "denominator" &&
                     type === "numerator"
                   ) {
                     newWeekNumber -= 1;
+                    newNumberOfSwipes -= 1;
                   }
-
                   dispatch(setCurrentWeekNumberStudent(newWeekNumber));
-
-                  setCurrentTypeWeek(type);
+                  dispatch(setNumberOfSwipes(newNumberOfSwipes));
                 }
                 setTypeWeekToSwitch(type);
               } else if (

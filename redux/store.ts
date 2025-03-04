@@ -14,6 +14,7 @@ import AuthTokenSlice from "./slices/AccountSlices/AuthTokenSlice";
 import ProfileInfoSlice from "./slices/AccountSlices/ProfileInfoSlice";
 import SemesterGradesInfoSlice from "./slices/AccountSlices/SemesterGradesInfoSlice";
 import LibraryInfoSlice from "./slices/AccountSlices/LibraryInfoSlice";
+import SwipesSlice from "./slices/SwipesSlice";
 export const store = configureStore({
   reducer: {
     DepartmentInfoSlice: DepartmentInfoSlice.reducer,
@@ -29,6 +30,7 @@ export const store = configureStore({
     SemesterGradesInfoSlice: SemesterGradesInfoSlice,
     ProfileInfoSlice: ProfileInfoSlice,
     LibraryInfoSlice: LibraryInfoSlice,
+    SwipesSlice: SwipesSlice,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

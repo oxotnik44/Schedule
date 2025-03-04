@@ -45,6 +45,9 @@ import React from "react";
 
 import SwipeableContainer from "./components/SwipeableContainer";
 import { useHandleSwipe } from "./hooks/useHandleSwipe";
+import moment from "moment";
+import { useAppDispatch, useAppSelector } from "../../redux/store";
+import { setWeekNumber } from "../../redux/slices/SwipesSlice";
 interface FavoriteGroupsState {
   FavoriteGroupsSlice: {
     favoriteGroups: { idGroup: number; nameGroup: string }[];
@@ -94,6 +97,10 @@ const Schedule = ({ navigation }: ScheduleProps) => {
 
   let hasWeekday: any = null;
   const dispatch = useDispatch();
+  const [typeWeekToSwitch, setTypeWeekToSwitch] = useState("");
+  const [currentTypeWeek, setCurrentTypeWeek] = useState<
+    "numerator" | "denominator" | "session"
+  >();
 
   const { handleSwipe, isLoading, numberOfSwipes } = useHandleSwipe({
     dataSchedule,
@@ -101,27 +108,41 @@ const Schedule = ({ navigation }: ScheduleProps) => {
     dispatch,
     name: nameGroup,
     getScheduleByWeek: getScheduleStudentByWeek,
+    currentTypeWeek: currentTypeWeek,
+    typeWeekToSwitch: typeWeekToSwitch,
   });
-  const [typeWeekToSwitch, setTypeWeekToSwitch] = useState("");
-  const [currentTypeWeek, setCurrentTypeWeek] = useState<
-    "numerator" | "denominator" | "session"
-  >();
+
   const [currentDayForResident, setCurrentDayForResident] =
     useState<string>("Понедельник");
   const [currentDayForExtramuralist, setCurrentDayForExtramuralist] =
     useState<string>("");
+  const appDispatch = useAppDispatch();
 
   const [currentTime, setCurrentTime] = useState<string>("");
   const [timeArray, setTimeArray] = useState("");
-  const [timeDifferences, setTimeDifference] = useState<string|null>("");
+  const [timeDifferences, setTimeDifference] = useState<string | null>("");
   const arrayStartsPairs: any[] = [];
+  const [currentWeekNumber, setCurrentWeekNumber] = useState<number | null>();
+  useEffect(() => {
+    setCurrentWeekNumber(Number(dataSchedule.currentWeekNumber));
+    const typeToSwitch =
+      (moment().isoWeek() +
+        dataSchedule.scheduleResident.weekCorrection +
+        numberOfSwipes) %
+      2
+        ? "numerator"
+        : "denominator";
+    setCurrentTypeWeek(typeToSwitch);
+    appDispatch(setWeekNumber(getWeekNumber()));
+  }, []);
 
   useWeekTypeSwitcher(
     dataSchedule,
     setCurrentTypeWeek,
     setTypeWeekToSwitch,
     numberOfSwipes,
-    randomNumber
+    randomNumber,
+    currentWeekNumber
   );
   useCurrentDateTime(
     setCurrentDayForExtramuralist,
@@ -184,6 +205,8 @@ const Schedule = ({ navigation }: ScheduleProps) => {
             userType="student"
             dispatch={dispatch}
             setCurrentTypeWeek={setCurrentTypeWeek}
+            currentWeekNumber={currentWeekNumber}
+            numberOfSwipes={numberOfSwipes}
           />
         )}
 

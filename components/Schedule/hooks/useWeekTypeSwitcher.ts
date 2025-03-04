@@ -1,13 +1,13 @@
 import { useEffect } from "react";
 import moment from "moment";
-import { setCurrentWeekNumberEducator } from "../../../redux/slices/ScheduleEducatorInfoSlice";
 
 const useWeekTypeSwitcher = (
   dataSchedule,
   setCurrentTypeWeek,
   setTypeWeekToSwitch,
   numberOfSwipes,
-  randomNumber
+  randomNumber,
+  currentWeekNumber
 ) => {
   useEffect(() => {
     const typeToSwitch =
@@ -17,7 +17,6 @@ const useWeekTypeSwitcher = (
       2
         ? "numerator"
         : "denominator";
-    setCurrentTypeWeek(typeToSwitch);
     setTypeWeekToSwitch(typeToSwitch);
   }, [randomNumber]);
 };

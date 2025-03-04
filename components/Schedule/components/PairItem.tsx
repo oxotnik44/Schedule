@@ -14,6 +14,7 @@ import {
 } from "../ScheduleStyle";
 import { fetchSchedule } from "../api/groupApi";
 import moment from "moment";
+import { setSelectIdGroup } from "../../../redux/slices/ScheduleStudentInfoSlice";
 
 interface ScheduleItemProps {
   item: any; // Желательно заменить `any` на точный тип данных
@@ -57,11 +58,11 @@ export const PairItem: FC<ScheduleItemProps> = ({
       ToastAndroid.show("Нет соединения с интернетом", ToastAndroid.SHORT);
     } else {
       dispatch(setSelectIdEducator(item.idEducator));
-      console.log(isEducator);
+      dispatch(setSelectIdGroup(item.idGroup));
+
       if (isEducator) {
         fetchSchedule(item.idGroup, item.groupName, dispatch, navigation);
       } else {
-        console.log(item);
         fetchScheduleEducator(
           item.fullNameEducator,
           item.idEducator,

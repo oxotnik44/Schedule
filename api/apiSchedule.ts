@@ -13,6 +13,7 @@ import {
   setDataScheduleEducator,
 } from "../redux/slices/ScheduleEducatorInfoSlice";
 import { api } from "./baseUrl";
+import { setNumberOfSwipes } from "../redux/slices/SwipesSlice";
 
 export const getSchedule = async (
   idGroup: number,
@@ -27,7 +28,9 @@ export const getSchedule = async (
     });
     const data = response.data;
     dispatch(resetScheduleStudent());
+    dispatch(setNumberOfSwipes(0));
     dispatch(setDataScheduleStudent(data));
+
     if (isNotification) {
       return data;
     }
@@ -53,6 +56,7 @@ export const getScheduleStudentByWeek = async (
     const data = response.data;
     dispatch(resetScheduleStudent());
     dispatch(setDataScheduleStudent(data));
+    console.log(data.currentWeekNumber);
     if (isNotification) {
       return data;
     }
@@ -95,6 +99,7 @@ export const getScheduleEducator = async (
     });
     const data = responce.data;
     dispatch(resetScheduleEducator());
+    dispatch(setNumberOfSwipes(0));
     dispatch(setDataScheduleEducator(data));
   } catch (error) {
     dispatch(resetScheduleEducator());

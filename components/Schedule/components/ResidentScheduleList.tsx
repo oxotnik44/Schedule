@@ -70,32 +70,30 @@ const ResidentScheduleList: React.FC<Props> = ({
             .trim()
             .split(/(?=\()/)
             .forEach((week: string) => {
-              // Обработка диапазонов, например "27-29"
-              const [start, end] =
-                week
-                  .match(/\d+-\d+/)?.[0]
-                  .split("-")
-                  .map(Number) || [];
+              // Обработка диапазонов, например "28-31, 36-38"
+              const ranges = week.match(/\d+-\d+/g); // Ищем все диапазоны
+              if (ranges) {
+                ranges.forEach((range) => {
+                  const [start, end] = range.split("-").map(Number);
+                  if (
+                    start &&
+                    end &&
+                    +dataSchedule.currentWeekNumber >= start &&
+                    +dataSchedule.currentWeekNumber <= end
+                  ) {
+                    matchingIdPairs.push(idPair);
+                  }
+                });
+              }
 
               // Обработка одиночных недель, например "27, 30"
-              const singleWeeks = week.match(/\d+/g);
-
+              const singleWeeks = week.match(/\b\d+\b/g);
               if (singleWeeks) {
                 singleWeeks.forEach((weekNumber) => {
                   if (+dataSchedule.currentWeekNumber === Number(weekNumber)) {
                     matchingIdPairs.push(idPair);
                   }
                 });
-              }
-
-              // Проверка диапазонов
-              if (
-                start &&
-                end && // Если это диапазон
-                +dataSchedule.currentWeekNumber >= start &&
-                +dataSchedule.currentWeekNumber <= end
-              ) {
-                matchingIdPairs.push(idPair);
               }
             });
         });

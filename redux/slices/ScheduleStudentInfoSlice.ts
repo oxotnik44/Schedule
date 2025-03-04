@@ -55,7 +55,7 @@ interface IState {
       allTypeWeeks: string[][];
     };
     scheduleExtramural: { date: string; schedule: IScheduleExtramuralInfo[] }[];
-    currentWeekNumber: string;
+    currentWeekNumber: number;
   };
   typeGroupStudent: string;
   selectIdGroup: number;
@@ -79,7 +79,7 @@ export const initialScheduleState: IState = {
       allTypeWeeks: [],
     },
     scheduleExtramural: [],
-    currentWeekNumber: "",
+    currentWeekNumber: 0,
   },
   typeGroupStudent: "",
   selectIdGroup: 0,

@@ -162,6 +162,18 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
   const resultArray: any[] = [];
   const [timeArray, setTimeArray] = useState("");
   const [timeDifferences, setTimeDifference] = useState<string>("");
+  const [currentWeekNumber, setCurrentWeekNumber] = useState<number | null>();
+  useEffect(() => {
+    setCurrentWeekNumber(Number(dataScheduleEducator.currentWeekNumber));
+    const typeToSwitch =
+      (moment().isoWeek() +
+        dataScheduleEducator.scheduleResident.weekCorrection +
+        numberOfSwipes) %
+      2
+        ? "numerator"
+        : "denominator";
+    setCurrentTypeWeek(typeToSwitch);
+  }, []);
 
   const favoriteEducators = useSelector(
     (state: FavoriteEducatorsState) =>
@@ -253,6 +265,8 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
         groupType={groupType}
         dispatch={dispatch}
         setCurrentTypeWeek={setCurrentTypeWeek}
+        currentWeekNumber={currentWeekNumber}
+        numberOfSwipes={numberOfSwipes}
       />
 
       {groupType === "resident" && (
@@ -265,6 +279,8 @@ const ScheduleEducator = ({ navigation }: ScheduleEducatorProps) => {
           screenWidth={screenWidth}
           dispatch={dispatch}
           setCurrentTypeWeek={setCurrentTypeWeek}
+          currentWeekNumber={currentWeekNumber}
+          numberOfSwipes={numberOfSwipes}
         />
       )}
 
